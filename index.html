@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="유튜브 카워드 스튜디오와 영화·편집 포트폴리오">
+<title>MS Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap">
+<style>
+/* Layout: 주(유튜브) → 서브(영화) → 서브의 서브(편집) 순서로 섹션 무게가 점점 작아지는 흐름. 에이치와이식 소제목 + 샌드박스식 목록 */
+:root{
+  --bg:#121212; --panel:#1c1c1e; --panel-2:#26262a; --line:#323236;
+  --ink:#f0f0f0; --mute:#9a9a9f; --accent:#7030a0; --at:#c79ae6; --on:#ffffff; --gold:#f2c94c;
+  --tag-key-bg:#7030a0; --tag-key-fg:#ffffff; --tag-sub-bg:#2f2f34; --tag-sub-fg:#b9b9be;
+  --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#f5f5f3; --panel:#ffffff; --panel-2:#ebebe8; --line:#d8d8d4;
+  --ink:#1a1a1a; --mute:#6a6a6a; --accent:#7030a0; --at:#7030a0; --on:#ffffff; --gold:#a87b00;
+  --tag-key-bg:#7030a0; --tag-key-fg:#ffffff; --tag-sub-bg:#e4e4e1; --tag-sub-fg:#55555b;
+  color-scheme:light;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+html{scroll-padding-top:84px}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.7 var(--body);transition:background .3s,color .3s;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+::selection{background:var(--accent);color:var(--on)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--at);outline-offset:3px}
+h1,h2,h3{margin:0;letter-spacing:-.035em;text-wrap:balance}
+.wrap{max-width:1320px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px),4vw);padding-right:max(16px,env(safe-area-inset-right,0px),4vw)}
+
+/* ── 헤더 ── */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;gap:20px;height:72px}
+.logo{font-weight:900;font-size:21px;letter-spacing:-.03em;white-space:nowrap}
+.logo b{color:var(--at)}
+nav{display:flex;gap:2px;margin-left:auto}
+nav a{padding:8px 14px;font-size:15px;font-weight:500;color:var(--mute);transition:color .2s}
+nav a:hover{color:var(--ink)}
+.right{display:flex;align-items:center;gap:8px}
+.pillcta{font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;background:var(--accent);color:var(--on);white-space:nowrap;transition:transform .2s}
+.pillcta:hover{transform:translateY(-2px)}
+.tg{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:transparent;cursor:pointer;display:grid;place-items:center}
+.tg:hover{border-color:var(--accent);color:var(--at)}
+.tg svg{width:18px;height:18px}
+
+/* ── 히어로 ── */
+.hero{position:relative;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);background:var(--accent);opacity:.55;animation:drift 16s ease-in-out infinite alternate;pointer-events:none}
+.o1{width:520px;height:520px;max-width:70vw;max-height:70vw;right:-120px;top:-180px}
+.o2{width:320px;height:320px;max-width:50vw;max-height:50vw;left:-80px;bottom:-160px;opacity:.3;animation-duration:20s}
+@keyframes drift{to{transform:translate(-60px,50px) scale(1.12)}}
+@media (prefers-reduced-motion:reduce){.orb{animation:none}}
+.hero .wrap{position:relative;padding-block:96px 72px}
+.eyeline{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--at);margin:0 0 26px}
+.eyeline::before{content:"";width:36px;height:2px;background:var(--at)}
+.hero h1{font-weight:900;font-size:clamp(38px,7.4vw,104px);line-height:1.08;letter-spacing:-.05em}
+.hero h1 em{font-style:normal;color:var(--at)}
+.hero .sub{margin:28px 0 36px;font-size:clamp(16px,1.6vw,19px);color:var(--mute);max-width:34em}
+.hero .sub b{color:var(--ink);font-weight:700}
+@media (min-width:1041px){.hero .sub{max-width:none;white-space:nowrap}}
+.ctas{display:flex;flex-wrap:wrap;gap:10px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:15px 28px;border-radius:999px;font-weight:700;border:1px solid var(--accent);background:var(--accent);color:var(--on);transition:transform .2s,background .2s,color .2s;cursor:pointer}
+.btn:hover{transform:translateY(-3px)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--at);color:var(--at)}
+@media (prefers-reduced-motion:no-preference){
+  .hero h1,.hero .sub,.ctas{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+  .hero .sub{animation-delay:.1s}.ctas{animation-delay:.18s}
+  @keyframes rise{from{transform:translateY(18px)}to{transform:none}}
+}
+.facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--line);margin-top:72px}
+.fact{padding:22px 4px 0;display:flex;flex-direction:column;gap:2px}
+.fact strong{font-size:clamp(26px,3vw,38px);font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.fact strong small{font-size:.5em;font-weight:700;margin-left:2px}
+.fact span{font-size:14px;color:var(--mute)}
+
+/* ── 섹션 머리 ── */
+.sec{padding-block:112px 0}
+.sh{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:40px}
+.eb{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--at);margin-bottom:10px}
+.eb .lv{font-size:11px;letter-spacing:.14em;padding:3px 10px;border-radius:999px;border:1px solid currentColor}
+.eb .lv.main{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.sh h2{font-size:clamp(30px,4.4vw,52px);font-weight:900;line-height:1.15}
+.sh p{margin:10px 0 0;color:var(--mute);max-width:34em}
+
+/* ── 01 유튜브 (주) ── */
+.yt{display:grid;grid-template-columns:1fr 1.5fr;gap:20px}
+.chan{position:relative;overflow:hidden;background:var(--accent);color:var(--on);border-radius:26px;padding:40px 36px;display:flex;flex-direction:column;justify-content:space-between;gap:36px;min-width:0}
+.chan::after{content:"";position:absolute;width:300px;height:300px;right:-90px;bottom:-110px;border-radius:50%;background:rgba(255,255,255,.14);filter:blur(10px);pointer-events:none}
+.avatar{position:relative;width:92px;height:92px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.85);display:grid;place-items:center;font-weight:900;font-size:28px;letter-spacing:-.04em;margin-bottom:22px}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.chan small{font-size:12px;font-weight:700;letter-spacing:.2em;opacity:.8}
+.chan h3{font-size:clamp(30px,3.6vw,46px);font-weight:900;margin:8px 0 4px;line-height:1.15}
+.chan .handle{font-weight:700;opacity:.85}
+.chan .tl{margin:18px 0 0;font-size:clamp(17px,1.8vw,20px);font-weight:500}
+.chan .btn{position:relative;z-index:1;align-self:flex-start;background:var(--on);color:var(--accent);border-color:var(--on)}
+.vids{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.vid{display:flex;flex-direction:column;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden;transition:transform .3s,border-color .3s}
+.vid:hover{transform:translateY(-6px);border-color:var(--accent)}
+.thumb{position:relative;aspect-ratio:16/9;max-width:100%;background:var(--panel-2);overflow:hidden;display:grid;place-items:center}
+.thumb::before{content:"";position:absolute;width:75%;aspect-ratio:1;right:-20%;top:-35%;border-radius:50%;background:var(--accent);opacity:.4;filter:blur(30px);transition:opacity .35s}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.vid:hover .thumb img{transform:scale(1.05)}
+.play{position:relative;z-index:1;width:54px;height:38px;border-radius:12px;background:var(--accent);display:grid;place-items:center;transition:transform .3s;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.play::after{content:"";border-left:14px solid var(--on);border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:3px}
+.vid:hover .play{transform:scale(1.12)}
+.vid .info{padding:16px 18px 18px;display:flex;flex-direction:column;gap:4px}
+.vid h3{font-size:16px;font-weight:700;line-height:1.4}
+.vid span{font-size:13px;color:var(--at);font-weight:500}
+
+/* ── 02 영화 (서브) ── */
+.awards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:56px}
+.aw{display:flex;gap:16px;align-items:flex-start;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:18px;min-width:0}
+.aw .ic{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold);font-size:17px}
+.aw b{display:block;font-size:17px;font-weight:900;letter-spacing:-.02em;line-height:1.35}
+.aw p{margin:4px 0 0;font-size:13.5px;color:var(--gold);font-weight:700}
+.fbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.fbar h3{font-size:22px;font-weight:900}
+.fbar h3 span{color:var(--mute);font-weight:500;font-size:15px;margin-left:8px}
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:transparent;padding:7px 15px;border-radius:999px;cursor:pointer;font-weight:500;font-size:14px;color:var(--mute);transition:border-color .2s,color .2s}
+.tab:hover{border-color:var(--at);color:var(--ink)}
+.tab[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.sort{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--accent);background:transparent;color:var(--at);padding:7px 15px;border-radius:999px;cursor:pointer;font-weight:700;font-size:14px;white-space:nowrap}
+.sort:hover{background:var(--accent);color:var(--on)}
+.sort .ar{display:inline-block;transition:transform .3s}
+.sort[data-dir="old"] .ar{transform:rotate(180deg)}
+.films{border-top:2px solid var(--ink)}
+.fr{display:grid;grid-template-columns:64px minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.5fr);gap:20px;align-items:start;padding:16px 8px;border-bottom:1px solid var(--line);transition:background .2s}
+.fr:hover{background:var(--panel)}
+.fr .y{font-size:14px;color:var(--mute);font-variant-numeric:tabular-nums;padding-top:2px}
+.fr .t{font-weight:700;font-size:16.5px}
+.st{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;margin-left:8px;border-radius:999px;border:1px solid var(--at);color:var(--at);vertical-align:2px}
+.roles{display:flex;flex-wrap:wrap;gap:5px}
+.role{font-size:12px;font-weight:700;padding:2px 9px;border-radius:6px;line-height:1.6;background:var(--tag-sub-bg);color:var(--tag-sub-fg)}
+.role.key{background:var(--tag-key-bg);color:var(--tag-key-fg)}
+.res{display:flex;flex-direction:column;gap:2px;font-size:14px;min-width:0}
+.res .win{color:var(--gold);font-weight:700}
+.res .win::before{content:"★ "}
+.res .sub{color:var(--ink);font-weight:500}
+.more{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:2px 0;color:var(--mute);font-size:13px;cursor:pointer}
+.more:hover{color:var(--at)}
+.more .ar{display:inline-block;transition:transform .25s;font-size:10px}
+.more[aria-expanded="true"] .ar{transform:rotate(180deg)}
+.extra{display:flex;flex-direction:column;gap:2px;color:var(--mute);font-size:13.5px;padding-left:10px;border-left:2px solid var(--line);margin-top:2px}
+.empty{padding:28px 8px;color:var(--mute);text-align:center}
+.next{margin-top:48px}
+.next h3{font-size:18px;font-weight:900;margin-bottom:14px}
+.next h3 span{color:var(--mute);font-weight:500;font-size:14px;margin-left:8px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.nx{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px dashed var(--line);border-radius:12px;font-weight:500;font-size:15px}
+
+/* ── 03 편집 (서브의 서브) ── */
+.edit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:20px}
+.edit-lead{position:relative;overflow:hidden;border-radius:26px;padding:40px 36px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;justify-content:space-between;gap:28px}
+.edit-lead::before{content:"";position:absolute;width:340px;height:340px;left:-120px;bottom:-160px;border-radius:50%;background:var(--accent);opacity:.32;filter:blur(60px);pointer-events:none}
+.yrs{position:relative;font-size:clamp(84px,11vw,140px);font-weight:900;line-height:.9;letter-spacing:-.06em;color:var(--at)}
+.yrs small{display:block;font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--mute);margin-top:14px}
+.edit-lead p{position:relative;margin:0;font-size:clamp(16px,1.6vw,18px);line-height:1.85}
+.edit-lead p b{color:var(--at)}
+.skills{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sk{padding:26px 24px;border-radius:20px;background:var(--panel);border:1px solid var(--line);display:flex;flex-direction:column;gap:10px;transition:border-color .25s,transform .25s;min-width:0}
+.sk:hover{border-color:var(--accent);transform:translateY(-4px)}
+.sk .ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 22%,transparent);color:var(--at)}
+.sk .ico svg{width:22px;height:22px}
+.sk h3{font-size:20px;font-weight:900}
+.sk h3 small{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--mute);margin-left:8px}
+.sk p{margin:0;font-size:14.5px;color:var(--mute);line-height:1.75}
+
+/* ── 문의 ── */
+.dual{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+.door{border-radius:24px;padding:44px 40px;display:flex;flex-direction:column;justify-content:space-between;gap:28px;border:1px solid var(--line);background:var(--panel);transition:transform .25s,border-color .25s;min-width:0}
+a.door:hover{transform:translateY(-4px);border-color:var(--accent)}
+.door small{font-size:12px;font-weight:700;letter-spacing:.2em;color:var(--at)}
+.door h3{font-size:clamp(26px,3vw,36px);font-weight:900;margin:10px 0}
+.door p{margin:0;color:var(--mute);max-width:26em}
+.door.hot{background:var(--accent);border-color:var(--accent);color:var(--on)}
+.door.hot small,.door.hot p{color:var(--on);opacity:.85}
+.door .arrow{font-weight:700}
+.clist{display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.28)}
+.ci{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.28)}
+.ci .k{font-size:12px;font-weight:700;letter-spacing:.16em;opacity:.75}
+.ci .v{font-weight:700;font-size:16px;overflow-wrap:anywhere;user-select:all}
+.ci a.v{user-select:auto;text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(255,255,255,.45)}
+.ci a.v:hover{text-decoration-color:var(--on)}
+.cp{font-weight:700;font-size:12.5px;padding:6px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.55);background:transparent;color:var(--on);cursor:pointer;white-space:nowrap}
+.cp:hover{background:var(--on);color:var(--accent)}
+
+/* ── 푸터 ── */
+footer{margin-top:120px;border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+footer .wrap{display:grid;grid-template-columns:1fr auto;gap:20px 40px;padding-block:44px}
+footer .logo{color:var(--ink);font-size:19px}
+footer .info{line-height:1.9;margin-top:8px}
+footer .links{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+footer .links a:hover,.totop:hover{color:var(--at)}
+.totop{background:none;border:0;color:var(--mute);cursor:pointer;font-weight:700}
+footer .bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px 24px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--line);font-size:13px}
+
+/* ── 반응형 ── */
+@media (max-width:1040px){
+  nav{display:none}.right{margin-left:auto}
+  .yt,.edit,.dual{grid-template-columns:1fr}
+  .awards{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fr{grid-template-columns:56px minmax(0,1fr) minmax(0,1fr)}
+  .fr .res{grid-column:2/-1}
+}
+@media (max-width:640px){
+  .pillcta{display:none}
+  .hero .wrap{padding-block:64px 48px}
+  .facts{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:48px}
+  .fact{padding-bottom:16px}
+  .sec{padding-block:80px 0}
+  .vids,.awards,.skills{grid-template-columns:1fr}
+  .chan,.edit-lead{padding:30px 24px}
+  .fr{grid-template-columns:1fr auto;gap:6px 12px;padding:16px 4px}
+  .fr .t{grid-column:1}.fr .y{grid-column:2;grid-row:1}
+  .fr .roles,.fr .res{grid-column:1/-1}
+  .door{padding:30px 24px}
+  .ci{grid-template-columns:1fr auto}
+  .ci .k{grid-column:1/-1}
+  footer .wrap{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top">MS PORTFOLIO<b>.</b></a>
+    <nav aria-label="주요 메뉴">
+      <a href="#youtube">유튜브</a>
+      <a href="#film">영화</a>
+      <a href="#edit">편집</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="right">
+      <a class="pillcta" href="#contact">작업 의뢰 →</a>
+      <button class="tg" id="tg" type="button" aria-label="화이트/다크 모드 전환"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="orb o1"></div><div class="orb o2"></div>
+    <div class="wrap">
+      <p class="eyeline">MS PORTFOLIO — YOUTUBE · FILM · EDIT</p>
+      <h1>잘 짖고, 잘 놀고,<br><em>잘 만듭니다.</em></h1>
+      <p class="sub">유튜브 채널 <b>카워드 스튜디오</b>를 만들고, 영화 현장에서는 연출부터 촬영, 음향까지 맡아왔습니다.</p>
+      <div class="ctas">
+        <a class="btn" href="https://www.youtube.com/@c_ward" target="_blank" rel="noopener">유튜브 채널 보기 ↗</a>
+        <a class="btn ghost" href="#film">영화 포트폴리오</a>
+      </div>
+      <div class="facts">
+        <div class="fact"><strong>8<small>년</small></strong><span>편집 경력</span></div>
+        <div class="fact"><strong id="fCount">25<small>편</small></strong><span>참여한 영화</span></div>
+        <div class="fact"><strong id="fWin">7<small>회</small></strong><span>수상 · 입선</span></div>
+        <div class="fact"><strong id="fNext">6<small>편</small></strong><span>제작 예정</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <!-- 01 유튜브 -->
+    <section class="sec" id="youtube">
+      <div class="sh">
+        <div><span class="eb">01 YOUTUBE <span class="lv main">MAIN</span></span><h2>유튜브</h2><p>제일 많이, 제일 즐겁게 하는 일. 직접 기획하고 찍고 편집합니다.</p></div>
+      </div>
+      <div class="yt">
+        <div class="chan">
+          <div>
+            <div class="avatar" id="avatar" aria-label="카워드 스튜디오 프로필 사진">CW</div>
+            <small>YOUTUBE CHANNEL</small>
+            <h3>카워드 스튜디오</h3>
+            <span class="handle">@c_ward</span>
+            <p class="tl">잘 짖고, 잘 놀고, 잘 만듭니다.</p>
+          </div>
+          <a class="btn" href="https://www.youtube.com/@c_ward" target="_blank" rel="noopener">채널 방문하기 ↗</a>
+        </div>
+        <div class="vids" id="vids"></div>
+      </div>
+    </section>
+
+    <!-- 02 영화 -->
+    <section class="sec" id="film">
+      <div class="sh">
+        <div><span class="eb">02 FILM <span class="lv">SUB</span></span><h2>영화</h2><p>연출, 촬영, 음향, 배우까지. 현장의 여러 자리에서 영화를 만들어 왔습니다.</p></div>
+      </div>
+
+      <div class="awards" id="awards"></div>
+
+      <div class="fbar">
+        <h3>필모그래피<span id="fShown"></span></h3>
+        <button class="sort" type="button" id="sortBtn" data-dir="new" aria-label="정렬 순서 바꾸기"><span id="sortLabel">최신순</span><span class="ar">↓</span></button>
+      </div>
+      <div class="ctrl" style="margin-bottom:16px">
+        <div class="tabs" role="group" aria-label="분야별 보기" id="tabs"></div>
+      </div>
+      <div class="films" id="films"></div>
+
+      <div class="next">
+        <h3>준비 중인 작품<span>2026 – 2027</span></h3>
+        <div class="chips" id="next"></div>
+      </div>
+    </section>
+
+    <!-- 03 편집 -->
+    <section class="sec" id="edit">
+      <div class="sh">
+        <div><span class="eb">03 EDIT <span class="lv">SUB</span></span><h2>편집</h2><p>모든 작업은 결국 편집에서 완성됩니다.</p></div>
+      </div>
+      <div class="edit">
+        <div class="edit-lead">
+          <div class="yrs">8년<small>EDITING CAREER</small></div>
+          <p>편집은 촬영이 끝난 뒤에 시작되는 <b>두 번째 연출</b>이라고 생각해요. 유튜브의 빠른 호흡부터 단편 영화의 긴 여운까지, 찍어둔 장면이 가장 잘 보이는 순서를 찾는 일을 8년째 해오고 있습니다. 기획 단계부터 편집을 생각하고, 현장에서도 편집을 생각하며 찍습니다.</p>
+        </div>
+        <div class="skills">
+          <div class="sk">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></span>
+            <h3>기획<small>PLANNING</small></h3>
+            <p>무엇을 찍을지부터 정합니다. 유튜브 콘텐츠 아이디어와 단편 영화의 이야기를 직접 짜고 다듬습니다.</p>
+          </div>
+          <div class="sk">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+            <h3>제작<small>PRODUCTION</small></h3>
+            <p>현장이 굴러가게 만드는 일. 제작부로 일정과 장소, 사람을 챙기며 여러 작품을 끝까지 함께했습니다.</p>
+          </div>
+          <div class="sk">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg></span>
+            <h3>편집<small>EDITING</small></h3>
+            <p>가장 오래 붙잡아 온 일. 컷과 자막, 음악과 리듬까지 맞춰 찍어둔 장면을 한 편의 이야기로 완성합니다.</p>
+          </div>
+          <div class="sk">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></svg></span>
+            <h3>촬영<small>CAMERA</small></h3>
+            <p>카메라를 직접 잡고 장면을 담아왔습니다. 편집할 때 필요한 화면을 알기에 현장에서 더 정확하게 찍습니다.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 문의 -->
+    <section class="sec" id="contact">
+      <div class="sh"><div><span class="eb">CONTACT</span><h2>함께 만들어요</h2></div></div>
+      <div class="dual">
+        <div class="door hot">
+          <div><small>FOR CLIENTS</small><h3>작업 의뢰</h3><p>유튜브 영상 편집, 촬영, 단편 영화 작업이 필요하다면 편하게 연락 주세요.</p></div>
+          <div class="clist">
+            <div class="ci"><span class="k">EMAIL</span><span class="v" id="cEmail">eddy0730@naver.com</span><button class="cp" type="button" id="cpEmail" data-for="cEmail">복사</button></div>
+            <div class="ci"><span class="k">INSTAGRAM</span><a class="v" href="https://www.instagram.com/ms_xy.0/" target="_blank" rel="noopener">@ms_xy.0 ↗</a><span></span></div>
+            <div class="ci"><span class="k">CALL</span><span class="v" id="cCall">010-7572-8957</span><button class="cp" type="button" id="cpCall" data-for="cCall">복사</button></div>
+          </div>
+        </div>
+        <a class="door" href="https://www.youtube.com/@c_ward" target="_blank" rel="noopener">
+          <div><small>FOR VIEWERS</small><h3>카워드 스튜디오</h3><p>새 영상은 유튜브에 가장 먼저 올라갑니다.</p></div>
+          <span class="arrow">채널 구독하러 가기 ↗</span>
+        </a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <span class="logo">MS PORTFOLIO<b>.</b></span>
+      <div class="info">유튜브 · 영화 · 편집<br>YouTube 카워드 스튜디오 @c_ward</div>
+    </div>
+    <div class="links"><a href="https://www.youtube.com/@c_ward" target="_blank" rel="noopener">YouTube</a><a href="https://www.instagram.com/ms_xy.0/" target="_blank" rel="noopener">Instagram</a><button class="totop" id="toTop" type="button">↑ TOP</button></div>
+    <div class="bottom"><span>서울특별시 양천구 목동로11길 46 (신정동)</span><span>© 2026 MS Portfolio. All rights reserved.</span></div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // 기본 다크, 버튼으로 라이트 전환
+  var root=document.documentElement;
+  try{var sv=localStorage.getItem('msp-theme');if(sv)root.setAttribute('data-theme',sv)}catch(e){}
+  document.getElementById('tg').addEventListener('click',function(){
+    var n=root.getAttribute('data-theme')==='light'?'dark':'light';
+    root.setAttribute('data-theme',n);
+    try{localStorage.setItem('msp-theme',n)}catch(e){}
+  });
+
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  // 이미지: 불러오지 못하면 지우고 기본 디자인을 보여줌
+  function safeImg(box,src,alt){
+    if(!src)return;
+    var im=new Image();im.alt=alt||'';im.loading='lazy';
+    im.onload=function(){box.appendChild(im)};
+    im.src=src;
+  }
+
+  // ── 유튜브 ──
+  var AVATAR=''; // 프로필 사진 (첨부받으면 여기에 넣음)
+  safeImg(document.getElementById('avatar'),AVATAR,'카워드 스튜디오 프로필');
+  var VIDS=[
+    ['이게 뭔 스킨이야','C0VnVbcB8-g'],
+    ['한국인이 아시아 섭 하면 생기는 일','HX09tGF0QPc'],
+    ['롤 좋아하는 친구들이랑 볼링 치러가면 생기는 일','Ih2qKrALhaI'],
+    ['친구랑 손절할 뻔했습니다','YX6wRNR4XbA']
+  ];
+  var vbox=document.getElementById('vids');
+  vbox.innerHTML=VIDS.map(function(v,i){
+    return '<a class="vid" href="https://www.youtube.com/watch?v='+v[1]+'" target="_blank" rel="noopener"><div class="thumb" id="th'+i+'"><span class="play"></span></div><div class="info"><h3>'+esc(v[0])+'</h3><span>유튜브 ↗</span></div></a>';
+  }).join('');
+  VIDS.forEach(function(v,i){
+    var box=document.getElementById('th'+i);
+    var im=new Image();im.alt='';im.loading='lazy';
+    im.onload=function(){box.insertBefore(im,box.firstChild)};
+    im.src='https://img.youtube.com/vi/'+v[1]+'/hqdefault.jpg';
+  });
+
+  // ── 영화 ──
+  // 분야 순서: 연출 촬영 조명 음향 제작 미술 편집 배우 (키스탭 + ~부 묶음)
+  var CATS=[
+    ['dir','연출',['연출','연출부','스크립터']],
+    ['cam','촬영',['촬영','촬영부']],
+    ['light','조명',['조명','조명부']],
+    ['snd','음향',['음향','음향부']],
+    ['prod','제작',['제작','PD','제작부']],
+    ['art','미술',['미술','미술부']],
+    ['edit','편집',['편집','편집부']],
+    ['act','배우',['배우']]
+  ];
+  var CAT={},ORDER={};
+  CATS.forEach(function(c,i){c[2].forEach(function(r){CAT[r]=c[0];ORDER[r]=i})});
+  function isSub(r){return /부$/.test(r)||r==='스크립터'}
+
+  // [제목, 연도, 역할들, 기록들, 상태]
+  var FILMS=[
+    ['이륙!',2026,['연출'],['29초 영화제 ICN 공모전 출품']],
+    ['黃昏(황혼)',2026,['연출'],['비브리유 공모전 출품']],
+    ['Monage!',2026,['제작부'],[]],
+    ['아빠의 방식',2026,['제작'],['26 여름영화 상영']],
+    ['Emotion Store',2026,['제작부'],['26 여름영화 상영']],
+    ['성장통',2026,['촬영부'],['청소년 미디어 대전 출품']],
+    ['영상고 옥상엔 요술램프가 있다! (26 SVMHS 뮤지컬)',2026,['음향'],['서울영상고등학교 공식 유튜브 업로드']],
+    ['읽음',2026,['연출'],['청소년 광고대회 입선']],
+    ['빨래방',2026,['제작'],['시 영상제']],
+    ['내가 사랑하는 사람',2026,['제작'],['시 영상제']],
+    ['헤드 퍼스트 슬라이딩',2026,['제작부'],[]],
+    ['나는 오늘!!',2026,['촬영부','조명부'],['시 영상제 동상 수상']],
+    ['아트필름 홍보영상',2026,['촬영부','편집'],['2026 동아리 홍보영상 상영']],
+    ['사랑의 색체',2026,['제작부'],['청소년 미디어 대전 출품']],
+    ['유흔',2025,['연출부'],['동랑제 감독상 수상','26 여름영화 상영']],
+    ['땅볼아웃',2025,['배우'],['스스로넷 상영']],
+    ['Scholl Of Roll (25 SVMHS 뮤지컬)',2025,['배우'],['25 청소년 미디어 대전 수상']],
+    ['무제-Untitled',2025,['제작','미술'],['25 청소년 미디어 대전 수상']],
+    ['비밀하나',2025,['제작부'],['25 여름영화 상영']],
+    ['도박 중독 예방 광고',2025,['음향'],[]],
+    ['작은 불씨',2025,['음향'],[]],
+    ['적반하장',2025,['배우'],[]],
+    ['Awaken The Bull',2025,['연출','촬영'],[]],
+    ['환생검문소',2025,['음향'],['26 보건복지부장상 수상','26 교내 흡연예방 UCC 은상','25 여름영화 상영']],
+    ['자화상',2025,['촬영','편집'],['시 영상제 상영']]
+  ];
+  // 준비 중 [제목, 역할]
+  var NEXT=[
+    ['혈모양처','배우'],
+    ['시취나는 꽃','음향'],
+    ['아트필름 겨울영화',''],
+    ['다시, 변신','연출'],
+    ['2027 시영상제','연출'],
+    ['2027 졸업작품','연출']
+  ];
+  var WIN=/수상|은상|동상|입선|감독상|장상/, ENTRY=/출품/;
+
+  function tags(rs){
+    return rs.slice().sort(function(a,b){return (ORDER[a]||0)-(ORDER[b]||0)}).map(function(r){
+      return '<span class="role'+(isSub(r)?'':' key')+'">'+esc(r)+'</span>';
+    }).join('');
+  }
+
+  // 수상 하이라이트 (작품당 한 칸)
+  var winCount=0;
+  var wins=FILMS.filter(function(f){var w=f[3].filter(function(x){return WIN.test(x)});winCount+=w.length;return w.length});
+  document.getElementById('awards').innerHTML=wins.map(function(f){
+    return '<div class="aw"><span class="ic" aria-hidden="true">★</span><div><b>'+esc(f[0])+'</b><p>'+f[3].filter(function(x){return WIN.test(x)}).map(esc).join('<br>')+'</p></div></div>';
+  }).join('');
+  document.getElementById('fCount').innerHTML=FILMS.length+'<small>편</small>';
+  document.getElementById('fWin').innerHTML=winCount+'<small>회</small>';
+  document.getElementById('fNext').innerHTML=NEXT.length+'<small>편</small>';
+
+  // 분류 버튼
+  var tabsBox=document.getElementById('tabs');
+  tabsBox.innerHTML='<button class="tab" type="button" id="r-all" data-r="all" aria-pressed="true">전체</button>'+
+    CATS.map(function(c){return '<button class="tab" type="button" id="r-'+c[0]+'" data-r="'+c[0]+'" aria-pressed="false">'+c[1]+'</button>'}).join('');
+
+  var state={cat:'all',dir:'new'};
+  var box=document.getElementById('films'),shown=document.getElementById('fShown');
+  function draw(){
+    var list=FILMS.map(function(f,i){return {f:f,i:i}}).filter(function(o){return state.cat==='all'||o.f[2].some(function(r){return CAT[r]===state.cat})});
+    list.sort(function(a,b){var d=b.f[1]-a.f[1];if(!d)d=a.i-b.i;return state.dir==='new'?d:-d});
+    shown.textContent=list.length+'편';
+    box.innerHTML=list.length?list.map(function(o){
+      var f=o.f,main=f[3].filter(function(x){return WIN.test(x)||ENTRY.test(x)}),rest=f[3].filter(function(x){return !(WIN.test(x)||ENTRY.test(x))});
+      var res=main.map(function(x){return '<span class="'+(WIN.test(x)?'win':'sub')+'">'+esc(x)+'</span>'}).join('');
+      if(rest.length){
+        res+='<button class="more" type="button" id="m'+o.i+'" aria-expanded="false" aria-controls="x'+o.i+'">'+(main.length?'기록 더보기':'기록 보기')+' '+rest.length+' <span class="ar">▼</span></button>'+
+             '<div class="extra" id="x'+o.i+'" hidden>'+rest.map(esc).join('<br>')+'</div>';
+      }
+      return '<div class="fr"><span class="y">'+f[1]+'</span><span class="t">'+esc(f[0])+(f[4]?'<span class="st">'+esc(f[4])+'</span>':'')+'</span><span class="roles">'+tags(f[2])+'</span><div class="res">'+res+'</div></div>';
+    }).join(''):'<p class="empty">이 분야로 참여한 작품이 아직 없어요.</p>';
+  }
+  draw();
+  tabsBox.addEventListener('click',function(e){
+    var t=e.target.closest('.tab');if(!t)return;
+    tabsBox.querySelectorAll('.tab').forEach(function(x){x.setAttribute('aria-pressed',String(x===t))});
+    state.cat=t.dataset.r;draw();
+  });
+  box.addEventListener('click',function(e){
+    var b=e.target.closest('.more');if(!b)return;
+    var x=document.getElementById(b.getAttribute('aria-controls')),open=b.getAttribute('aria-expanded')!=='true';
+    b.setAttribute('aria-expanded',String(open));x.hidden=!open;
+  });
+  var sortBtn=document.getElementById('sortBtn');
+  sortBtn.addEventListener('click',function(){
+    state.dir=state.dir==='new'?'old':'new';
+    sortBtn.dataset.dir=state.dir;
+    document.getElementById('sortLabel').textContent=state.dir==='new'?'최신순':'오래된순';
+    draw();
+  });
+
+  // 준비 중
+  document.getElementById('next').innerHTML=NEXT.map(function(n){
+    return '<span class="nx">'+esc(n[0])+(n[1]?' '+tags([n[1]]):'')+'</span>';
+  }).join('');
+
+  // 연락처 복사
+  document.querySelectorAll('.cp').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var el=document.getElementById(btn.dataset.for);
+      function sel(){var rg=document.createRange();rg.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(rg)}
+      try{navigator.clipboard.writeText(el.textContent).then(function(){btn.textContent='복사됨';setTimeout(function(){btn.textContent='복사'},1500)},sel)}catch(e){sel()}
+    });
+  });
+  document.getElementById('toTop').addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+})();
+</script>
+
+</body>
+</html>
