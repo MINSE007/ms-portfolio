@@ -343,6 +343,10 @@ footer .bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:1
 .flash{position:absolute;inset:0;background:radial-gradient(circle at 62% 30%,#fff,rgba(255,255,255,.6) 40%,rgba(255,255,255,0) 75%);opacity:0;pointer-events:none}
 #intro.p-clap .flash{animation:flash .32s ease-out}
 @keyframes flash{0%{opacity:.85}100%{opacity:0}}
+#intro.calm *,#intro.calm{animation:none!important}
+#intro.calm .cam-wrap,#intro.calm .zoom,#intro.calm .stick-top,#intro.calm .sl-wrap{transition:opacity .3s ease!important;filter:none!important}
+#intro.calm.p-slate .cam-wrap{transform:none}
+#intro.calm.p-out .zoom{transform:none}
 #skip{position:absolute;right:max(24px,5vmin);bottom:max(28px,6vmin);z-index:2;padding:9px 16px;border-radius:999px;font-size:13px;font-weight:700;color:#f4f1f8;cursor:pointer;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
 #skip:hover{background:rgba(255,255,255,.18)}
 
@@ -561,7 +565,7 @@ footer .bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:1
       <span class="logo"><span class="badge-ms">MS</span>MS PORTFOLIO</span>
       <div class="info">유튜브 · 영화 · 편집<br>YouTube 카워드 스튜디오 @c_ward</div>
     </div>
-    <div class="links"><a href="https://www.youtube.com/@c_ward" target="_blank" rel="noopener">YouTube</a><a href="https://www.instagram.com/ms_xy.0/" target="_blank" rel="noopener">Instagram</a><button class="totop" id="toTop" type="button">↑ TOP</button></div>
+    <div class="links"><a href="https://www.youtube.com/@c_ward" target="_blank" rel="noopener">YouTube</a><a href="https://www.instagram.com/ms_xy.0/" target="_blank" rel="noopener">Instagram</a><button class="totop" id="replay" type="button">▶ 인트로 다시 보기</button><button class="totop" id="toTop" type="button">↑ TOP</button></div>
     <div class="bottom"><span>서울특별시 양천구 목동로11길 46 (신정동)</span><span>© 2026 MS Portfolio. All rights reserved.</span></div>
   </div>
 </footer>
@@ -572,35 +576,48 @@ footer .bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:1
   function pad(n){return String(n).padStart(2,'0')}
 
   // ── 인트로: 미러리스 REC 누름 → 슬레이트 딱 → 입장 (약 1.6초) ──
+  // 화면이 실제로 보일 때 시작 · 끝나면 숨겨두고 '인트로 다시 보기'로 재생
   (function(){
     var el=document.getElementById('intro');if(!el)return;
-    var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var timers=[],tcTimer=null,done=false;
+    var calm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(calm)el.classList.add('calm');
+    var timers=[],tcTimer=null,done=true;
     var d=new Date();document.getElementById('slDate').textContent=d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate());
-    var stg=document.getElementById('stg');
+    var stg=document.getElementById('stg'),recTxt=document.getElementById('recTxt'),tc=document.getElementById('tc');
     function fit(){stg.style.setProperty('--k',Math.min(1,(innerWidth-24)/800,(innerHeight-90)/460).toFixed(3))}
-    fit();window.addEventListener('resize',fit);
+    window.addEventListener('resize',fit);
+    function at(ms,fn){timers.push(setTimeout(fn,ms))}
     function finish(){
       if(done)return;done=true;
-      timers.forEach(clearTimeout);clearInterval(tcTimer);
-      window.removeEventListener('resize',fit);
+      timers.forEach(clearTimeout);timers=[];clearInterval(tcTimer);
       el.classList.add('p-out');
-      setTimeout(function(){el.remove()},reduce?0:440);
+      setTimeout(function(){if(done)el.hidden=true},440);
     }
-    if(reduce){el.remove();return}
-    function at(ms,fn){timers.push(setTimeout(fn,ms))}
-    at(380,function(){el.classList.add('p-press')});
-    at(440,function(){
-      el.classList.add('p-rec');document.getElementById('recTxt').textContent='REC';
-      var f=0,tc=document.getElementById('tc');
-      tcTimer=setInterval(function(){f++;tc.textContent='00:00:'+pad(Math.floor(f/24))+':'+pad(f%24)},1000/24);
-    });
-    at(600,function(){el.classList.add('p-slate')});
-    at(990,function(){el.classList.add('p-clap')});
-    at(1220,finish);
+    function play(){
+      timers.forEach(clearTimeout);timers=[];clearInterval(tcTimer);
+      el.classList.remove('p-press','p-rec','p-slate','p-clap','p-out');
+      recTxt.textContent='STBY';tc.textContent='00:00:00:00';
+      el.hidden=true;void el.offsetWidth;el.hidden=false;
+      done=false;fit();
+      at(380,function(){el.classList.add('p-press')});
+      at(440,function(){
+        el.classList.add('p-rec');recTxt.textContent='REC';
+        var f=0;tcTimer=setInterval(function(){f++;tc.textContent='00:00:'+pad(Math.floor(f/24))+':'+pad(f%24)},1000/24);
+      });
+      at(600,function(){el.classList.add('p-slate')});
+      at(990,function(){el.classList.add('p-clap')});
+      at(calm?1600:1220,finish);
+    }
     el.addEventListener('click',finish);
     document.getElementById('skip').addEventListener('click',function(e){e.stopPropagation();finish()});
-    document.addEventListener('keydown',function k(e){if(e.key==='Escape'||e.key==='Enter'){finish();document.removeEventListener('keydown',k)}});
+    document.addEventListener('keydown',function(e){if(!done&&(e.key==='Escape'||e.key==='Enter'))finish()});
+    document.getElementById('replay').addEventListener('click',function(){window.scrollTo(0,0);play()});
+    // 탭이 뒤에서 열렸으면 화면에 보일 때 시작
+    if(document.visibilityState==='hidden'){
+      document.addEventListener('visibilitychange',function v(){if(document.visibilityState==='visible'){document.removeEventListener('visibilitychange',v);play()}});
+    }else{
+      requestAnimationFrame(function(){requestAnimationFrame(play)});
+    }
   })();
 
   // ── 배경 빛: 마우스를 천천히 따라옴 (클라 시계 빛처럼) ──
