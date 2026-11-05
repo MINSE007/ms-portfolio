@@ -80,7 +80,7 @@
   function drawPanel(){
     if(!on)return;
     var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">시험판</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button></div>'+
-      '<div class="ad-tabs">'+[['layout','배치'],['film','영화'],['save','저장']].map(function(t){return '<button type="button" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div><div class="ad-body">';
+      '<div class="ad-tabs">'+[['layout','배치'],['out','외주'],['film','영화'],['save','저장']].map(function(t){return '<button type="button" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div><div class="ad-body">';
     if(tab==='layout'){
       html+='<p class="ad-tip">글자는 화면에서 <b>점선 테두리</b>가 있는 곳을 눌러 바로 고치면 돼요.</p><ol class="ad-list">'+
         S.layout.map(function(x,i){
@@ -89,21 +89,30 @@
             '<button type="button" data-a="up" data-i="'+i+'"'+(i===0?' disabled':'')+' aria-label="위로">↑</button>'+
             '<button type="button" data-a="down" data-i="'+i+'"'+(i===S.layout.length-1?' disabled':'')+' aria-label="아래로">↓</button></li>';
         }).join('')+'</ol>';
+    }else if(tab==='out'){
+      var W=(S.outsource&&S.outsource.works)||[];
+      html+='<p class="ad-tip">영상 주소를 넣으면 카드에 "영상 보기" 버튼이 생겨요.</p>'+
+        '<div class="ad-sub"><b>외주 작업 '+W.length+'개</b><button type="button" data-a="addWork">+ 외주 추가</button></div>'+
+        W.map(function(w,i){
+          var f=function(k,label,type){return row(label,'<input id="ad-w'+k+'-'+i+'"'+(type?' type="'+type+'"':'')+' data-f="outsource.works.'+i+'.'+k+'" value="'+esc(w[k])+'">')};
+          return '<div class="ad-card">'+f('title','제목')+'<div class="ad-2">'+f('client','의뢰')+f('year','연도')+'</div>'+f('role','맡은 일')+f('desc','설명')+f('link','영상 주소','url')+
+            '<button type="button" class="ad-del" data-a="delWork" data-i="'+i+'">이 외주 삭제</button></div>';
+        }).join('');
     }else if(tab==='film'){
       html+='<p class="ad-tip">역할·기록은 쉼표(,)로 나눠 적어요. 예: 촬영부, 조명부</p>'+
         '<div class="ad-sub"><b>필모그래피 '+S.film.films.length+'편</b><button type="button" data-a="addFilm">+ 작품 추가</button></div>'+
         S.film.films.map(function(f,i){
           return '<div class="ad-card">'+
-            row('제목','<input id="ad-ft-'+i+'" data-f="films.'+i+'.title" value="'+esc(f.title)+'">')+
-            '<div class="ad-2">'+row('연도','<input id="ad-fy-'+i+'" type="number" data-f="films.'+i+'.year" value="'+esc(f.year)+'">')+
-            row('역할','<input id="ad-fr-'+i+'" data-f="films.'+i+'.roles" data-list="1" value="'+esc((f.roles||[]).join(', '))+'">')+'</div>'+
-            row('기록','<input id="ad-fc-'+i+'" data-f="films.'+i+'.records" data-list="1" value="'+esc((f.records||[]).join(', '))+'">')+
+            row('제목','<input id="ad-ft-'+i+'" data-f="film.films.'+i+'.title" value="'+esc(f.title)+'">')+
+            '<div class="ad-2">'+row('연도','<input id="ad-fy-'+i+'" type="number" data-f="film.films.'+i+'.year" value="'+esc(f.year)+'">')+
+            row('역할','<input id="ad-fr-'+i+'" data-f="film.films.'+i+'.roles" data-list="1" value="'+esc((f.roles||[]).join(', '))+'">')+'</div>'+
+            row('기록','<input id="ad-fc-'+i+'" data-f="film.films.'+i+'.records" data-list="1" value="'+esc((f.records||[]).join(', '))+'">')+
             '<button type="button" class="ad-del" data-a="delFilm" data-i="'+i+'">이 작품 삭제</button></div>';
         }).join('')+
         '<div class="ad-sub"><b>준비 중인 작품 '+S.film.next.length+'편</b><button type="button" data-a="addNext">+ 추가</button></div>'+
         S.film.next.map(function(x,i){
-          return '<div class="ad-card ad-2">'+row('제목','<input id="ad-nt-'+i+'" data-f="next.'+i+'.title" value="'+esc(x.title)+'">')+
-            row('역할','<input id="ad-nr-'+i+'" data-f="next.'+i+'.role" value="'+esc(x.role)+'">')+
+          return '<div class="ad-card ad-2">'+row('제목','<input id="ad-nt-'+i+'" data-f="film.next.'+i+'.title" value="'+esc(x.title)+'">')+
+            row('역할','<input id="ad-nr-'+i+'" data-f="film.next.'+i+'.role" value="'+esc(x.role)+'">')+
             '<button type="button" class="ad-del" data-a="delNext" data-i="'+i+'">삭제</button></div>';
         }).join('');
     }else{
@@ -138,6 +147,12 @@
     else if(a==='addFilm'){F.films.unshift({title:'새 작품',year:new Date().getFullYear(),roles:[],records:[]})}
     else if(a==='delFilm'){F.films.splice(i,1)}
     else if(a==='addNext'){F.next.push({title:'새 작품',role:''})}
+    else if(a==='addWork'){
+      if(!S.outsource)S.outsource={en:'OUTSOURCING',badge:'WORK',title:'외주',desc:'',works:[]};
+      if(!S.layout.some(function(x){return x.id==='outsource'}))S.layout.splice(1,0,{id:'outsource',show:true});
+      S.outsource.works.unshift({title:'새 외주 작업',client:'',year:String(new Date().getFullYear()),role:'',desc:'',link:''});
+    }
+    else if(a==='delWork'){S.outsource.works.splice(i,1)}
     else if(a==='delNext'){F.next.splice(i,1)}
     else if(a==='copy'){
       var t=toFile();
@@ -160,7 +175,8 @@
     var v=c.value;
     if(c.dataset.list)v=v.split(',').map(function(s){return s.trim()}).filter(Boolean);
     else if(c.type==='number')v=parseInt(v,10)||0;
-    setPath(S.film,p,v);saveDraft();
+    else v=v.trim()===''&&c.type==='url'?'':v;
+    setPath(S,p,v);saveDraft();
     // 패널 입력칸에 커서가 있으니 본문만 다시 그림
     clearTimeout(renderT);renderT=setTimeout(renderPage,400);
   });
@@ -203,7 +219,12 @@
     if(on){
       if(MSP.skipIntro)MSP.skipIntro();
       var d=null;try{d=JSON.parse(localStorage.getItem('msp-draft')||'null')}catch(e){}
-      if(d&&d.site&&d.film){replaceSite(d)}
+      if(d&&d.site&&d.film){
+        // 예전 임시본에 없는 새 항목(예: 외주)은 원본에서 채워 넣기
+        var o=JSON.parse(ORIG);Object.keys(o).forEach(function(k){if(!(k in d))d[k]=o[k]});
+        (o.layout||[]).forEach(function(x,i){if(!d.layout.some(function(y){return y.id===x.id}))d.layout.splice(Math.min(i,d.layout.length),0,x)});
+        replaceSite(d);
+      }
       MSP.render();
       if(d){tab='save';drawPanel();msg('지난번에 저장 안 한 변경을 불러왔어요.',true)}
     }else{

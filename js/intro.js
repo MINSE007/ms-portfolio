@@ -1,33 +1,60 @@
 /* =====================================================================
-   intro.js — 키워드 인트로 (휙휙 버전, 약 3.3초, 건너뛰기 가능)
-   키워드는 data.js 의 intro.keywords, 슬로건은 hero.title1 / title2 를 써요.
-   시간 조절: 아래 STEP(키워드 하나 머무는 시간), HOLD(슬로건 머무는 시간), FLY(제목 자리로 가는 시간)
-   방향: DIRS — 키워드마다 [들어오는 쪽, 나가는 쪽] (r 오른쪽 / l 왼쪽 / b 아래 / t 위)
+   intro.js — 컷 편집식 타이포 인트로 (약 3.6초, 건너뛰기 가능)
+   단어는 data.js 의 intro.cuts, 슬로건은 hero.title1 / title2 를 써요.
+   컷 모양 바꾸기: 아래 LOOK 목록 — [모양, 자리, 배경, 움직임, 길이(ms)]
+     모양: fill 채움 / out 외곽선 / acc 보라 글씨
+     자리: bl 왼쪽아래 / br 오른쪽아래 / tl 왼쪽위 / tr 오른쪽위 / l 왼쪽 / r 오른쪽 / c 가운데
+           (뒤에 ' crop-r' 이나 ' crop-l' 을 붙이면 화면 밖으로 잘려 나감)
+     배경: dark 어둡게 / light 밝게 / acc 보라
+     움직임: zoom 줌 / left·right 옆으로 / up 위로 / blur 초점 맞추기
    ===================================================================== */
 (function(){
-  var STEP=560, HOLD=760, FLY=750;
-  var DIRS=[['r','l'],['b','t'],['l','r']];
+  var LOOK=[
+    ['fill','bl','dark','zoom',240],
+    ['out','r crop-r','dark','left',190],
+    ['fill','l','light','right',190],
+    ['acc','tr','dark','up',230],
+    ['fill','c','dark','blur',180],
+    ['out','bl','light','zoom',170],
+    ['fill','c','acc','zoom',170],
+    ['fill','br crop-r','dark','left',190],
+    ['out','c','dark','zoom',170],
+    ['fill','l','dark','up',280]
+  ];
+  var DEFAULT_CUTS=['YOUTUBE','FILM','EDIT','8년','잘','짖고,','잘','놀고,','잘','만듭니다.'];
+  var HOLD=720, FLY=750;
   var MSP=window.MSP||{},S=window.SITE,root=document.documentElement;
   var el=document.getElementById('intro');if(!el)return;
-  var roll=document.getElementById('iRoll'),slog=document.getElementById('iSlogan');
-  var count=document.getElementById('iCount'),bar=document.getElementById('iBar'),wipe=document.getElementById('iWipe');
+  var stage=document.getElementById('iCuts'),slog=document.getElementById('iSlogan');
+  var take=document.getElementById('iTake'),seg=document.getElementById('iSeg');
   var timers=[],running=false;
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function at(ms,fn){timers.push(setTimeout(fn,ms))}
   function pad(n){return String(n).padStart(2,'0')}
   function isCalm(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
 
-  function build(){
-    var kws=(S.intro&&S.intro.keywords)||[];
-    roll.innerHTML=kws.map(function(k){
-      return '<div class="w"><span class="en">'+esc(k.en)+'</span><span class="ko">'+esc(k.ko)+'</span></div>';
-    }).join('');
-    slog.innerHTML='<span class="sl-in"><span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span></span>';
-    document.getElementById('iEb').textContent=S.site.name;
-    return kws.length;
+  // 글자 수에 맞춰 화면에 꽉 차는 크기 정하기 (한글은 넓게, 영문은 좁게 계산)
+  function fontSize(t){
+    var w=0;Array.from(t).forEach(function(c){w+=/[가-힣一-龥]/.test(c)?1:/[A-Z0-9]/.test(c)?.68:.4});
+    var byW=86/Math.max(w,1.2), byH=62*innerHeight/innerWidth;
+    return Math.min(byW,byH,34).toFixed(2)+'vw';
   }
 
-  // 슬로건을 첫 화면 제목과 똑같은 폭으로 맞추고, 끝 위치(제목 자리)를 기준으로 가운데까지의 거리를 잼
+  function build(){
+    var cuts=(S.intro&&S.intro.cuts&&S.intro.cuts.length)?S.intro.cuts:DEFAULT_CUTS;
+    stage.innerHTML=cuts.map(function(t,i){
+      var L=LOOK[i%LOOK.length],sty=L[0];
+      // 외곽선은 영문에만 (한글은 글꼴 획이 겹쳐 보여서 채움으로)
+      if(sty==='out'&&/[가-힣一-龥]/.test(String(t)))sty='fill';
+      return '<div class="cut s-'+sty+' p-'+L[1]+' m-'+L[3]+'"><span class="tx" style="--fs:'+fontSize(String(t))+'">'+esc(t)+'</span></div>';
+    }).join('');
+    seg.innerHTML=cuts.map(function(){return '<i></i>'}).join('');
+    slog.innerHTML='<span class="sl-in"><span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span></span>';
+    document.getElementById('iName').textContent=S.site.name;
+    return cuts.length;
+  }
+
+  // 슬로건을 첫 화면 제목과 똑같은 폭으로 맞추고, 제목 자리 기준으로 화면 가운데까지의 거리를 잼
   function place(){
     var h1=document.getElementById('heroTitle');if(!h1)return null;
     var r=h1.getBoundingClientRect();
@@ -35,20 +62,13 @@
     var tw=0;slog.querySelectorAll('.ln>span').forEach(function(s){
       var rg=document.createRange();rg.selectNodeContents(s);tw=Math.max(tw,rg.getBoundingClientRect().width);
     });
-    var h=slog.offsetHeight;
-    return {dx:(innerWidth-tw)/2-r.left,dy:(innerHeight-h)/2-r.top};
+    return {dx:(innerWidth-tw)/2-r.left,dy:(innerHeight-slog.offsetHeight)/2-r.top};
   }
 
-  var cur=-1;
-  function dir(k){return DIRS[k%DIRS.length]}
   function show(i,n){
-    var ws=roll.children;
-    if(cur>=0&&ws[cur]){ws[cur].className='w out-'+dir(cur)[1]}
-    if(i>=0&&ws[i]){ws[i].className='w in-'+dir(i)[0]}
-    cur=i;
-    // 빛줄기 다시 지나가게
-    wipe.classList.remove('go');void wipe.offsetWidth;wipe.classList.add('go');
-    if(i>=0){count.textContent=pad(i+1)+' / '+pad(n);bar.style.width=((i+1)/n*100)+'%'}
+    var cs=stage.children,ss=seg.children;
+    for(var k=0;k<cs.length;k++){cs[k].classList.toggle('on',k===i);if(ss[k])ss[k].classList.toggle('on',k<=i)}
+    if(i>=0){el.setAttribute('data-bg',LOOK[i%LOOK.length][2]);take.textContent='TAKE '+pad(i+1)+' / '+pad(n)}
   }
 
   function finish(){
@@ -62,32 +82,31 @@
   function play(){
     timers.forEach(clearTimeout);timers=[];running=true;
     var calm=isCalm();
-    el.className='';if(calm)el.classList.add('calm');
+    el.className='';el.removeAttribute('data-bg');if(calm)el.classList.add('calm');
     root.classList.remove('entered');root.classList.add('intro-on');
     window.scrollTo(0,0);
-    var n=build();cur=-1;wipe.classList.remove('go');bar.style.width='0';
+    var n=build();
     slog.style.transition='none';slog.style.transform='none';
     var go=function(){
       if(!running)return;
-      at(80,function(){el.classList.add('p-on')});
-      for(var i=0;i<n;i++)(function(i){at(150+i*STEP,function(){show(i,n)})})(i);
-      var tEnd=150+n*STEP;
-      at(tEnd,function(){
-        show(-1,n);
+      var t=60;
+      for(var i=0;i<n;i++)(function(i){at(t,function(){show(i,n)});t+=calm?320:LOOK[i%LOOK.length][4]})(i);
+      at(t,function(){
+        show(-1,n);el.removeAttribute('data-bg');
         var p=place();
-        if(p&&!calm){slog.style.transform='translate('+p.dx+'px,'+p.dy+'px)'}
+        if(p&&!calm)slog.style.transform='translate('+p.dx+'px,'+p.dy+'px)';
         void slog.offsetWidth;slog.style.transition='';
         el.classList.add('p-slogan');
       });
-      at(tEnd+HOLD,function(){
+      at(t+HOLD,function(){
         var h1=document.getElementById('heroTitle');
         if(h1){var r=h1.getBoundingClientRect();slog.style.left=r.left+'px';slog.style.top=r.top+'px'}
         el.classList.add('p-fly');slog.style.transform='none';
         root.classList.add('entered');
       });
-      at(tEnd+HOLD+FLY,finish);
+      at(t+HOLD+FLY,finish);
     };
-    // 글꼴이 다 불러와진 뒤 시작해야 슬로건 크기가 정확해요 (최대 1.2초 기다림)
+    // 글꼴이 다 불러와진 뒤 시작해야 크기가 정확해요 (최대 1.2초 기다림)
     var started=false,start=function(){if(!started){started=true;go()}};
     try{document.fonts.ready.then(start)}catch(e){start()}
     setTimeout(start,1200);

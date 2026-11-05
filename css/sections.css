@@ -28,26 +28,15 @@
 .fact strong small{font-size:.4em;font-weight:700;margin-left:3px;letter-spacing:0}
 .fact>span{font-size:14px;color:var(--muted)}
 
-/* 작품 흐름 띠 (작품 제목이 계속 흘러감) */
-.ticker{margin-top:72px;border-block:1px solid var(--line);overflow:hidden;background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.tk-track{display:flex;width:max-content;animation:tick 60s linear infinite}
-.ticker:hover .tk-track{animation-play-state:paused}
-.tk-track span{display:flex;align-items:center;gap:22px;padding:16px 0 16px 22px;font-size:15px;font-weight:700;white-space:nowrap}
-.tk-track span::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--line)}
-.tk-track span.aw{color:var(--gold)}
-.tk-track span.aw::before{content:"★"}
-@keyframes tick{to{transform:translateX(-50%)}}
-
 /* 인트로가 도는 동안은 제목 자리를 비워두고, 끝나면 나머지가 차례로 올라옴 */
 html.intro-on .hero h1{visibility:hidden}
-html.intro-on:not(.entered) .hero :is(.h-meta,.sub,.ctas,.now,.facts,.ticker){opacity:0;transform:translateY(20px)}
+html.intro-on:not(.entered) .hero :is(.h-meta,.sub,.ctas,.now,.facts){opacity:0;transform:translateY(20px)}
 html.intro-on:not(.entered) header{opacity:0}
-html.entered .hero :is(.h-meta,.sub,.ctas,.now,.facts,.ticker),html.entered header{transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
+html.entered .hero :is(.h-meta,.sub,.ctas,.now,.facts),html.entered header{transition:opacity .6s ease,transform .7s cubic-bezier(.2,.8,.2,1)}
 html.entered .hero .sub{transition-delay:.08s}
 html.entered .hero .ctas{transition-delay:.14s}
 html.entered .hero .now{transition-delay:.2s}
 html.entered .hero .facts{transition-delay:.26s}
-html.entered .hero .ticker{transition-delay:.32s}
 
 /* ── 유튜브 ── */
 .yt{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.75fr);gap:20px;align-items:start}
@@ -75,6 +64,17 @@ html.entered .hero .ticker{transition-delay:.32s}
 .vid .idx{font-size:13px;font-weight:700;color:var(--acc);padding-top:2px;font-variant-numeric:tabular-nums}
 .vid h3{font-size:16px;font-weight:700;line-height:1.45}
 
+/* ── 외주 ── */
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:20px}
+.case{border-radius:24px;padding:26px 26px 24px;display:flex;flex-direction:column;gap:16px;min-width:0;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.case:hover{transform:translateY(-4px)}
+.cs-top{display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.cs-no{color:var(--acc);letter-spacing:.14em}
+.case h3{font-size:clamp(22px,2.4vw,28px);font-weight:900;line-height:1.25}
+.case p{color:var(--muted);font-size:15px}
+.cs-link{align-self:flex-start;font-weight:700;font-size:14px;padding:8px 14px;border-radius:999px;border:1px solid var(--line)}
+.cs-link:hover{background:var(--hover)}
+
 /* ── 영화 ── */
 .sub-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 14px}
 .sub-h h3{font-size:18px;font-weight:900}
@@ -92,12 +92,22 @@ html.entered .hero .ticker{transition-delay:.32s}
 .pk-r .k,.fr .ro .k{color:var(--acc);font-weight:700}
 .pk-a{font-size:14px;font-weight:700;color:var(--gold);text-align:right}
 .pk-a span{display:block}
-.film-grid{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start}
-.box{border-radius:24px;padding:24px 26px}
-.nextbox{position:sticky;top:96px}
-.nexts{list-style:none;margin:0;padding:0}
-.nexts li{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-weight:700;font-size:15px}
-.nexts em{font-style:normal;font-weight:500;font-size:12.5px;color:var(--acc);white-space:nowrap}
+/* 전체 필모그래피: 눌러서 펼치기 (높이가 부드럽게 늘어남) */
+.fold{border-radius:24px;overflow:hidden}
+.fold-btn{display:flex;align-items:center;gap:10px;width:100%;padding:22px 26px;border:0;background:none;cursor:pointer;text-align:left;font-size:17px;font-weight:900}
+.fold-btn:hover{background:var(--hover)}
+.fold-btn b{color:var(--acc)}
+.fold-ic{margin-left:auto;position:relative;width:28px;height:28px;border-radius:50%;border:1px solid var(--line)}
+.fold-ic::before,.fold-ic::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:1.5px;background:currentColor;transform:translate(-50%,-50%);transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.fold-ic::after{transform:translate(-50%,-50%) rotate(90deg)}
+.fold.open .fold-ic::after{transform:translate(-50%,-50%) rotate(0)}
+.fold.open .fold-ic::before{transform:translate(-50%,-50%) rotate(180deg)}
+.fold-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s cubic-bezier(.2,.8,.2,1)}
+.fold.open .fold-body{grid-template-rows:1fr}
+.fold-in{min-height:0;overflow:hidden;padding:0 26px;opacity:0;transform:translateY(-10px);transition:opacity .4s ease,transform .5s cubic-bezier(.2,.8,.2,1),padding .6s}
+.fold.open .fold-in{opacity:1;transform:none;padding-bottom:22px;transition-delay:.12s}
+.fcount{font-size:13px;color:var(--muted)}
+.fcount b{color:var(--text)}
 .fbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
 .fbar .sub-h{margin:0}
 .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
@@ -118,6 +128,10 @@ html.entered .hero .ticker{transition-delay:.32s}
 .fr .res .win{color:var(--gold);font-weight:700}
 .fr .res .win::before{content:"★ "}
 .fr .res .ent{color:var(--text)}
+.xr{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1)}
+.xr-in{min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:2px;opacity:0;transform:translateY(-6px);transition:opacity .3s,transform .4s cubic-bezier(.2,.8,.2,1)}
+.fr.open .xr{grid-template-rows:1fr}
+.fr.open .xr-in{opacity:1;transform:none;transition-delay:.08s}
 .more{align-self:flex-start;border:0;background:none;padding:0;color:var(--muted);font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .more:hover{color:var(--acc)}
 .empty{padding:24px 0;color:var(--muted)}
@@ -162,12 +176,12 @@ a.door:hover{transform:translateY(-4px)}
   .rv.anim{transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .8s ease}
   .rv.wait{transform:translateY(32px);opacity:.35}
 }
-@media (prefers-reduced-motion:reduce){.tk-track,.now .mono::before{animation:none}}
+@media (prefers-reduced-motion:reduce){.now .mono::before{animation:none}}
 
 /* ── 화면 폭에 맞추기 ── */
 @media (max-width:1040px){
-  .h-main,.yt,.film-grid,.dual,.ed-top{grid-template-columns:1fr}
-  .now,.chan,.nextbox{position:static}
+  .h-main,.yt,.dual,.ed-top{grid-template-columns:1fr}
+  .now,.chan{position:static}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .pk{grid-template-columns:44px minmax(0,1fr) auto}
   .pk-r{display:none}
@@ -182,7 +196,9 @@ a.door:hover{transform:translateY(-4px)}
   .pk{grid-template-columns:1fr;gap:4px;padding:18px 4px}
   .pk-no{display:none}
   .pk-a{text-align:left}
-  .chan,.door,.box{padding:22px 20px}
+  .chan,.door,.box,.case{padding:22px 20px}
+  .fold-btn{padding:18px 20px}
+  .fold-in{padding:0 16px}
   .yg{grid-template-columns:1fr}
   .fr{grid-template-columns:1fr auto;gap:4px 12px}
   .fr .res{grid-column:1/-1}

@@ -13,8 +13,9 @@ window.SITE = {
     "eyebrow": "MS PORTFOLIO — YOUTUBE · FILM · EDIT"
   },
 
-  /* ② 인트로 — 키워드가 순서대로 크게 나온 뒤 슬로건으로 이어져요 */
+  /* ② 인트로 — cuts 단어가 컷처럼 빠르게 지나간 뒤 슬로건으로 이어져요 */
   "intro": {
+    "cuts": ["YOUTUBE", "FILM", "EDIT", "8년", "잘", "짖고,", "잘", "놀고,", "잘", "만듭니다."],
     "keywords": [
       { "en": "YOUTUBE", "ko": "유튜브 · 카워드 스튜디오" },
       { "en": "FILM", "ko": "영화 · 연출 / 촬영 / 음향" },
@@ -44,6 +45,7 @@ window.SITE = {
   /* ④ 섹션 순서와 보이기 (위에서부터 이 순서대로 나와요. show:false면 숨김) */
   "layout": [
     { "id": "youtube", "show": true },
+    { "id": "outsource", "show": true },
     { "id": "film", "show": true },
     { "id": "edit", "show": true },
     { "id": "contact", "show": true }
@@ -69,6 +71,17 @@ window.SITE = {
       { "title": "한국인이 아시아 섭 하면 생기는 일", "id": "HX09tGF0QPc" },
       { "title": "롤 좋아하는 친구들이랑 볼링 치러가면 생기는 일", "id": "Ih2qKrALhaI" },
       { "title": "친구랑 손절할 뻔했습니다", "id": "YX6wRNR4XbA" }
+    ]
+  },
+
+  /* ⑤-2 외주 — 의뢰받아 만든 작업 (link에 영상 주소를 넣으면 '영상 보기' 버튼이 생겨요) */
+  "outsource": {
+    "en": "OUTSOURCING",
+    "badge": "WORK",
+    "title": "외주",
+    "desc": "의뢰받아 함께 만든 작업들입니다. 기획 의도를 먼저 듣고, 맡긴 분이 원하는 결과로 완성합니다.",
+    "works": [
+      { "title": "뮤지컬 음악감독 쇼릴", "client": "뮤지컬 음악감독", "year": "2026", "role": "편집", "desc": "뮤지컬 시츠프로브 영상을 엮어 음악감독의 작업을 한 편에 담은 쇼릴입니다.", "link": "" }
     ]
   },
 

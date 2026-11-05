@@ -45,13 +45,13 @@
   }
 
   /* ── 섹션 이름표 ── */
-  var NAMES={youtube:'유튜브',film:'영화',edit:'편집',contact:'연락'};
+  var NAMES={youtube:'유튜브',outsource:'외주',film:'영화',edit:'편집',contact:'연락'};
   MSP.NAMES=NAMES;
-  function visible(){return (S.layout||[]).filter(function(x){return x.show!==false&&SECTIONS[x.id]})}
+  function visible(){return (S.layout||[]).filter(function(x){return x.show!==false&&SECTIONS[x.id]&&S[x.id]})}
 
   /* ── 첫 화면 ── */
   function renderHero(){
-    var h=S.hero,c=counts(),films=S.film.films||[];
+    var h=S.hero,c=counts();
     var sub=esc(h.sub);
     if(h.subStrong){var k=esc(h.subStrong);sub=sub.replace(k,'<b>'+k+'</b>')}
     var facts=(h.facts||[]).map(function(f,i){
@@ -60,8 +60,6 @@
       return '<div class="fact"><strong>'+(auto?esc(n):'<span'+ed('hero.facts.'+i+'.value')+'>'+esc(n)+'</span>')+'<small'+ed('hero.facts.'+i+'.unit')+'>'+esc(f.unit)+'</small></strong><span'+ed('hero.facts.'+i+'.label')+'>'+esc(f.label)+'</span></div>';
     }).join('');
     var now=(S.film.next||[]).slice(0,4).map(function(x){return '<li><span>'+esc(x.title)+'</span>'+(x.role?'<em>'+esc(x.role)+'</em>':'')+'</li>'}).join('');
-    // 작품 흐름 띠: 작품 제목 전체를 두 번 이어 붙여 끊김 없이 흐르게
-    var tk=films.map(function(f){var aw=(f.records||[]).some(function(x){return WIN.test(x)});return '<span'+(aw?' class="aw"':'')+'>'+esc(f.title)+'</span>'}).join('');
     $('hero').innerHTML='<div class="wrap">'+
       '<div class="h-meta mono"><span'+ed('hero.metaLeft')+'>'+esc(or(h.metaLeft,'PORTFOLIO — 2026'))+'</span><span'+ed('hero.metaRight')+'>'+esc(or(h.metaRight,'유튜브 · 영화 · 편집 — MS'))+'</span></div>'+
       '<div class="h-main"><div>'+
@@ -69,8 +67,7 @@
         '<p class="sub"'+ed('hero.sub')+'>'+sub+'</p>'+
         '<div class="ctas"><a class="btn" href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener"><span'+ed('hero.btn1')+'>'+esc(h.btn1)+'</span> ↗</a><a class="btn ghost" href="#film"'+ed('hero.btn2')+'>'+esc(h.btn2)+'</a></div>'+
       '</div>'+(now?'<aside class="now glass"><span class="mono"'+ed('hero.nowTitle')+'>'+esc(or(h.nowTitle,'NOW · 지금 만드는 것'))+'</span><ol>'+now+'</ol></aside>':'')+'</div>'+
-      '<div class="facts">'+facts+'</div></div>'+
-      (films.length?'<div class="ticker" aria-hidden="true"><div class="tk-track">'+tk+tk+'</div></div>':'');
+      '<div class="facts">'+facts+'</div></div>';
   }
 
   /* ── 섹션 머리 (번호는 보이는 순서대로 자동) ── */
@@ -101,6 +98,17 @@
         '<a class="btn" href="'+esc(ch.url)+'" target="_blank" rel="noopener"><span'+ed('youtube.channel.button')+'>'+esc(ch.button)+'</span> ↗</a></aside>'+
         '<div class="vids">'+grid+'</div></div>';
     },
+    outsource:function(n){
+      var o=S.outsource,works=o.works||[];
+      return head('outsource',n)+'<div class="cases">'+works.map(function(w,i){
+        var p='outsource.works.'+i+'.';
+        return '<article class="case glass rv"><div class="cs-top"><span class="cs-no">CASE '+pad(i+1)+'</span><span'+ed(p+'year')+'>'+esc(w.year)+'</span></div>'+
+          '<h3'+ed(p+'title')+'>'+esc(w.title)+'</h3>'+
+          '<dl class="meta"><dt>의뢰</dt><dd'+ed(p+'client')+'>'+esc(w.client)+'</dd><dt>맡은 일</dt><dd'+ed(p+'role')+'>'+esc(w.role)+'</dd></dl>'+
+          '<p'+ed(p+'desc')+'>'+esc(w.desc)+'</p>'+
+          (w.link?'<a class="cs-link" href="'+esc(w.link)+'" target="_blank" rel="noopener">영상 보기 ↗</a>':'')+'</article>';
+      }).join('')+'</div>';
+    },
     film:function(n){
       var f=S.film,films=f.films||[];
       var picks=films.filter(function(x){return (x.records||[]).some(function(r){return WIN.test(r)})});
@@ -113,13 +121,13 @@
           var aw=(x.records||[]).filter(function(r){return WIN.test(r)});
           return '<li class="pk rv"><span class="pk-no">'+pad(i+1)+'</span><span class="pk-t">'+esc(x.title)+'</span><span class="pk-r">'+esc(x.year)+' · '+roleText(x.roles)+'</span><span class="pk-a">'+aw.map(function(a){return '<span>★ '+esc(a)+'</span>'}).join('')+'</span></li>';
         }).join('')+'</ol>':'')+
-        '<div class="film-grid">'+
-          '<aside class="box glass nextbox rv"><div class="sub-h"><h3><span'+ed('film.nextTitle')+'>'+esc(or(f.nextTitle,'준비 중인 작품'))+'</span><b class="num">'+(f.next||[]).length+'</b></h3></div><ul class="nexts">'+
-            (f.next||[]).map(function(x){return '<li><span>'+esc(x.title)+'</span>'+(x.role?'<em>'+esc(x.role)+'</em>':'')+'</li>'}).join('')+'</ul></aside>'+
-          '<div class="box glass rv"><div class="fbar"><div class="sub-h"><h3>필모그래피<b class="num" id="fShown">'+films.length+'</b></h3></div>'+
-            '<div class="tools"><div class="tabs" role="group" aria-label="분야별 보기" id="ftabs">'+tabs+'</div>'+
-            '<button class="sort" type="button" id="sortBtn">최신순 ↓</button></div></div>'+
-            '<div id="films"></div></div>'+
+        '<div class="fold glass rv" id="filmFold">'+
+          '<button class="fold-btn" type="button" id="foldBtn" aria-expanded="false" aria-controls="foldBody"><span class="fold-t">전체 필모그래피 보기</span><b class="num">'+films.length+'편</b><span class="fold-ic" aria-hidden="true"></span></button>'+
+          '<div class="fold-body" id="foldBody"><div class="fold-in">'+
+            '<div class="fbar"><div class="tools"><div class="tabs" role="group" aria-label="분야별 보기" id="ftabs">'+tabs+'</div>'+
+            '<button class="sort" type="button" id="sortBtn">최신순 ↓</button></div><span class="fcount">보이는 작품 <b class="num" id="fShown">'+films.length+'</b>편</span></div>'+
+            '<div id="films"></div>'+
+          '</div></div>'+
         '</div>';
     },
     edit:function(n){
@@ -136,7 +144,7 @@
       return '<div class="no mono" style="color:var(--acc);display:flex;gap:10px"><span>'+pad(n)+'</span><span'+ed('contact.en')+'>'+esc(c.en)+'</span></div>'+
         '<h2 class="ct-title rv"'+ed('contact.title')+'>'+esc(c.title)+'</h2>'+
         '<div class="dual"><div class="door glass rv"><div><small class="mono"'+ed('contact.clientEyebrow')+'>'+esc(c.clientEyebrow)+'</small><h3'+ed('contact.clientTitle')+'>'+esc(c.clientTitle)+'</h3><p'+ed('contact.clientDesc')+'>'+esc(c.clientDesc)+'</p></div>'+
-        '<div class="clist"><div class="ci"><span class="k mono">EMAIL</span><span class="v" id="cEmail"'+ed('contact.email')+'>'+esc(c.email)+'</span><button class="cp" type="button" data-for="cEmail">복사</button></div>'+
+        '<div class="clist"><div class="ci"><span class="k mono">EMAIL</span><a class="v" id="cEmail" href="mailto:'+esc(c.email)+'"'+ed('contact.email')+'>'+esc(c.email)+'</a><button class="cp" type="button" data-for="cEmail">복사</button></div>'+
         '<div class="ci"><span class="k mono">INSTAGRAM</span><a class="v" href="'+esc(c.instagramUrl)+'" target="_blank" rel="noopener"'+ed('contact.instagram')+'>'+esc(c.instagram)+'</a><span></span></div></div></div>'+
         '<a class="door glass rv" href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener"><div><small class="mono"'+ed('contact.viewerEyebrow')+'>'+esc(c.viewerEyebrow)+'</small><h3'+ed('contact.viewerTitle')+'>'+esc(c.viewerTitle)+'</h3><p'+ed('contact.viewerDesc')+'>'+esc(c.viewerDesc)+'</p></div><span class="arrow"><span'+ed('contact.viewerLink')+'>'+esc(c.viewerLink)+'</span> ↗</span></a></div>';
     }
@@ -158,13 +166,13 @@
       return '<div class="yg"><div class="yr">'+esc(y)+'</div><ul>'+list.map(function(o){
         var f=o.f,rec=f.records||[];
         var main=rec.filter(function(x){return WIN.test(x)||ENTRY.test(x)}),rest=rec.filter(function(x){return !(WIN.test(x)||ENTRY.test(x))});
-        var open=fstate.open[o.i];
+        var open=!!fstate.open[o.i];
         var res=main.map(function(x){return '<span class="'+(WIN.test(x)?'win':'ent')+'">'+esc(x)+'</span>'}).join('');
         if(rest.length){
-          if(open)res+=rest.map(function(x){return '<span>'+esc(x)+'</span>'}).join('');
-          res+='<button class="more" type="button" data-i="'+o.i+'" aria-expanded="'+(open?'true':'false')+'">'+(open?'접기':(main.length?'기록 '+rest.length+'개 더':'기록 보기'))+'</button>';
+          res+='<span class="xr"><span class="xr-in">'+rest.map(function(x){return '<span>'+esc(x)+'</span>'}).join('')+'</span></span>'+
+            '<button class="more" type="button" data-i="'+o.i+'" data-label="'+(main.length?'기록 '+rest.length+'개 더':'기록 보기')+'" aria-expanded="'+open+'">'+(open?'접기':(main.length?'기록 '+rest.length+'개 더':'기록 보기'))+'</button>';
         }
-        return '<li class="fr"><span class="t">'+esc(f.title)+'</span><span class="ro">'+roleText(f.roles)+'</span><span class="res">'+res+'</span></li>';
+        return '<li class="fr'+(open?' open':'')+'"><span class="t">'+esc(f.title)+'</span><span class="ro">'+roleText(f.roles)+'</span><span class="res">'+res+'</span></li>';
       }).join('')+'</ul></div>';
     }).join('');
   }
@@ -191,6 +199,7 @@
     }).join('');
     renderFooter();
     drawFilms();
+    if(fstate.fold&&$('filmFold')){$('filmFold').classList.add('open');$('foldBtn').setAttribute('aria-expanded','true');$('foldBtn').querySelector('.fold-t').textContent='필모그래피 접기'}
     loadImages();
     reveal();
     (MSP.onRender||[]).forEach(function(fn){fn()});
@@ -238,6 +247,23 @@
     window.addEventListener('pointermove',function(e){tx=e.clientX/innerWidth;ty=e.clientY/innerHeight;if(!raf)raf=requestAnimationFrame(step)},{passive:true});
   })();
 
+  /* ── 쭈우욱 미끄러지는 스크롤 (멀수록 조금 더 길게, 처음·끝은 부드럽게) ── */
+  var scrollRaf=0;
+  function scrollToY(y){
+    cancelAnimationFrame(scrollRaf);
+    var from=scrollY,dist=y-from;if(Math.abs(dist)<2)return;
+    try{if(matchMedia('(prefers-reduced-motion: reduce)').matches){window.scrollTo(0,y);return}}catch(e){}
+    var dur=Math.min(1600,600+Math.abs(dist)*.18),t0=performance.now();
+    var ease=function(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+    (function step(now){
+      var p=Math.min(1,(now-t0)/dur);window.scrollTo(0,from+dist*ease(p));
+      if(p<1)scrollRaf=requestAnimationFrame(step);
+    })(t0);
+  }
+  // 손으로 스크롤하면 바로 멈춤
+  ['wheel','touchstart','keydown'].forEach(function(ev){window.addEventListener(ev,function(){cancelAnimationFrame(scrollRaf)},{passive:true})});
+  MSP.scrollToY=scrollToY;
+
   /* ── 클릭 동작 (다시 그려도 계속 동작하도록 문서 전체에서 받음) ── */
   document.addEventListener('click',function(e){
     var t;
@@ -252,8 +278,17 @@
       drawFilms();return;
     }
     if((t=e.target.closest('#films .more'))){
-      var i=t.getAttribute('data-i');fstate.open[i]=!fstate.open[i];drawFilms();return;
+      var i=t.getAttribute('data-i'),li=t.closest('.fr'),op=!fstate.open[i];fstate.open[i]=op;
+      li.classList.toggle('open',op);t.setAttribute('aria-expanded',String(op));t.textContent=op?'접기':t.getAttribute('data-label');return;
     }
+    if((t=e.target.closest('#foldBtn'))){
+      var fold=$('filmFold'),o2=!fold.classList.contains('open');fstate.fold=o2;
+      fold.classList.toggle('open',o2);t.setAttribute('aria-expanded',String(o2));
+      t.querySelector('.fold-t').textContent=o2?'필모그래피 접기':'전체 필모그래피 보기';
+      if(!o2)scrollToY(fold.getBoundingClientRect().top+scrollY-110);
+      return;
+    }
+    if((t=e.target.closest('.logo'))&&!root.classList.contains('admin')){e.preventDefault();scrollToY(0);return}
     if((t=e.target.closest('.cp'))){
       if(root.classList.contains('admin'))return;
       var el=$(t.getAttribute('data-for'));if(!el)return;
@@ -261,7 +296,7 @@
       try{navigator.clipboard.writeText(el.textContent).then(function(){t.textContent='복사됨';setTimeout(function(){t.textContent='복사'},1500)},sel)}catch(err){sel()}
       return;
     }
-    if(e.target.closest('#toTop')){window.scrollTo({top:0,behavior:'smooth'});return}
+    if(e.target.closest('#toTop')){scrollToY(0);return}
     if(e.target.closest('#replay')){if(MSP.playIntro)MSP.playIntro(true);return}
   });
 
