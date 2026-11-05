@@ -11,8 +11,10 @@
   /* ── 도우미 ── */
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function $(id){return document.getElementById(id)}
+  function pad(n){return String(n).padStart(2,'0')}
   // data-edit="hero.title1" 처럼 표시해 두면 관리자 모드에서 바로 고칠 수 있어요
   function ed(path){return ' data-edit="'+path+'"'}
+  function or(v,d){return v==null||v===''?d:v}
   MSP.esc=esc;
 
   /* ── 영화: 역할 분류 (키스탭 + ~부 묶음) ── */
@@ -32,7 +34,7 @@
   var WIN=/수상|은상|동상|입선|감독상|장상/, ENTRY=/출품/;
   MSP.WIN=WIN;
   function roleText(rs){
-    return rs.slice().sort(function(a,b){return (ORDER[a]||0)-(ORDER[b]||0)}).map(function(r){
+    return (rs||[]).slice().sort(function(a,b){return (ORDER[a]||0)-(ORDER[b]||0)}).map(function(r){
       return isKey(r)?'<span class="k">'+esc(r)+'</span>':esc(r);
     }).join(' · ');
   }
@@ -43,13 +45,13 @@
   }
 
   /* ── 섹션 이름표 ── */
-  var NAMES={youtube:'유튜브',film:'영화',edit:'편집',contact:'Contact'};
+  var NAMES={youtube:'유튜브',film:'영화',edit:'편집',contact:'연락'};
   MSP.NAMES=NAMES;
   function visible(){return (S.layout||[]).filter(function(x){return x.show!==false&&SECTIONS[x.id]})}
 
   /* ── 첫 화면 ── */
   function renderHero(){
-    var h=S.hero,c=counts();
+    var h=S.hero,c=counts(),films=S.film.films||[];
     var sub=esc(h.sub);
     if(h.subStrong){var k=esc(h.subStrong);sub=sub.replace(k,'<b>'+k+'</b>')}
     var facts=(h.facts||[]).map(function(f,i){
@@ -57,78 +59,86 @@
       var n=auto?c[v.slice(5)]:v;
       return '<div class="fact"><strong>'+(auto?esc(n):'<span'+ed('hero.facts.'+i+'.value')+'>'+esc(n)+'</span>')+'<small'+ed('hero.facts.'+i+'.unit')+'>'+esc(f.unit)+'</small></strong><span'+ed('hero.facts.'+i+'.label')+'>'+esc(f.label)+'</span></div>';
     }).join('');
+    var now=(S.film.next||[]).slice(0,4).map(function(x){return '<li><span>'+esc(x.title)+'</span>'+(x.role?'<em>'+esc(x.role)+'</em>':'')+'</li>'}).join('');
+    // 작품 흐름 띠: 작품 제목 전체를 두 번 이어 붙여 끊김 없이 흐르게
+    var tk=films.map(function(f){var aw=(f.records||[]).some(function(x){return WIN.test(x)});return '<span'+(aw?' class="aw"':'')+'>'+esc(f.title)+'</span>'}).join('');
     $('hero').innerHTML='<div class="wrap">'+
-      '<p class="eyeline"'+ed('site.eyebrow')+'>'+esc(S.site.eyebrow)+'</p>'+
-      '<h1 id="heroTitle"><span class="l l1"'+ed('hero.title1')+'>'+esc(h.title1)+'</span><span class="l l2"'+ed('hero.title2')+'>'+esc(h.title2)+'</span></h1>'+
-      '<p class="sub"'+ed('hero.sub')+'>'+sub+'</p>'+
-      '<div class="ctas"><a class="btn" href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener"><span'+ed('hero.btn1')+'>'+esc(h.btn1)+'</span> ↗</a><a class="btn ghost" href="#film"'+ed('hero.btn2')+'>'+esc(h.btn2)+'</a></div>'+
-      '<div class="facts">'+facts+'</div></div>';
+      '<div class="h-meta mono"><span'+ed('hero.metaLeft')+'>'+esc(or(h.metaLeft,'PORTFOLIO — 2026'))+'</span><span'+ed('hero.metaRight')+'>'+esc(or(h.metaRight,'유튜브 · 영화 · 편집 — MS'))+'</span></div>'+
+      '<div class="h-main"><div>'+
+        '<h1 id="heroTitle"><span class="l l1"'+ed('hero.title1')+'>'+esc(h.title1)+'</span><span class="l l2"'+ed('hero.title2')+'>'+esc(h.title2)+'</span></h1>'+
+        '<p class="sub"'+ed('hero.sub')+'>'+sub+'</p>'+
+        '<div class="ctas"><a class="btn" href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener"><span'+ed('hero.btn1')+'>'+esc(h.btn1)+'</span> ↗</a><a class="btn ghost" href="#film"'+ed('hero.btn2')+'>'+esc(h.btn2)+'</a></div>'+
+      '</div>'+(now?'<aside class="now glass"><span class="mono"'+ed('hero.nowTitle')+'>'+esc(or(h.nowTitle,'NOW · 지금 만드는 것'))+'</span><ol>'+now+'</ol></aside>':'')+'</div>'+
+      '<div class="facts">'+facts+'</div></div>'+
+      (films.length?'<div class="ticker" aria-hidden="true"><div class="tk-track">'+tk+tk+'</div></div>':'');
   }
 
   /* ── 섹션 머리 (번호는 보이는 순서대로 자동) ── */
-  function head(key,num,extra){
+  function head(key,num){
     var d=S[key];
-    return '<div class="sh"><div><span class="eb">'+String(num).padStart(2,'0')+' <span'+ed(key+'.en')+'>'+esc(d.en)+'</span>'+(d.badge?' <span class="lv"'+ed(key+'.badge')+'>'+esc(d.badge)+'</span>':'')+'</span>'+
-      '<h2'+ed(key+'.title')+'>'+esc(d.title)+'</h2>'+(d.desc!=null?'<p'+ed(key+'.desc')+'>'+esc(d.desc)+'</p>':'')+'</div>'+(extra||'')+'</div>';
+    return '<div class="sh rv"><div><div class="no mono"><span>'+pad(num)+'</span><span'+ed(key+'.en')+'>'+esc(d.en)+'</span>'+(d.badge?'<span class="lv"'+ed(key+'.badge')+'>'+esc(d.badge)+'</span>':'')+'</div>'+
+      '<h2'+ed(key+'.title')+'>'+esc(d.title)+'</h2></div>'+(d.desc!=null?'<p'+ed(key+'.desc')+'>'+esc(d.desc)+'</p>':'')+'</div>';
   }
 
   /* ── 섹션들 ── */
+  var ICON={
+    plan:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+    prod:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
+    edit:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+    cam:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/>'
+  };
   var SECTIONS={
     youtube:function(n){
-      var y=S.youtube,ch=y.channel;
-      var vids=(y.videos||[]).map(function(v,i){
-        return '<a class="vid glass" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><div class="thumb" data-yt="'+esc(v.id)+'"><span class="play"></span></div><div class="info"><h3'+ed('youtube.videos.'+i+'.title')+'>'+esc(v.title)+'</h3><span>YouTube ↗</span></div></a>';
+      var y=S.youtube,ch=y.channel,vids=y.videos||[];
+      var grid=vids.map(function(v,i){
+        return '<a class="vid rv" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><div class="thumb" data-yt="'+esc(v.id)+'"><span class="play"></span></div>'+
+          '<div class="info"><span class="idx">'+pad(i+1)+'</span><h3'+ed('youtube.videos.'+i+'.title')+'>'+esc(v.title)+'</h3></div></a>';
       }).join('');
       return head('youtube',n)+'<div class="yt">'+
-        '<div class="chan glass"><div><div class="avatar" id="avatar">CW</div><small>YOUTUBE CHANNEL</small>'+
-        '<h3'+ed('youtube.channel.name')+'>'+esc(ch.name)+'</h3><span class="handle"'+ed('youtube.channel.handle')+'>'+esc(ch.handle)+'</span>'+
-        '<p class="tl"'+ed('youtube.channel.tagline')+'>'+esc(ch.tagline)+'</p></div>'+
-        '<a class="btn" href="'+esc(ch.url)+'" target="_blank" rel="noopener"><span'+ed('youtube.channel.button')+'>'+esc(ch.button)+'</span> ↗</a></div>'+
-        '<div class="vids">'+vids+'</div></div>';
+        '<aside class="chan glass rv"><div class="ch-top"><div class="avatar" id="avatar">CW</div><div><h3'+ed('youtube.channel.name')+'>'+esc(ch.name)+'</h3><span class="handle"'+ed('youtube.channel.handle')+'>'+esc(ch.handle)+'</span></div></div>'+
+        '<p class="tl"'+ed('youtube.channel.tagline')+'>'+esc(ch.tagline)+'</p>'+
+        '<dl class="meta"><dt>하는 일</dt><dd'+ed('youtube.channel.role')+'>'+esc(or(ch.role,'기획 · 촬영 · 편집'))+'</dd><dt>대표 영상</dt><dd>'+vids.length+'편</dd></dl>'+
+        '<a class="btn" href="'+esc(ch.url)+'" target="_blank" rel="noopener"><span'+ed('youtube.channel.button')+'>'+esc(ch.button)+'</span> ↗</a></aside>'+
+        '<div class="vids">'+grid+'</div></div>';
     },
     film:function(n){
       var f=S.film,films=f.films||[];
-      var awards=[];
-      films.forEach(function(x){(x.records||[]).forEach(function(r){if(WIN.test(r))awards.push([x.title,r])})});
+      var picks=films.filter(function(x){return (x.records||[]).some(function(r){return WIN.test(r)})});
       var used={};films.forEach(function(x){(x.roles||[]).forEach(function(r){if(CAT[r])used[CAT[r]]=1})});
       var tabs='<button class="tab" type="button" data-r="all" aria-pressed="true">전체</button>'+
         CATS.filter(function(c){return used[c[0]]}).map(function(c){return '<button class="tab" type="button" data-r="'+c[0]+'" aria-pressed="false">'+c[1]+'</button>'}).join('');
       return head('film',n)+
-        '<div class="film-top">'+
-          '<div class="box glass"><h3><span'+ed('film.nextTitle')+'>'+esc(f.nextTitle||'준비 중인 작품')+'</span><b class="num">'+(f.next||[]).length+'</b></h3><div class="nexts">'+
-            (f.next||[]).map(function(x){return '<span class="nx">'+esc(x.title)+(x.role?'<em>'+esc(x.role)+'</em>':'')+'</span>'}).join('')+'</div></div>'+
-          '<div class="box glass"><h3>수상 · 입선<b class="num">'+awards.length+'</b></h3><ul class="awards">'+
-            awards.map(function(a){return '<li><b title="'+esc(a[0])+'">'+esc(a[0])+'</b><span>'+esc(a[1])+'</span></li>'}).join('')+'</ul></div>'+
-        '</div>'+
-        '<div class="box glass">'+
-          '<div class="fbar"><h3>필모그래피<b class="num" id="fShown">'+films.length+'</b></h3>'+
-          '<div class="tools"><div class="tabs" role="group" aria-label="분야별 보기" id="ftabs">'+tabs+'</div>'+
-          '<button class="sort" type="button" id="sortBtn">최신순 ↓</button></div></div>'+
-          '<div id="films"></div>'+
+        (picks.length?'<div class="sub-h rv"><h3><span'+ed('film.picksTitle')+'>'+esc(or(f.picksTitle,'수상 · 입선작'))+'</span><b class="num">'+picks.length+'</b></h3><span>마우스를 올려 보세요</span></div>'+
+        '<ol class="picks">'+picks.map(function(x,i){
+          var aw=(x.records||[]).filter(function(r){return WIN.test(r)});
+          return '<li class="pk rv"><span class="pk-no">'+pad(i+1)+'</span><span class="pk-t">'+esc(x.title)+'</span><span class="pk-r">'+esc(x.year)+' · '+roleText(x.roles)+'</span><span class="pk-a">'+aw.map(function(a){return '<span>★ '+esc(a)+'</span>'}).join('')+'</span></li>';
+        }).join('')+'</ol>':'')+
+        '<div class="film-grid">'+
+          '<aside class="box glass nextbox rv"><div class="sub-h"><h3><span'+ed('film.nextTitle')+'>'+esc(or(f.nextTitle,'준비 중인 작품'))+'</span><b class="num">'+(f.next||[]).length+'</b></h3></div><ul class="nexts">'+
+            (f.next||[]).map(function(x){return '<li><span>'+esc(x.title)+'</span>'+(x.role?'<em>'+esc(x.role)+'</em>':'')+'</li>'}).join('')+'</ul></aside>'+
+          '<div class="box glass rv"><div class="fbar"><div class="sub-h"><h3>필모그래피<b class="num" id="fShown">'+films.length+'</b></h3></div>'+
+            '<div class="tools"><div class="tabs" role="group" aria-label="분야별 보기" id="ftabs">'+tabs+'</div>'+
+            '<button class="sort" type="button" id="sortBtn">최신순 ↓</button></div></div>'+
+            '<div id="films"></div></div>'+
         '</div>';
     },
     edit:function(n){
       var e=S.edit;
-      var ICON={
-        plan:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
-        prod:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>',
-        edit:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
-        cam:'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/>'
-      };
-      var sk=(e.skills||[]).map(function(s,i){
-        return '<div class="sk glass"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICON[s.icon]||ICON.edit)+'</svg></span>'+
-          '<h3><span'+ed('edit.skills.'+i+'.title')+'>'+esc(s.title)+'</span><small'+ed('edit.skills.'+i+'.en')+'>'+esc(s.en)+'</small></h3><p'+ed('edit.skills.'+i+'.desc')+'>'+esc(s.desc)+'</p></div>';
+      var steps=(e.skills||[]).map(function(s,i){
+        return '<li class="step glass rv"><div class="st-top"><span class="st-no">'+pad(i+1)+'</span><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICON[s.icon]||ICON.edit)+'</svg></span></div>'+
+          '<h3><span'+ed('edit.skills.'+i+'.title')+'>'+esc(s.title)+'</span><small'+ed('edit.skills.'+i+'.en')+'>'+esc(s.en)+'</small></h3><p'+ed('edit.skills.'+i+'.desc')+'>'+esc(s.desc)+'</p></li>';
       }).join('');
-      return head('edit',n)+'<div class="edit"><div class="edit-lead glass"><div class="yrs"><span'+ed('edit.years')+'>'+esc(e.years)+'</span><b>년</b><small>EDITING CAREER</small></div>'+
-        '<p'+ed('edit.lead')+'>'+esc(e.lead)+'</p></div><div class="skills">'+sk+'</div></div>';
+      return head('edit',n)+'<div class="ed-top rv"><div class="yrs"><span'+ed('edit.years')+'>'+esc(e.years)+'</span><b>년</b><small>EDITING CAREER</small></div>'+
+        '<p'+ed('edit.lead')+'>'+esc(e.lead)+'</p></div><ol class="steps">'+steps+'</ol>';
     },
     contact:function(n){
       var c=S.contact;
-      return '<div class="sh"><div><span class="eb">'+String(n).padStart(2,'0')+' <span'+ed('contact.en')+'>'+esc(c.en)+'</span></span><h2'+ed('contact.title')+'>'+esc(c.title)+'</h2></div></div>'+
-        '<div class="dual"><div class="door glass"><div><small'+ed('contact.clientEyebrow')+'>'+esc(c.clientEyebrow)+'</small><h3'+ed('contact.clientTitle')+'>'+esc(c.clientTitle)+'</h3><p'+ed('contact.clientDesc')+'>'+esc(c.clientDesc)+'</p></div>'+
-        '<div class="clist"><div class="ci"><span class="k">EMAIL</span><span class="v" id="cEmail"'+ed('contact.email')+'>'+esc(c.email)+'</span><button class="cp" type="button" data-for="cEmail">복사</button></div>'+
-        '<div class="ci"><span class="k">INSTAGRAM</span><a class="v" href="'+esc(c.instagramUrl)+'" target="_blank" rel="noopener"'+ed('contact.instagram')+'>'+esc(c.instagram)+'</a><span></span></div></div></div>'+
-        '<a class="door glass" href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener"><div><small'+ed('contact.viewerEyebrow')+'>'+esc(c.viewerEyebrow)+'</small><h3'+ed('contact.viewerTitle')+'>'+esc(c.viewerTitle)+'</h3><p'+ed('contact.viewerDesc')+'>'+esc(c.viewerDesc)+'</p></div><span class="arrow"><span'+ed('contact.viewerLink')+'>'+esc(c.viewerLink)+'</span> ↗</span></a></div>';
+      return '<div class="no mono" style="color:var(--acc);display:flex;gap:10px"><span>'+pad(n)+'</span><span'+ed('contact.en')+'>'+esc(c.en)+'</span></div>'+
+        '<h2 class="ct-title rv"'+ed('contact.title')+'>'+esc(c.title)+'</h2>'+
+        '<div class="dual"><div class="door glass rv"><div><small class="mono"'+ed('contact.clientEyebrow')+'>'+esc(c.clientEyebrow)+'</small><h3'+ed('contact.clientTitle')+'>'+esc(c.clientTitle)+'</h3><p'+ed('contact.clientDesc')+'>'+esc(c.clientDesc)+'</p></div>'+
+        '<div class="clist"><div class="ci"><span class="k mono">EMAIL</span><span class="v" id="cEmail"'+ed('contact.email')+'>'+esc(c.email)+'</span><button class="cp" type="button" data-for="cEmail">복사</button></div>'+
+        '<div class="ci"><span class="k mono">INSTAGRAM</span><a class="v" href="'+esc(c.instagramUrl)+'" target="_blank" rel="noopener"'+ed('contact.instagram')+'>'+esc(c.instagram)+'</a><span></span></div></div></div>'+
+        '<a class="door glass rv" href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener"><div><small class="mono"'+ed('contact.viewerEyebrow')+'>'+esc(c.viewerEyebrow)+'</small><h3'+ed('contact.viewerTitle')+'>'+esc(c.viewerTitle)+'</h3><p'+ed('contact.viewerDesc')+'>'+esc(c.viewerDesc)+'</p></div><span class="arrow"><span'+ed('contact.viewerLink')+'>'+esc(c.viewerLink)+'</span> ↗</span></a></div>';
     }
   };
 
@@ -154,7 +164,7 @@
           if(open)res+=rest.map(function(x){return '<span>'+esc(x)+'</span>'}).join('');
           res+='<button class="more" type="button" data-i="'+o.i+'" aria-expanded="'+(open?'true':'false')+'">'+(open?'접기':(main.length?'기록 '+rest.length+'개 더':'기록 보기'))+'</button>';
         }
-        return '<li class="fr"><span class="t">'+esc(f.title)+'</span><span class="ro">'+roleText(f.roles||[])+'</span><span class="res">'+res+'</span></li>';
+        return '<li class="fr"><span class="t">'+esc(f.title)+'</span><span class="ro">'+roleText(f.roles)+'</span><span class="res">'+res+'</span></li>';
       }).join('')+'</ul></div>';
     }).join('');
   }
@@ -182,6 +192,7 @@
     renderFooter();
     drawFilms();
     loadImages();
+    reveal();
     (MSP.onRender||[]).forEach(function(fn){fn()});
   }
   MSP.render=render;
@@ -197,6 +208,35 @@
       im.src='https://img.youtube.com/vi/'+encodeURIComponent(box.getAttribute('data-yt'))+'/hqdefault.jpg';
     });
   }
+
+  /* ── 스크롤하면 살짝 떠오르기 (화면 아래쪽에 있는 것만, 관리자 모드에선 끔) ── */
+  var io=null;
+  function reveal(){
+    if(io)io.disconnect();
+    if(!('IntersectionObserver' in window)||root.classList.contains('admin'))return;
+    try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){}
+    io=new IntersectionObserver(function(es){es.forEach(function(x){
+      if(!x.isIntersecting)return;var t=x.target;io.unobserve(t);t.classList.remove('wait');
+      setTimeout(function(){t.classList.remove('anim');t.style.transitionDelay=''},1100);
+    })},{rootMargin:'0px 0px -8% 0px'});
+    var vh=innerHeight;
+    document.querySelectorAll('.rv').forEach(function(el,i){
+      if(el.getBoundingClientRect().top>vh){el.classList.add('wait','anim');el.style.transitionDelay=((i%4)*60)+'ms';io.observe(el)}
+    });
+  }
+
+  /* ── 배경 빛: 마우스를 천천히 따라옴 (MS 클라처럼) ── */
+  (function(){
+    var bg=$('bg');
+    try{if(!matchMedia('(pointer:fine)').matches||matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){return}
+    var tx=.78,ty=.18,x=tx,y=ty,raf=0;
+    function step(){
+      x+=(tx-x)*.06;y+=(ty-y)*.06;
+      bg.style.setProperty('--gx',(x*100).toFixed(2)+'%');bg.style.setProperty('--gy',(y*100).toFixed(2)+'%');
+      raf=(Math.abs(tx-x)>.001||Math.abs(ty-y)>.001)?requestAnimationFrame(step):0;
+    }
+    window.addEventListener('pointermove',function(e){tx=e.clientX/innerWidth;ty=e.clientY/innerHeight;if(!raf)raf=requestAnimationFrame(step)},{passive:true});
+  })();
 
   /* ── 클릭 동작 (다시 그려도 계속 동작하도록 문서 전체에서 받음) ── */
   document.addEventListener('click',function(e){

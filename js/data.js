@@ -24,6 +24,9 @@ window.SITE = {
 
   /* ③ 첫 화면 */
   "hero": {
+    "metaLeft": "PORTFOLIO — 2026",
+    "metaRight": "유튜브 · 영화 · 편집 — MS",
+    "nowTitle": "NOW · 지금 만드는 것",
     "title1": "잘 짖고, 잘 놀고,",
     "title2": "잘 만듭니다.",
     "sub": "유튜브 채널 카워드 스튜디오를 만들고, 영화 현장에서는 연출부터 촬영, 음향까지 맡아왔습니다.",
@@ -58,6 +61,7 @@ window.SITE = {
       "tagline": "잘 짖고, 잘 놀고, 잘 만듭니다.",
       "url": "https://www.youtube.com/@c_ward",
       "avatar": "",
+      "role": "기획 · 촬영 · 편집",
       "button": "채널 방문하기"
     },
     "videos": [
@@ -105,6 +109,7 @@ window.SITE = {
       { "title": "환생검문소", "year": 2025, "roles": ["음향"], "records": ["26 보건복지부장상 수상", "26 교내 흡연예방 UCC 은상", "25 여름영화 상영"] },
       { "title": "자화상", "year": 2025, "roles": ["촬영", "편집"], "records": ["시 영상제 상영"] }
     ],
+    "picksTitle": "수상 · 입선작",
     "nextTitle": "준비 중인 작품",
     "next": [
       { "title": "혈모양처", "role": "배우" },

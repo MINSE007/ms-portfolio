@@ -1,39 +1,53 @@
 /* =====================================================================
-   base.css — 색 · 글꼴 · 바닥 · 유리 카드 · 위쪽 메뉴 · 맨 아래 · 버튼
+   base.css — 색 · 글꼴 · 바닥(그라데이션) · 유리 카드 · 위쪽 메뉴 · 맨 아래 · 버튼
    색은 여기 :root 한 곳에서만 바꾸면 사이트 전체에 적용돼요.
    ===================================================================== */
 :root{
-  --bg:#111013;          /* 바닥 */
-  --text:#EFEDF2;        /* 기본 글씨 */
-  --muted:#9C98A3;       /* 흐린 글씨 */
-  --line:rgba(255,255,255,.09);
-  --glass:rgba(255,255,255,.035);   /* 유리 카드 */
-  --glass-b:rgba(255,255,255,.09);  /* 유리 카드 테두리 */
-  --chip:rgba(255,255,255,.06);
-  --hover:rgba(255,255,255,.06);
-  --bar:rgba(17,16,19,.78);         /* 위쪽 메뉴 막대 */
-  --acc:#B794E6;         /* 포인트 보라 (글씨·선에만 조금) */
-  --acc-soft:rgba(183,148,230,.14);
-  --btn:#EFEDF2;         /* 주 버튼 */
-  --btn-ink:#111013;
-  --gold:#E8C35A;
+  /* 바닥 그라데이션 (MS Client 글라스 배경) */
+  --bg:#12101A;
+  --g-base:linear-gradient(160deg,#16131F 0%,#120F1A 50%,#0F1220 100%);
+  --g-side:rgba(70,90,170,.30);
+  --glow-a:rgba(112,48,160,.70);
+  --glow-b:rgba(112,48,160,.42);
+  /* 글씨 */
+  --text:#F2EFF7;
+  --muted:#A8A2B6;
+  --line:rgba(255,255,255,.10);
+  /* 유리 카드 */
+  --glass:rgba(255,255,255,.055);
+  --glass-b:rgba(255,255,255,.12);
+  --g-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 40px rgba(0,0,0,.30);
+  --chip:rgba(255,255,255,.07);
+  --hover:rgba(255,255,255,.07);
+  --bar:rgba(22,19,31,.72);
+  /* 포인트 보라 (글씨·선·작은 표시에만) */
+  --acc:#C3A3EE;
+  --acc-soft:rgba(195,163,238,.14);
+  --btn:#F2EFF7;
+  --btn-ink:#14111B;
+  --gold:#EBC660;
   --body:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   color-scheme:dark;
 }
 :root[data-theme="light"]{
-  --bg:#F4F3F1;
-  --text:#18161B;
-  --muted:#67636C;
-  --line:rgba(0,0,0,.08);
-  --glass:rgba(255,255,255,.62);
-  --glass-b:rgba(0,0,0,.07);
-  --chip:rgba(0,0,0,.045);
-  --hover:rgba(0,0,0,.04);
-  --bar:rgba(244,243,241,.82);
-  --acc:#6E43A6;
-  --acc-soft:rgba(110,67,166,.10);
-  --btn:#18161B;
-  --btn-ink:#F4F3F1;
+  --bg:#ECE8F6;
+  --g-base:linear-gradient(160deg,#E9E5F5 0%,#F1ECF8 45%,#E5EAF5 100%);
+  --g-side:rgba(150,175,235,.50);
+  --glow-a:rgba(160,110,215,.45);
+  --glow-b:rgba(160,110,215,.28);
+  --text:#1C1A21;
+  --muted:#625D6B;
+  --line:rgba(40,20,70,.10);
+  --glass:rgba(255,255,255,.55);
+  --glass-b:rgba(255,255,255,.9);
+  --g-shadow:inset 0 1px 0 #fff,0 12px 40px rgba(70,50,140,.08);
+  --chip:rgba(40,20,70,.05);
+  --hover:rgba(40,20,70,.05);
+  --bar:rgba(244,241,250,.78);
+  --acc:#6B3FA3;
+  --acc-soft:rgba(107,63,163,.10);
+  --btn:#1C1A21;
+  --btn-ink:#F4F1FA;
   --gold:#9A7400;
   color-scheme:light;
 }
@@ -42,7 +56,7 @@
 html,body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
-html{scroll-padding-top:84px}
+html{scroll-padding-top:90px}
 body{background:var(--bg);color:var(--text);font:400 16px/1.7 var(--body);-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bar)}
 ::selection{background:var(--acc);color:var(--bg)}
@@ -53,58 +67,71 @@ h1,h2,h3,p{margin:0}
 h1,h2,h3{letter-spacing:-.035em;text-wrap:balance}
 .wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px),4vw);padding-right:max(16px,env(safe-area-inset-right,0px),4vw)}
 .num{font-variant-numeric:tabular-nums}
+.mono{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase}
 
-/* 바닥: 단색 + 아주 옅은 빛 한 군데 + 필름 입자 */
-#bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 45% at 85% -5%,var(--acc-soft),transparent 70%),var(--bg)}
-#bg::after{content:"";position:absolute;inset:0;opacity:.05;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+/* 바닥: MS Client v4.092 그라데이션 — 가장자리 보라 빛 + 마우스를 따라오는 빛 */
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 560px 420px at var(--gx,78%) var(--gy,18%),color-mix(in srgb,var(--glow-a) 60%,transparent),transparent 72%),
+    radial-gradient(ellipse 62% 58% at 0% 100%,color-mix(in srgb,var(--glow-b) 75%,transparent),transparent 70%),
+    radial-gradient(ellipse 55% 50% at 100% 0%,color-mix(in srgb,var(--glow-b) 55%,transparent),transparent 70%),
+    radial-gradient(ellipse 45% 42% at 100% 100%,color-mix(in srgb,var(--glow-b) 35%,transparent),transparent 70%),
+    radial-gradient(circle at 0% 0%,var(--g-side),transparent 40%),
+    var(--g-base)}
 header,main,footer{position:relative;z-index:1}
 
-/* 유리 카드 (MS 클라 느낌, 은은하게) */
-.glass{background:var(--glass);border:1px solid var(--glass-b);-webkit-backdrop-filter:blur(18px) saturate(1.2);backdrop-filter:blur(18px) saturate(1.2)}
+/* 유리 카드 */
+.glass{background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--g-shadow);-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5)}
 
-/* 위쪽 메뉴 */
-header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bar);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
-header .wrap{display:flex;align-items:center;gap:20px;height:64px}
-.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:18px;letter-spacing:-.02em;white-space:nowrap}
-.badge-ms{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;font-size:12.5px;font-weight:900;letter-spacing:0;color:#1E1442;background:linear-gradient(145deg,#fff 0,#EEE9F8 100%);border:1px solid rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(0,0,0,.18)}
-nav{display:flex;gap:2px;margin-left:auto}
-nav a{padding:6px 14px;border-radius:999px;font-size:14.5px;font-weight:500;color:var(--muted);transition:background .2s,color .2s}
+/* 위쪽 메뉴: 떠 있는 알약 3개 (로고 · 메뉴 · 버튼) */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;pointer-events:none}
+header .wrap{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;height:76px}
+header .wrap>*{pointer-events:auto}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:16px;letter-spacing:-.02em;white-space:nowrap;padding:6px 16px 6px 6px;border-radius:999px}
+.badge-ms{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;font-size:12px;font-weight:900;letter-spacing:0;color:#1E1442;
+  background:radial-gradient(circle at 85% 12%,rgba(138,99,255,.55) 0,rgba(138,99,255,0) 48%),linear-gradient(145deg,#fff 0,#EFEAFF 100%);border:1px solid rgba(255,255,255,.95)}
+nav{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:5px;border-radius:999px}
+nav a{padding:7px 16px;border-radius:999px;font-size:14px;font-weight:500;color:var(--muted);transition:background .2s,color .2s}
 nav a:hover{background:var(--hover);color:var(--text)}
 .right{display:flex;align-items:center;gap:8px}
-.pillcta{font-weight:700;font-size:14px;padding:9px 16px;border-radius:999px;background:var(--btn);color:var(--btn-ink);white-space:nowrap;transition:opacity .2s}
-.pillcta:hover{opacity:.86}
-.tg{width:38px;height:38px;border-radius:50%;background:transparent;border:1px solid var(--line);cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.pillcta{font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;background:var(--btn);color:var(--btn-ink);white-space:nowrap;transition:transform .2s}
+.pillcta:hover{transform:translateY(-2px)}
+.tg{width:42px;height:42px;border-radius:50%;cursor:pointer;display:grid;place-items:center;transition:background .2s}
 .tg:hover{background:var(--hover)}
 .tg svg{width:17px;height:17px}
 
 /* 버튼 */
-.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;border-radius:999px;font-weight:700;border:1px solid var(--btn);background:var(--btn);color:var(--btn-ink);cursor:pointer;transition:opacity .2s,transform .2s}
-.btn:hover{opacity:.88;transform:translateY(-2px)}
-.btn.ghost{background:transparent;color:var(--text);border-color:var(--glass-b)}
-.btn.ghost:hover{background:var(--hover);opacity:1}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:999px;font-weight:700;border:1px solid var(--btn);background:var(--btn);color:var(--btn-ink);cursor:pointer;transition:transform .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:var(--glass);color:var(--text);border-color:var(--glass-b);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.btn.ghost:hover{background:var(--hover)}
 
-/* 섹션 머리 (모든 섹션 공통) */
-.sec{padding-block:112px 0}
-.sh{display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap;margin-bottom:36px}
-.eb{display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700;letter-spacing:.2em;color:var(--acc);margin-bottom:12px}
-.eb .lv{font-size:10.5px;letter-spacing:.14em;padding:2px 9px;border-radius:999px;border:1px solid currentColor}
-.sh h2{font-size:clamp(30px,4.2vw,48px);font-weight:900;line-height:1.15}
-.sh p{margin-top:10px;color:var(--muted);max-width:34em}
+/* 섹션 머리: 번호 · 제목 · 설명 (왼쪽 제목, 오른쪽 설명) */
+.sec{padding-block:128px 0}
+.sh{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 40px;align-items:end;padding-bottom:22px;margin-bottom:40px;border-bottom:1px solid var(--line)}
+.sh .no{display:flex;align-items:center;gap:10px;color:var(--acc);margin-bottom:14px}
+.sh .no .lv{font-size:10.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;letter-spacing:.14em}
+.sh h2{font-size:clamp(34px,5vw,60px);font-weight:900;line-height:1.08}
+.sh p{color:var(--muted);max-width:30em;justify-self:end;text-align:right}
 
 /* 맨 아래 */
-footer{margin-top:120px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+footer{margin-top:128px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);background:var(--bar);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
 footer .wrap{display:grid;grid-template-columns:1fr auto;gap:20px 40px;padding-block:40px}
-footer .logo{color:var(--text);font-size:17px}
-footer .info{line-height:1.9;margin-top:10px}
+footer .logo{color:var(--text);padding:0}
+footer .info{line-height:1.9;margin-top:12px}
 footer .links{display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
 footer .links a:hover,.fbtn:hover{color:var(--acc)}
 .fbtn{background:none;border:0;padding:0;color:var(--muted);cursor:pointer;font-weight:700;font-size:14px}
 footer .bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:10px 24px;flex-wrap:wrap;padding-top:20px;border-top:1px solid var(--line);font-size:13px}
 
-@media (max-width:1040px){nav{display:none}.right{margin-left:auto}}
+@media (max-width:1040px){nav{display:none}}
+@media (max-width:760px){
+  .sh{grid-template-columns:1fr}
+  .sh p{justify-self:start;text-align:left}
+}
 @media (max-width:640px){
   .pillcta{display:none}
-  .sec{padding-block:80px 0}
+  .logo{padding-right:12px}
+  .sec{padding-block:88px 0}
   footer .wrap{grid-template-columns:1fr}
 }

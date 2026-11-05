@@ -1,14 +1,16 @@
 /* =====================================================================
-   intro.js — 키워드 타이포 인트로 (약 5초, 건너뛰기 가능)
+   intro.js — 키워드 인트로 (휙휙 버전, 약 3.3초, 건너뛰기 가능)
    키워드는 data.js 의 intro.keywords, 슬로건은 hero.title1 / title2 를 써요.
-   시간 조절: 아래 STEP(키워드 하나 머무는 시간), HOLD(슬로건 머무는 시간)
+   시간 조절: 아래 STEP(키워드 하나 머무는 시간), HOLD(슬로건 머무는 시간), FLY(제목 자리로 가는 시간)
+   방향: DIRS — 키워드마다 [들어오는 쪽, 나가는 쪽] (r 오른쪽 / l 왼쪽 / b 아래 / t 위)
    ===================================================================== */
 (function(){
-  var STEP=950, HOLD=1000, FLY=1000;
+  var STEP=560, HOLD=760, FLY=750;
+  var DIRS=[['r','l'],['b','t'],['l','r']];
   var MSP=window.MSP||{},S=window.SITE,root=document.documentElement;
   var el=document.getElementById('intro');if(!el)return;
   var roll=document.getElementById('iRoll'),slog=document.getElementById('iSlogan');
-  var count=document.getElementById('iCount'),bar=document.getElementById('iBar');
+  var count=document.getElementById('iCount'),bar=document.getElementById('iBar'),wipe=document.getElementById('iWipe');
   var timers=[],running=false;
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function at(ms,fn){timers.push(setTimeout(fn,ms))}
@@ -18,10 +20,9 @@
   function build(){
     var kws=(S.intro&&S.intro.keywords)||[];
     roll.innerHTML=kws.map(function(k){
-      var letters=Array.from(String(k.en)).map(function(c,j){return '<span class="ch" style="--i:'+j+'">'+(c===' '?'&nbsp;':esc(c))+'</span>'}).join('');
-      return '<div class="w"><span class="en">'+letters+'</span><span class="ko"><span>'+esc(k.ko)+'</span></span></div>';
+      return '<div class="w"><span class="en">'+esc(k.en)+'</span><span class="ko">'+esc(k.ko)+'</span></div>';
     }).join('');
-    slog.innerHTML='<span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span>';
+    slog.innerHTML='<span class="sl-in"><span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span></span>';
     document.getElementById('iEb').textContent=S.site.name;
     return kws.length;
   }
@@ -38,12 +39,15 @@
     return {dx:(innerWidth-tw)/2-r.left,dy:(innerHeight-h)/2-r.top};
   }
 
+  var cur=-1;
+  function dir(k){return DIRS[k%DIRS.length]}
   function show(i,n){
     var ws=roll.children;
-    for(var k=0;k<ws.length;k++){
-      ws[k].classList.toggle('in',k===i);
-      ws[k].classList.toggle('out',k<i||(i<0&&ws[k].classList.contains('in')));
-    }
+    if(cur>=0&&ws[cur]){ws[cur].className='w out-'+dir(cur)[1]}
+    if(i>=0&&ws[i]){ws[i].className='w in-'+dir(i)[0]}
+    cur=i;
+    // 빛줄기 다시 지나가게
+    wipe.classList.remove('go');void wipe.offsetWidth;wipe.classList.add('go');
     if(i>=0){count.textContent=pad(i+1)+' / '+pad(n);bar.style.width=((i+1)/n*100)+'%'}
   }
 
@@ -61,13 +65,13 @@
     el.className='';if(calm)el.classList.add('calm');
     root.classList.remove('entered');root.classList.add('intro-on');
     window.scrollTo(0,0);
-    var n=build();
+    var n=build();cur=-1;wipe.classList.remove('go');bar.style.width='0';
     slog.style.transition='none';slog.style.transform='none';
     var go=function(){
       if(!running)return;
       at(80,function(){el.classList.add('p-on')});
-      for(var i=0;i<n;i++)(function(i){at(220+i*STEP,function(){show(i,n)})})(i);
-      var tEnd=220+n*STEP;
+      for(var i=0;i<n;i++)(function(i){at(150+i*STEP,function(){show(i,n)})})(i);
+      var tEnd=150+n*STEP;
       at(tEnd,function(){
         show(-1,n);
         var p=place();
