@@ -1,11 +1,15 @@
 /* =====================================================================
-   admin.js — 관리자 모드 (시험판)
-   켜는 법: 주소 끝에 #admin 을 붙이거나, Ctrl+Shift+E, 또는 맨 아래 © 글자를 세 번 클릭
+   admin.js — 관리자 모드
+   켜는 법: 단축키(처음엔 Ctrl+Shift+E · [설정] 탭에서 바꿀 수 있음),
+           주소 끝에 #admin, 또는 맨 아래 © 글자를 세 번 클릭
    할 수 있는 것:
-     · 화면의 글자(점선 테두리)를 눌러서 바로 고치기
-     · 섹션 순서 바꾸기 / 숨기기
-     · 영화 작품·준비 중 작품 추가·수정·삭제
-     · GitHub에 저장 → js/data.js 가 새로 저장되고 1~2분 뒤 사이트에 반영
+     · 화면의 글자(점선 테두리)를 눌러서 바로 고치기 — Enter로 줄바꿈, Esc로 끝내기
+     · [배치] 섹션 순서 바꾸기 / 숨기기
+     · [유튜브] 채널 주소·프로필 사진·영상 추가/삭제
+     · [외주] 외주 작업 추가/수정/삭제
+     · [영화] 필모그래피, 지금 만들고 있는 영화(프리/프로덕션/포스트)
+     · [설정] 관리자 단축키, 사이트 이름, 인트로 단어
+     · [저장] GitHub에 저장 → js/data.js 가 새로 저장되고 1~2분 뒤 사이트에 반영
    바뀐 내용은 저장 전까지 이 브라우저에만 임시로 남아요(다른 사람에게는 안 보여요).
    ===================================================================== */
 (function(){
@@ -13,30 +17,44 @@
   var S=window.SITE,MSP=window.MSP,root=document.documentElement,esc=MSP.esc;
   var panel=document.getElementById('admin');
   var ORIG=JSON.stringify(S);
-  var on=false,tab='layout',saveT=0,renderT=0;
+  var on=false,tab='layout',saveT=0,renderT=0,recording=false;
 
   /* ── 저장소에 쓰는 data.js 머리말 ── */
   var HEADER=['/* =====================================================================',
     '   MS Portfolio — 사이트 내용 (글·작품·연락처는 전부 여기서 고쳐요)',
     '   ---------------------------------------------------------------------',
     '   · 따옴표 "..." 안의 글만 바꾸면 돼요. 쉼표(,)와 괄호는 지우지 마세요.',
-    '   · 관리자 모드(주소 끝에 #admin)에서 고치고 "GitHub에 저장"을 누르면',
-    '     이 파일이 통째로 새로 저장돼요.',
-    '   · 숫자(참여한 영화·수상·제작 예정)는 작품 목록을 세서 자동으로 나와요.',
-    '   · layout: 섹션 순서와 보이기(show), film.films: 작품 목록',
+    '   · 글 안의 \\n 은 "여기서 줄바꿈" 표시예요.',
+    '   · 관리자 모드에서 고치고 "GitHub에 저장"을 누르면 이 파일이 통째로 새로 저장돼요.',
+    '   · layout: 섹션 순서와 보이기(show) / film.films: 필모그래피',
+    '     film.stages: 지금 만들고 있는 영화 (pre 프리 / prod 프로덕션 / post 포스트)',
     '     역할: 연출 연출부 스크립터 / 촬영 촬영부 / 조명 조명부 / 음향 음향부 /',
     '           제작 PD 제작부 / 미술 미술부 / 편집 편집부 / 배우',
-    '     기록: 수상·입선·감독상·장상·은상·동상 → ★수상, 출품 → 바로 보임, 나머지 → 접힘',
     '   ===================================================================== */',''].join('\n');
   function toFile(){return HEADER+'window.SITE = '+JSON.stringify(S,null,2)+';\n'}
 
-  /* ── 경로로 값 읽고 쓰기 (예: "hero.facts.0.label") ── */
+  /* ── 경로로 값 쓰기 (예: "hero.facts.0.label") ── */
   function setPath(obj,path,val){
     var k=path.split('.'),o=obj;
-    for(var i=0;i<k.length-1;i++){o=o[k[i]];if(o==null)return}
+    for(var i=0;i<k.length-1;i++){if(o[k[i]]==null)o[k[i]]=/^\d+$/.test(k[i+1])?[]:{};o=o[k[i]]}
     o[k[k.length-1]]=val;
   }
   function replaceSite(data){Object.keys(S).forEach(function(k){delete S[k]});Object.keys(data).forEach(function(k){S[k]=data[k]})}
+
+  /* ── 단축키 ── */
+  var DEF_KEY='Ctrl+Shift+E';
+  function currentKey(){var k=null;try{k=localStorage.getItem('msp-shortcut')}catch(e){}return k||(S.admin&&S.admin.shortcut)||DEF_KEY}
+  function keyName(e){
+    var k=e.code&&/^Key[A-Z]$/.test(e.code)?e.code.slice(3):e.code&&/^Digit\d$/.test(e.code)?e.code.slice(5):(e.key.length===1?e.key.toUpperCase():e.key);
+    if(['Control','Shift','Alt','Meta'].indexOf(e.key)>=0)return null;
+    var p=[];if(e.ctrlKey)p.push('Ctrl');if(e.altKey)p.push('Alt');if(e.shiftKey)p.push('Shift');if(e.metaKey)p.push('Meta');
+    p.push(k);return p.join('+');
+  }
+  function setKey(k){
+    S.admin=S.admin||{};S.admin.shortcut=k;
+    try{localStorage.setItem('msp-shortcut',k)}catch(e){}
+    saveDraft();
+  }
 
   /* ── 임시 저장 ── */
   function dirty(){return JSON.stringify(S)!==ORIG}
@@ -47,9 +65,8 @@
       status();
     },250);
   }
-  function rerender(){clearTimeout(renderT);renderT=setTimeout(function(){MSP.render()},350)}
 
-  /* ── 화면 글자 바로 고치기 ── */
+  /* ── 화면 글자 바로 고치기 (Enter = 줄바꿈, Esc = 끝내기) ── */
   function makeEditable(){
     document.querySelectorAll('[data-edit]').forEach(function(n){
       if(on){
@@ -64,11 +81,12 @@
     if(!on)return;
     var n=e.target.closest&&e.target.closest('[data-edit]');
     if(!n||panel.contains(n))return;
-    setPath(S,n.getAttribute('data-edit'),n.innerText.replace(/\s*\n\s*/g,' ').trim());
+    var v=n.innerText.replace(/ /g,' ').replace(/[ \t]*\n[ \t]*/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+    setPath(S,n.getAttribute('data-edit'),v);
     saveDraft();
   });
   document.addEventListener('keydown',function(e){
-    if(on&&e.key==='Enter'&&e.target.closest&&e.target.closest('[data-edit]')){e.preventDefault();e.target.blur()}
+    if(on&&e.key==='Escape'&&e.target.closest&&e.target.closest('[data-edit]')){e.target.blur()}
   });
   // 관리자 모드에서는 링크를 눌러도 이동하지 않게 (글자를 고쳐야 하니까)
   document.addEventListener('click',function(e){
@@ -76,58 +94,94 @@
   },true);
 
   /* ── 패널 ── */
-  function row(label,inner){return '<label class="ad-f"><span>'+label+'</span>'+inner+'</label>'}
+  function inp(path,val,label,type,extra){
+    var id='ad-'+path.replace(/[^a-z0-9]/gi,'-');
+    return '<label class="ad-f" for="'+id+'"><span>'+label+'</span><input id="'+id+'"'+(type?' type="'+type+'"':'')+' data-f="'+path+'"'+(extra||'')+' value="'+esc(val==null?'':val)+'"></label>';
+  }
+  function area(path,val,label){
+    var id='ad-'+path.replace(/[^a-z0-9]/gi,'-');
+    return '<label class="ad-f" for="'+id+'"><span>'+label+'</span><textarea id="'+id+'" rows="3" data-f="'+path+'">'+esc(val==null?'':val)+'</textarea></label>';
+  }
+  var TABS=[['layout','배치'],['yt','유튜브'],['out','외주'],['film','영화'],['set','설정'],['save','저장']];
+  var STG=[['pre','프리 프로덕션'],['prod','프로덕션'],['post','포스트 프로덕션']];
   function drawPanel(){
     if(!on)return;
-    var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">시험판</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button></div>'+
-      '<div class="ad-tabs">'+[['layout','배치'],['out','외주'],['film','영화'],['save','저장']].map(function(t){return '<button type="button" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div><div class="ad-body">';
+    var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">'+esc(currentKey())+'</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button></div>'+
+      '<div class="ad-tabs">'+TABS.map(function(t){return '<button type="button" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div><div class="ad-body">';
     if(tab==='layout'){
-      html+='<p class="ad-tip">글자는 화면에서 <b>점선 테두리</b>가 있는 곳을 눌러 바로 고치면 돼요.</p><ol class="ad-list">'+
+      html+='<p class="ad-tip">글자는 화면에서 <b>점선 테두리</b>가 있는 곳을 눌러 바로 고치면 돼요.<br><b>Enter</b>는 줄바꿈, <b>Esc</b>는 끝내기예요.</p><ol class="ad-list">'+
         S.layout.map(function(x,i){
-          return '<li><span class="ad-name">'+esc(MSP.NAMES[x.id]||x.id)+'</span>'+
+          return '<li><span class="ad-name">'+esc((S[x.id]&&S[x.id].title)||MSP.NAMES[x.id]||x.id)+'</span>'+
             '<label class="ad-chk"><input type="checkbox" id="ad-show-'+x.id+'" data-a="show" data-i="'+i+'"'+(x.show!==false?' checked':'')+'> 보이기</label>'+
             '<button type="button" data-a="up" data-i="'+i+'"'+(i===0?' disabled':'')+' aria-label="위로">↑</button>'+
             '<button type="button" data-a="down" data-i="'+i+'"'+(i===S.layout.length-1?' disabled':'')+' aria-label="아래로">↓</button></li>';
         }).join('')+'</ol>';
+    }else if(tab==='yt'){
+      var ch=S.youtube.channel,V=S.youtube.videos||[];
+      html+=inp('youtube.channel.url',ch.url,'채널 주소','url')+inp('youtube.channel.avatar',ch.avatar,'프로필 사진 주소 (비워두면 글자 아이콘)','url')+
+        area('youtube.channel.desc',ch.desc,'채널 설명 (Enter로 줄바꿈)')+
+        '<div class="ad-sub"><b>영상 '+V.length+'개</b><button type="button" data-a="addVid">+ 영상 추가</button></div>'+
+        V.map(function(v,i){
+          return '<div class="ad-card">'+inp('youtube.videos.'+i+'.title',v.title,'제목')+
+            inp('youtube.videos.'+i+'.id','https://www.youtube.com/watch?v='+v.id,'영상 주소','url',' data-yt="1"')+
+            '<button type="button" class="ad-del" data-a="delVid" data-i="'+i+'">이 영상 삭제</button></div>';
+        }).join('');
     }else if(tab==='out'){
       var W=(S.outsource&&S.outsource.works)||[];
-      html+='<p class="ad-tip">영상 주소를 넣으면 카드에 "영상 보기" 버튼이 생겨요.</p>'+
+      html+='<p class="ad-tip">영상 주소를 넣으면 카드에 "영상 보기" 버튼이 생겨요. 연도는 비워둬도 돼요.</p>'+
         '<div class="ad-sub"><b>외주 작업 '+W.length+'개</b><button type="button" data-a="addWork">+ 외주 추가</button></div>'+
         W.map(function(w,i){
-          var f=function(k,label,type){return row(label,'<input id="ad-w'+k+'-'+i+'"'+(type?' type="'+type+'"':'')+' data-f="outsource.works.'+i+'.'+k+'" value="'+esc(w[k])+'">')};
-          return '<div class="ad-card">'+f('title','제목')+'<div class="ad-2">'+f('client','의뢰')+f('year','연도')+'</div>'+f('role','맡은 일')+f('desc','설명')+f('link','영상 주소','url')+
+          var p='outsource.works.'+i+'.';
+          return '<div class="ad-card">'+inp(p+'title',w.title,'제목')+'<div class="ad-2">'+inp(p+'client',w.client,'의뢰')+inp(p+'year',w.year,'연도')+'</div>'+
+            inp(p+'role',w.role,'맡은 일')+area(p+'desc',w.desc,'설명')+inp(p+'link',w.link,'영상 주소','url')+
             '<button type="button" class="ad-del" data-a="delWork" data-i="'+i+'">이 외주 삭제</button></div>';
         }).join('');
     }else if(tab==='film'){
-      html+='<p class="ad-tip">역할·기록은 쉼표(,)로 나눠 적어요. 예: 촬영부, 조명부</p>'+
-        '<div class="ad-sub"><b>필모그래피 '+S.film.films.length+'편</b><button type="button" data-a="addFilm">+ 작품 추가</button></div>'+
-        S.film.films.map(function(f,i){
-          return '<div class="ad-card">'+
-            row('제목','<input id="ad-ft-'+i+'" data-f="film.films.'+i+'.title" value="'+esc(f.title)+'">')+
-            '<div class="ad-2">'+row('연도','<input id="ad-fy-'+i+'" type="number" data-f="film.films.'+i+'.year" value="'+esc(f.year)+'">')+
-            row('역할','<input id="ad-fr-'+i+'" data-f="film.films.'+i+'.roles" data-list="1" value="'+esc((f.roles||[]).join(', '))+'">')+'</div>'+
-            row('기록','<input id="ad-fc-'+i+'" data-f="film.films.'+i+'.records" data-list="1" value="'+esc((f.records||[]).join(', '))+'">')+
-            '<button type="button" class="ad-del" data-a="delFilm" data-i="'+i+'">이 작품 삭제</button></div>';
+      var F=S.film,st=F.stages||{};
+      html+='<div class="ad-sub"><b>지금 만들고 있는 영화</b></div>'+
+        STG.map(function(c){
+          var list=st[c[0]]||[];
+          return '<div class="ad-sub sm"><span>'+c[1]+' · '+list.length+'편</span><button type="button" data-a="addStage" data-s="'+c[0]+'">+ 추가</button></div>'+
+            list.map(function(x,i){
+              var p='film.stages.'+c[0]+'.'+i+'.';
+              return '<div class="ad-card">'+inp(p+'title',x.title,'제목')+'<div class="ad-2">'+inp(p+'role',x.role,'맡은 일')+inp(p+'status',x.status,'진행 상황')+'</div>'+
+                area(p+'logline',x.logline,'한 줄 소개')+area(p+'note',x.note,'덧붙이는 글')+
+                '<div class="ad-2"><label class="ad-f"><span>단계 옮기기</span><select data-a="moveStage" data-s="'+c[0]+'" data-i="'+i+'" id="ad-mv-'+c[0]+'-'+i+'">'+
+                STG.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===c[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+                '<button type="button" class="ad-del" data-a="delStage" data-s="'+c[0]+'" data-i="'+i+'">삭제</button></div></div>';
+            }).join('');
         }).join('')+
-        '<div class="ad-sub"><b>준비 중인 작품 '+S.film.next.length+'편</b><button type="button" data-a="addNext">+ 추가</button></div>'+
-        S.film.next.map(function(x,i){
-          return '<div class="ad-card ad-2">'+row('제목','<input id="ad-nt-'+i+'" data-f="film.next.'+i+'.title" value="'+esc(x.title)+'">')+
-            row('역할','<input id="ad-nr-'+i+'" data-f="film.next.'+i+'.role" value="'+esc(x.role)+'">')+
-            '<button type="button" class="ad-del" data-a="delNext" data-i="'+i+'">삭제</button></div>';
+        '<div class="ad-sub"><b>필모그래피 '+F.films.length+'편</b><button type="button" data-a="addFilm">+ 작품 추가</button></div>'+
+        '<p class="ad-tip">역할·기록은 쉼표(,)로 나눠 적어요. 기록에는 수상·상영 이력을 넣으면 작품 옆에 나와요.</p>'+
+        F.films.map(function(f,i){
+          var p='film.films.'+i+'.';
+          return '<div class="ad-card">'+inp(p+'title',f.title,'제목')+
+            '<div class="ad-2">'+inp(p+'year',f.year,'연도','number')+inp(p+'roles',(f.roles||[]).join(', '),'역할','',' data-list="1"')+'</div>'+
+            inp(p+'records',(f.records||[]).join(', '),'기록','',' data-list="1"')+
+            '<button type="button" class="ad-del" data-a="delFilm" data-i="'+i+'">이 작품 삭제</button></div>';
         }).join('');
+    }else if(tab==='set'){
+      html+='<div class="ad-sub"><b>관리자 모드 단축키</b></div>'+
+        '<div class="ad-key"><kbd id="adKey">'+esc(currentKey())+'</kbd><button type="button" data-a="recKey" id="adRec">'+(recording?'키를 눌러 주세요…':'바꾸기')+'</button><button type="button" data-a="resetKey">처음대로</button></div>'+
+        '<p class="ad-tip">"바꾸기"를 누른 뒤 원하는 조합을 누르면 돼요. 예: Ctrl+Alt+M<br>Ctrl·Alt 중 하나는 꼭 같이 눌러야 해요. 이 컴퓨터에는 바로 적용되고, 다른 컴퓨터에는 GitHub에 저장한 뒤 적용돼요.</p>'+
+        '<div class="ad-sub"><b>사이트</b></div>'+inp('site.name',S.site.name,'사이트 이름 (왼쪽 위 로고)')+
+        inp('intro.cuts',((S.intro&&S.intro.cuts)||[]).join(', '),'인트로 단어 (쉼표로 나눔, 순서대로 나와요)','',' data-list="1"')+
+        '<button type="button" data-a="playIntro">인트로 미리 보기</button>';
     }else{
       var tok='';try{tok=localStorage.getItem('msp-gh-token')||''}catch(e){}
       html+='<p class="ad-state" id="adState"></p>'+
         '<div class="ad-sub"><b>GitHub에 저장</b></div>'+
         '<p class="ad-tip">GitHub에서 만든 <b>토큰</b>을 한 번 넣어두면 이 컴퓨터에서는 계속 쓸 수 있어요. 토큰은 이 브라우저에만 저장되고 사이트 파일에는 들어가지 않아요.</p>'+
-        row('토큰','<input id="adToken" type="password" autocomplete="off" placeholder="github_pat_…" value="'+esc(tok)+'">')+
+        '<label class="ad-f" for="adToken"><span>토큰</span><input id="adToken" type="password" autocomplete="off" placeholder="github_pat_…" value="'+esc(tok)+'"></label>'+
         '<button type="button" class="ad-main" data-a="push">GitHub에 저장</button>'+
         '<p class="ad-msg" id="adMsg" role="status"></p>'+
         '<div class="ad-sub"><b>다른 방법</b></div>'+
         '<button type="button" data-a="copy">data.js 내용 복사</button>'+
         '<button type="button" class="ad-del" data-a="discard">바뀐 내용 모두 버리기</button>';
     }
+    var keepScroll=panel.querySelector('.ad-body');keepScroll=keepScroll?keepScroll.scrollTop:0;
     panel.innerHTML=html+'</div>';
+    var body=panel.querySelector('.ad-body');if(body)body.scrollTop=keepScroll;
     status();
   }
   function status(){
@@ -136,27 +190,33 @@
     panel.classList.toggle('is-dirty',dirty());
   }
   function msg(t,ok){var n=document.getElementById('adMsg');if(n){n.textContent=t;n.className='ad-msg'+(ok?' ok':' err')}}
+  function ytId(v){var m=String(v).match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{6,})/);return m?m[1]:String(v).trim()}
 
   panel.addEventListener('click',function(e){
     var b=e.target.closest('button');if(!b)return;
-    if(b.dataset.tab){tab=b.dataset.tab;drawPanel();return}
+    if(b.dataset.tab){tab=b.dataset.tab;recording=false;drawPanel();return}
     var a=b.dataset.a,i=+b.dataset.i,L=S.layout,F=S.film;
     if(a==='off'){setOn(false);return}
+    if(a==='recKey'){recording=true;drawPanel();return}
+    if(a==='resetKey'){try{localStorage.removeItem('msp-shortcut')}catch(err){}setKey(DEF_KEY);drawPanel();return}
+    if(a==='playIntro'){setOn(false);setTimeout(function(){MSP.playIntro&&MSP.playIntro()},50);return}
     if(a==='up'&&i>0){L.splice(i-1,0,L.splice(i,1)[0])}
     else if(a==='down'&&i<L.length-1){L.splice(i+1,0,L.splice(i,1)[0])}
+    else if(a==='addVid'){S.youtube.videos=S.youtube.videos||[];S.youtube.videos.push({title:'새 영상',id:''})}
+    else if(a==='delVid'){S.youtube.videos.splice(i,1)}
     else if(a==='addFilm'){F.films.unshift({title:'새 작품',year:new Date().getFullYear(),roles:[],records:[]})}
     else if(a==='delFilm'){F.films.splice(i,1)}
-    else if(a==='addNext'){F.next.push({title:'새 작품',role:''})}
+    else if(a==='addStage'){F.stages=F.stages||{pre:[],prod:[],post:[]};(F.stages[b.dataset.s]=F.stages[b.dataset.s]||[]).push({title:'새 영화',role:'',status:'',logline:'',note:''})}
+    else if(a==='delStage'){F.stages[b.dataset.s].splice(i,1)}
     else if(a==='addWork'){
       if(!S.outsource)S.outsource={en:'OUTSOURCING',badge:'WORK',title:'외주',desc:'',works:[]};
       if(!S.layout.some(function(x){return x.id==='outsource'}))S.layout.splice(1,0,{id:'outsource',show:true});
-      S.outsource.works.unshift({title:'새 외주 작업',client:'',year:String(new Date().getFullYear()),role:'',desc:'',link:''});
+      S.outsource.works.unshift({title:'새 외주 작업',client:'',year:'',role:'',desc:'',link:''});
     }
     else if(a==='delWork'){S.outsource.works.splice(i,1)}
-    else if(a==='delNext'){F.next.splice(i,1)}
     else if(a==='copy'){
       var t=toFile();
-      try{navigator.clipboard.writeText(t).then(function(){msg('복사했어요. GitHub의 js/data.js 에 붙여 넣으면 돼요.',true)},function(){msg('복사가 막혀 있어요. 이 브라우저에서는 GitHub에 저장 버튼을 써 주세요.')})}catch(err){msg('복사가 막혀 있어요.')}
+      try{navigator.clipboard.writeText(t).then(function(){msg('복사했어요. GitHub의 js/data.js 에 붙여 넣으면 돼요.',true)},function(){msg('복사가 막혀 있어요. GitHub에 저장 버튼을 써 주세요.')})}catch(err){msg('복사가 막혀 있어요.')}
       return;
     }
     else if(a==='discard'){
@@ -168,14 +228,20 @@
     saveDraft();MSP.render();
   });
   panel.addEventListener('change',function(e){
-    var c=e.target;if(c.dataset.a==='show'){S.layout[+c.dataset.i].show=c.checked;saveDraft();MSP.render()}
+    var c=e.target;
+    if(c.dataset.a==='show'){S.layout[+c.dataset.i].show=c.checked;saveDraft();MSP.render()}
+    if(c.dataset.a==='moveStage'){
+      var from=c.dataset.s,to=c.value,i=+c.dataset.i;if(from===to)return;
+      var item=S.film.stages[from].splice(i,1)[0];(S.film.stages[to]=S.film.stages[to]||[]).push(item);
+      saveDraft();MSP.render();
+    }
   });
   panel.addEventListener('input',function(e){
     var c=e.target,p=c.dataset.f;if(!p)return;
     var v=c.value;
     if(c.dataset.list)v=v.split(',').map(function(s){return s.trim()}).filter(Boolean);
     else if(c.type==='number')v=parseInt(v,10)||0;
-    else v=v.trim()===''&&c.type==='url'?'':v;
+    else if(c.dataset.yt)v=ytId(v);
     setPath(S,p,v);saveDraft();
     // 패널 입력칸에 커서가 있으니 본문만 다시 그림
     clearTimeout(renderT);renderT=setTimeout(renderPage,400);
@@ -186,7 +252,7 @@
   /* ── GitHub에 저장 ── */
   function b64(str){var bytes=new TextEncoder().encode(str),bin='';for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)}
   async function push(){
-    var inp=document.getElementById('adToken'),token=(inp&&inp.value||'').trim();
+    var inpEl=document.getElementById('adToken'),token=(inpEl&&inpEl.value||'').trim();
     if(!token){msg('토큰을 먼저 넣어 주세요.');return}
     try{localStorage.setItem('msp-gh-token',token)}catch(e){}
     var api='https://api.github.com/repos/'+REPO.owner+'/'+REPO.repo+'/contents/'+REPO.path;
@@ -195,8 +261,8 @@
     try{
       var r=await fetch(api+'?ref='+REPO.branch,{headers:h,cache:'no-store'});
       if(r.status===401){msg('토큰이 맞지 않아요. 토큰을 다시 확인해 주세요.');return}
-      if(r.status===404){msg('저장소를 찾지 못했어요. 토큰에 ms-portfolio 저장소 권한(Contents: 읽기/쓰기)이 있는지 확인해 주세요.');return}
       if(r.status===403){msg('이 토큰으로는 저장소를 볼 수 없어요. 토큰에 ms-portfolio 저장소의 Contents 읽기/쓰기 권한을 주세요.');return}
+      if(r.status===404){msg('저장소를 찾지 못했어요. 토큰에 ms-portfolio 저장소 권한(Contents: 읽기/쓰기)이 있는지 확인해 주세요.');return}
       if(!r.ok){msg('GitHub이 응답하지 않아요 ('+r.status+'). 잠시 뒤 다시 눌러 주세요.');return}
       var cur=await r.json();
       r=await fetch(api,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},h),
@@ -220,20 +286,31 @@
       if(MSP.skipIntro)MSP.skipIntro();
       var d=null;try{d=JSON.parse(localStorage.getItem('msp-draft')||'null')}catch(e){}
       if(d&&d.site&&d.film){
-        // 예전 임시본에 없는 새 항목(예: 외주)은 원본에서 채워 넣기
+        // 예전 임시본에 없는 새 항목은 원본에서 채워 넣기
         var o=JSON.parse(ORIG);Object.keys(o).forEach(function(k){if(!(k in d))d[k]=o[k]});
+        if(!d.film.stages)d.film.stages=o.film.stages;
         (o.layout||[]).forEach(function(x,i){if(!d.layout.some(function(y){return y.id===x.id}))d.layout.splice(Math.min(i,d.layout.length),0,x)});
         replaceSite(d);
       }
       MSP.render();
       if(d){tab='save';drawPanel();msg('지난번에 저장 안 한 변경을 불러왔어요.',true)}
     }else{
-      makeEditable();
+      recording=false;makeEditable();
       if(location.hash==='#admin')try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}
     }
   }
   if(location.hash==='#admin')setOn(true);
   window.addEventListener('hashchange',function(){if(location.hash==='#admin')setOn(true)});
-  document.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&e.shiftKey&&(e.key==='E'||e.key==='e')){e.preventDefault();setOn(!on)}});
+  document.addEventListener('keydown',function(e){
+    // 새 단축키 기록 중
+    if(recording){
+      var k=keyName(e);if(!k)return;e.preventDefault();
+      if(e.key==='Escape'){recording=false;drawPanel();return}
+      if(!(e.ctrlKey||e.altKey||e.metaKey)){var n=document.getElementById('adKey');if(n)n.textContent='Ctrl이나 Alt를 같이 눌러 주세요';return}
+      recording=false;setKey(k);drawPanel();return;
+    }
+    var name=keyName(e);
+    if(name&&name.toLowerCase()===currentKey().toLowerCase()){e.preventDefault();setOn(!on)}
+  });
   document.addEventListener('click',function(e){if(e.detail===3&&e.target.closest('#copyR')&&!on)setOn(true)});
 })();

@@ -10,18 +10,16 @@
    ===================================================================== */
 (function(){
   var LOOK=[
-    ['fill','bl','dark','zoom',240],
+    ['fill','bl','dark','zoom',230],
     ['out','r crop-r','dark','left',190],
     ['fill','l','light','right',190],
-    ['acc','tr','dark','up',230],
-    ['fill','c','dark','blur',180],
-    ['out','bl','light','zoom',170],
-    ['fill','c','acc','zoom',170],
-    ['fill','br crop-r','dark','left',190],
-    ['out','c','dark','zoom',170],
-    ['fill','l','dark','up',280]
+    ['acc','tr','dark','up',220],
+    ['fill','c','dark','blur',210],
+    ['fill','bl','light','zoom',170],
+    ['fill','c','acc','zoom',210],
+    ['fill','r','dark','left',320]
   ];
-  var DEFAULT_CUTS=['YOUTUBE','FILM','EDIT','8년','잘','짖고,','잘','놀고,','잘','만듭니다.'];
+  var DEFAULT_CUTS=['YOUTUBE','FILM','EDIT','8년','상상','을','현실','로.'];
   var HOLD=720, FLY=750;
   var MSP=window.MSP||{},S=window.SITE,root=document.documentElement;
   var el=document.getElementById('intro');if(!el)return;
