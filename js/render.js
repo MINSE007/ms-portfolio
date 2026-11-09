@@ -94,7 +94,7 @@
           '<div class="info"><span class="idx">'+pad(i+1)+'</span><h3'+ed('youtube.videos.'+i+'.title')+'>'+esc(v.title)+'</h3></div></a>';
       }).join('');
       return head('youtube',n)+'<div class="yt">'+
-        '<aside class="chan glass rv"><div class="ch-top"><div class="avatar" id="avatar">CW</div><div><h3'+ed('youtube.channel.name')+'>'+esc(ch.name)+'</h3><span class="handle"'+ed('youtube.channel.handle')+'>'+esc(ch.handle)+'</span></div></div>'+
+        '<aside class="chan glass rv"><div class="ch-ban" aria-hidden="true"><span>'+esc(ch.handle)+'</span></div><div class="ch-top"><div class="avatar" id="avatar">CW</div><div><h3'+ed('youtube.channel.name')+'>'+esc(ch.name)+'</h3><span class="handle"'+ed('youtube.channel.handle')+'>'+esc(ch.handle)+'</span></div></div>'+
         '<p class="tl"'+ed('youtube.channel.tagline')+'>'+txt(ch.tagline)+'</p>'+
         '<p class="ch-desc"'+ed('youtube.channel.desc')+'>'+txt(or(ch.desc,''))+'</p>'+
         '<a class="btn" href="'+esc(ch.url)+'" target="_blank" rel="noopener"><span'+ed('youtube.channel.button')+'>'+esc(ch.button)+'</span> ↗</a></aside>'+
@@ -102,13 +102,15 @@
     },
     outsource:function(n){
       var o=S.outsource,works=o.works||[];
-      return head('outsource',n)+'<div class="cases">'+works.map(function(w,i){
+      return head('outsource',n)+'<div class="cases'+(works.length===1?' solo':'')+'">'+works.map(function(w,i){
         var p='outsource.works.'+i+'.';
-        return '<article class="case glass rv"><div class="cs-top"><span class="cs-no">CASE '+pad(i+1)+'</span>'+(w.year?'<span'+ed(p+'year')+'>'+esc(w.year)+'</span>':'')+'</div>'+
+        var m=String(w.link||'').match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{6,})/);
+        var th=m?'<a class="cs-thumb thumb" data-yt="'+esc(m[1])+'" href="'+esc(w.link)+'" target="_blank" rel="noopener" aria-label="영상 보기"><span class="play"></span></a>':'';
+        return '<article class="case glass rv'+(th?' has-th':'')+'">'+th+'<div class="cs-body"><div class="cs-top"><span class="cs-no">CASE '+pad(i+1)+'</span>'+(w.year?'<span'+ed(p+'year')+'>'+esc(w.year)+'</span>':'')+'</div>'+
           '<h3'+ed(p+'title')+'>'+esc(w.title)+'</h3>'+
           '<dl class="meta"><dt>의뢰</dt><dd'+ed(p+'client')+'>'+esc(w.client)+'</dd><dt>맡은 일</dt><dd'+ed(p+'role')+'>'+esc(w.role)+'</dd></dl>'+
           '<p'+ed(p+'desc')+'>'+txt(w.desc)+'</p>'+
-          (w.link?'<a class="cs-link" href="'+esc(w.link)+'" target="_blank" rel="noopener">영상 보기 ↗</a>':'')+'</article>';
+          (w.link?'<a class="cs-link" href="'+esc(w.link)+'" target="_blank" rel="noopener">영상 보기 ↗</a>':'')+'</div></article>';
       }).join('')+'</div>';
     },
     film:function(n){
@@ -249,9 +251,31 @@
     drawFilms();
     loadImages();
     reveal();
+    navSpy();
     (MSP.onRender||[]).forEach(function(fn){fn()});
   }
   MSP.render=render;
+
+  /* ── 위쪽 메뉴: 지금 보고 있는 섹션에 표시가 미끄러져 따라감 ── */
+  var spy=null;
+  function navSpy(){
+    var nav=$('nav');if(!nav)return;
+    var ind=document.createElement('i');ind.className='nav-ind';nav.appendChild(ind);
+    function mark(id){
+      var on=null;nav.querySelectorAll('a').forEach(function(a){var hit=a.getAttribute('href')==='#'+id;a.classList.toggle('on',hit);if(hit)on=a});
+      nav.classList.toggle('has-on',!!on);
+      if(on){ind.style.width=on.offsetWidth+'px';ind.style.transform='translateX('+on.offsetLeft+'px)'}
+    }
+    if(spy)spy.disconnect();
+    if(!('IntersectionObserver' in window))return;
+    var seen={};
+    spy=new IntersectionObserver(function(es){
+      es.forEach(function(x){seen[x.target.id]=x.isIntersecting});
+      var cur=null;document.querySelectorAll('#sections .sec').forEach(function(sec){if(seen[sec.id]&&!cur)cur=sec.id});
+      mark(cur);
+    },{rootMargin:'-45% 0px -50% 0px'});
+    document.querySelectorAll('#sections .sec').forEach(function(sec){spy.observe(sec)});
+  }
   MSP.drawFilms=drawFilms;
 
   /* ── 이미지 (불러오지 못하면 기본 모양 그대로) ── */

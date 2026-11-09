@@ -95,7 +95,11 @@ header .wrap>*{pointer-events:auto}
   background:radial-gradient(circle at 85% 12%,rgba(138,99,255,.55) 0,rgba(138,99,255,0) 48%),linear-gradient(145deg,#fff 0,#EFEAFF 100%);border:1px solid rgba(255,255,255,.95)}
 nav{position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:2px;padding:5px;border-radius:999px}
 nav a{padding:7px 16px;border-radius:999px;font-size:14px;font-weight:500;color:var(--muted);transition:background .2s,color .2s}
+nav a{position:relative;z-index:1}
 nav a:hover{background:var(--hover);color:var(--text)}
+nav a.on,nav a.on:hover{color:var(--btn-ink);background:none}
+.nav-ind{position:absolute;left:0;top:5px;bottom:5px;width:0;border-radius:999px;background:var(--btn);opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.2,.8,.2,1),width .45s cubic-bezier(.2,.8,.2,1),opacity .25s}
+nav.has-on .nav-ind{opacity:1}
 .right{display:flex;align-items:center;gap:8px}
 .pillcta{font-weight:700;font-size:14px;padding:10px 18px;border-radius:999px;background:var(--btn);color:var(--btn-ink);white-space:nowrap;transition:transform .2s}
 .pillcta:hover{transform:translateY(-2px)}
