@@ -285,7 +285,7 @@
     document.querySelectorAll('.thumb[data-yt]').forEach(function(box){
       var im=new Image();im.alt='';im.loading='lazy';
       im.onload=function(){box.insertBefore(im,box.firstChild)};
-      im.src='https://img.youtube.com/vi/'+encodeURIComponent(box.getAttribute('data-yt'))+'/hqdefault.jpg';
+      im.src='https://i.ytimg.com/vi/'+encodeURIComponent(box.getAttribute('data-yt'))+'/hqdefault.jpg';
     });
   }
 

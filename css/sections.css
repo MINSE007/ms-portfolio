@@ -58,7 +58,7 @@ html.entered .hero .facts{transition-delay:.26s}
 .vid h3{font-size:16px;font-weight:700;line-height:1.45}
 
 /* ── 외주 ── */
-.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:20px}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:20px}
 .case{border-radius:24px;padding:26px 26px 24px;display:flex;flex-direction:column;gap:16px;min-width:0;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .case:hover{transform:translateY(-4px)}
 .cs-body{display:flex;flex-direction:column;gap:16px;min-width:0}

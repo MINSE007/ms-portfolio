@@ -61,14 +61,14 @@ window.SITE = {
       "tagline": "잘 짖고, 잘 놀고, 잘 만듭니다.",
       "desc": "기획부터 촬영, 편집까지\n혼자서 끝까지 만드는 채널입니다.",
       "url": "https://www.youtube.com/@c_ward",
-      "avatar": "",
+      "avatar": "https://yt3.googleusercontent.com/vHPkuUp-OIPEEnbO4nkOg0arKz2vWY3r1pCbp-fnjRpDZTzMjaLrCwsMtdXS0zif0zz71Y4Mag=s240-c-k-c0x00ffffff-no-rj",
       "button": "채널 방문하기"
     },
     "videos": [
       { "title": "이게 뭔 스킨이야", "id": "C0VnVbcB8-g" },
       { "title": "한국인이 아시아 섭 하면 생기는 일", "id": "HX09tGF0QPc" },
-      { "title": "롤 좋아하는 친구들이랑 볼링 치러가면 생기는 일", "id": "Ih2qKrALhaI" },
-      { "title": "친구랑 손절할 뻔했습니다", "id": "YX6wRNR4XbA" }
+      { "title": "여기가 야시장 맛집이라면서요?", "id": "uZQ9S8cRW5I" },
+      { "title": "롤 좋아하는 친구들이랑 볼링 치러가면 생기는 일", "id": "Ih2qKrALhaI" }
     ]
   },
 
@@ -80,12 +80,20 @@ window.SITE = {
     "desc": "의뢰받아 함께 만든 작업들입니다.\n맡긴 분이 그린 장면이 그대로 나오도록 만듭니다.",
     "works": [
       {
-        "title": "십세들 × THE SMC",
+        "title": "십세들 EP.17",
         "client": "THE SMC 그룹 · 프로젝트 채널 '십세들'",
         "year": "",
         "role": "음향감독",
-        "desc": "THE SMC 그룹의 프로젝트 '십세들'에\n음향감독으로 참여했습니다.\n카메라가 담지 못하는 현장의 소리를 책임졌습니다.",
+        "desc": "1020 코덕들이 파우치를 탈탈 털어 보는 편.\n여러 명이 한꺼번에 이야기하는 현장에서\n목소리 하나하나가 또렷하게 들리도록 챙겼습니다.",
         "link": "https://www.youtube.com/watch?v=ZFlZpd5XYos"
+      },
+      {
+        "title": "십세들 EP.06",
+        "client": "THE SMC 그룹 · 프로젝트 채널 '십세들'",
+        "year": "",
+        "role": "음향감독",
+        "desc": "10대가 부모님과 싸우는 이유를 털어놓는 편.\n솔직한 이야기가 잡음에 묻히지 않도록\n현장의 소리를 책임졌습니다.",
+        "link": "https://www.youtube.com/watch?v=7iflRv-mVeo"
       }
     ]
   },
