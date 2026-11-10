@@ -283,8 +283,11 @@
     var av=$('avatar'),src=S.youtube.channel.avatar;
     if(av&&src){var im=new Image();im.alt='';im.onload=function(){av.appendChild(im)};im.src=src}
     document.querySelectorAll('.thumb[data-yt]').forEach(function(box){
-      var im=new Image();im.alt='';im.loading='lazy';
-      im.onload=function(){box.insertBefore(im,box.firstChild)};
+      // 화면에 먼저 붙여 두고(그래야 '늦게 불러오기'가 작동함), 다 불러오면 서서히 나타남
+      var im=new Image();im.alt='';im.loading='lazy';im.decoding='async';
+      im.onload=function(){im.classList.add('ok')};
+      im.onerror=function(){im.remove()};
+      box.insertBefore(im,box.firstChild);
       im.src='https://i.ytimg.com/vi/'+encodeURIComponent(box.getAttribute('data-yt'))+'/hqdefault.jpg';
     });
   }
