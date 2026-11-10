@@ -94,7 +94,7 @@
           '<div class="info"><span class="idx">'+pad(i+1)+'</span><h3'+ed('youtube.videos.'+i+'.title')+'>'+esc(v.title)+'</h3></div></a>';
       }).join('');
       return head('youtube',n)+'<div class="yt">'+
-        '<aside class="chan glass rv"><div class="ch-ban" aria-hidden="true"><span>'+esc(ch.handle)+'</span></div><div class="ch-top"><div class="avatar" id="avatar">CW</div><div><h3'+ed('youtube.channel.name')+'>'+esc(ch.name)+'</h3><span class="handle"'+ed('youtube.channel.handle')+'>'+esc(ch.handle)+'</span></div></div>'+
+        '<aside class="chan glass rv"><div class="ch-top"><div class="avatar" id="avatar">CW</div><div><h3'+ed('youtube.channel.name')+'>'+esc(ch.name)+'</h3><span class="handle"'+ed('youtube.channel.handle')+'>'+esc(ch.handle)+'</span></div></div>'+
         '<p class="tl"'+ed('youtube.channel.tagline')+'>'+txt(ch.tagline)+'</p>'+
         '<p class="ch-desc"'+ed('youtube.channel.desc')+'>'+txt(or(ch.desc,''))+'</p>'+
         '<a class="btn" href="'+esc(ch.url)+'" target="_blank" rel="noopener"><span'+ed('youtube.channel.button')+'>'+esc(ch.button)+'</span> ↗</a></aside>'+
