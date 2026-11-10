@@ -9,17 +9,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <!-- 디자인: 공통 / 섹션 / 인트로 / 관리자 -->
-<link rel="stylesheet" href="css/base.css?v=1110a">
-<link rel="stylesheet" href="css/sections.css?v=1110a">
-<link rel="stylesheet" href="css/intro.css?v=1110a">
-<link rel="stylesheet" href="css/admin.css?v=1110a">
+<link rel="stylesheet" href="css/base.css?v=1110b">
+<link rel="stylesheet" href="css/sections.css?v=1110b">
+<link rel="stylesheet" href="css/intro.css?v=1110b">
+<link rel="stylesheet" href="css/admin.css?v=1110b">
 <script>
 /* 첫 화면이 번쩍 보이지 않게, 인트로를 틀 때는 미리 표시해 둠 */
 (function(){
-  var r=document.documentElement,admin=location.hash==='#admin',calm=false;
-  try{calm=matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){}
+  var r=document.documentElement,admin=location.hash==='#admin';
   try{var t=localStorage.getItem('msp-theme');if(t)r.setAttribute('data-theme',t)}catch(e){}
-  if(!admin&&!calm)r.classList.add('intro-on');
+  if(!admin)r.classList.add('intro-on');
 })();
 </script>
 </head>
@@ -63,9 +62,9 @@
 <!-- ── 관리자 패널 (js/admin.js) ── -->
 <aside id="admin" hidden></aside>
 
-<script src="js/data.js?v=1110a"></script>
-<script src="js/render.js?v=1110a"></script>
-<script src="js/intro.js?v=1110a"></script>
-<script src="js/admin.js?v=1110a"></script>
+<script src="js/data.js?v=1110b"></script>
+<script src="js/render.js?v=1110b"></script>
+<script src="js/intro.js?v=1110b"></script>
+<script src="js/admin.js?v=1110b"></script>
 </body>
 </html>

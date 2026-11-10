@@ -136,7 +136,6 @@ html.entered .hero .facts{transition-delay:.26s}
 .pj-st{color:var(--muted);font-weight:500}
 .pj-st::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff5a4f;margin-right:6px;vertical-align:2px;animation:blink2 1.6s ease-in-out infinite}
 @keyframes blink2{50%{opacity:.3}}
-@media (prefers-reduced-motion:reduce){.pj-st::before{animation:none}}
 .pj-log{font-size:15px;font-weight:700;line-height:1.7}
 .pj-note{font-size:14px;color:var(--muted);line-height:1.75;padding-left:12px;border-left:2px solid var(--acc)}
 
@@ -176,7 +175,7 @@ a.door:hover{transform:translateY(-4px)}
 .cp:hover{background:var(--hover)}
 
 /* 스크롤하면 살짝 떠오르며 나타남 (처음부터 보이는 상태에서 시작) */
-@media (prefers-reduced-motion:no-preference){
+@media all{
   .rv.anim{transition:transform .8s cubic-bezier(.2,.8,.2,1),opacity .8s ease}
   .rv.wait{transform:translateY(32px);opacity:.35}
 }

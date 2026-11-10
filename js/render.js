@@ -297,7 +297,6 @@
   function reveal(){
     if(io)io.disconnect();
     if(!('IntersectionObserver' in window)||root.classList.contains('admin'))return;
-    try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){}
     io=new IntersectionObserver(function(es){es.forEach(function(x){
       if(!x.isIntersecting)return;var t=x.target;io.unobserve(t);t.classList.remove('wait');
       setTimeout(function(){t.classList.remove('anim');t.style.transitionDelay=''},1100);
@@ -311,7 +310,7 @@
   /* ── 배경 빛: 마우스를 천천히 따라옴 (MS 클라처럼) ── */
   (function(){
     var bg=$('bg');
-    try{if(!matchMedia('(pointer:fine)').matches||matchMedia('(prefers-reduced-motion: reduce)').matches)return}catch(e){return}
+    try{if(!matchMedia('(pointer:fine)').matches)return}catch(e){return}
     var tx=.78,ty=.18,x=tx,y=ty,raf=0;
     function step(){
       x+=(tx-x)*.06;y+=(ty-y)*.06;
@@ -326,7 +325,6 @@
   function scrollToY(y){
     cancelAnimationFrame(scrollRaf);
     var from=scrollY,dist=y-from;if(Math.abs(dist)<2)return;
-    try{if(matchMedia('(prefers-reduced-motion: reduce)').matches){window.scrollTo(0,y);return}}catch(e){}
     var dur=Math.min(1600,600+Math.abs(dist)*.18),t0=performance.now();
     var ease=function(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
     (function step(now){

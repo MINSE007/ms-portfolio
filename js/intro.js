@@ -29,7 +29,8 @@
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function at(ms,fn){timers.push(setTimeout(fn,ms))}
   function pad(n){return String(n).padStart(2,'0')}
-  function isCalm(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}}
+  // 윈도우에서 '애니메이션 효과'를 꺼 두면 브라우저가 '움직임 줄이기'로 알려줘서 인트로가 멈춰 버림 → 항상 정상 재생
+  function isCalm(){return false}
 
   // 글자 수에 맞춰 화면에 꽉 차는 크기 정하기 (한글은 넓게, 영문은 좁게 계산)
   function fontSize(t){

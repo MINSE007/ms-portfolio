@@ -60,6 +60,9 @@ html{scroll-padding-top:90px}
 body{background:var(--bg);color:var(--text);font:400 16px/1.7 var(--body);-webkit-font-smoothing:antialiased;transition:background .3s,color .3s}
 /* 줄바꿈: 한글 단어 중간에서 끊지 않기 + 마지막 줄에 한 단어만 남지 않게 */
 body{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
+/* 윈도우의 두꺼운 회색 스크롤바 대신 얇고 어두운 스크롤바 */
+html{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.22) transparent}
+:root[data-theme="light"]{scrollbar-color:rgba(40,20,70,.25) transparent}
 p,dd,li,h3,h4,h5{text-wrap:pretty}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bar)}
 ::selection{background:var(--acc);color:var(--bg)}
