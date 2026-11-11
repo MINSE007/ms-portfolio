@@ -7,12 +7,15 @@
 <title>MS Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- 영상 썸네일·프로필 사진 서버에 미리 연결 (썸네일이 빨리 뜨게) -->
+<link rel="preconnect" href="https://i.ytimg.com">
+<link rel="preconnect" href="https://yt3.googleusercontent.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <!-- 디자인: 공통 / 섹션 / 인트로 / 관리자 -->
-<link rel="stylesheet" href="css/base.css?v=1111a">
-<link rel="stylesheet" href="css/sections.css?v=1111a">
-<link rel="stylesheet" href="css/intro.css?v=1111a">
-<link rel="stylesheet" href="css/admin.css?v=1111a">
+<link rel="stylesheet" href="css/base.css?v=1111b">
+<link rel="stylesheet" href="css/sections.css?v=1111b">
+<link rel="stylesheet" href="css/intro.css?v=1111b">
+<link rel="stylesheet" href="css/admin.css?v=1111b">
 <script>
 /* 첫 화면이 번쩍 보이지 않게, 인트로를 틀 때는 미리 표시해 둠 */
 (function(){
@@ -56,9 +59,10 @@
 <!-- ── 관리자 패널 (js/admin.js) ── -->
 <aside id="admin" hidden></aside>
 
-<script src="js/data.js?v=1111a"></script>
-<script src="js/render.js?v=1111a"></script>
-<script src="js/intro.js?v=1111a"></script>
-<script src="js/admin.js?v=1111a"></script>
+<!-- 내용(data.js)은 매번 새로 받아옴 → 관리자 모드에서 저장한 내용이 옛날 파일에 가려지지 않게 -->
+<script>document.write('<script src="js/data.js?t='+Date.now()+'"><\/script>')</script>
+<script src="js/render.js?v=1111b"></script>
+<script src="js/intro.js?v=1111b"></script>
+<script src="js/admin.js?v=1111b"></script>
 </body>
 </html>

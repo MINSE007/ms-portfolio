@@ -145,14 +145,6 @@ window.SITE = {
       { "title": "환생검문소", "year": 2025, "roles": ["음향"], "records": [] },
       { "title": "자화상", "year": 2025, "roles": ["촬영", "편집"], "records": [] }
     ],
-
-    /* 지금 만들고 있는 영화 — 단계별(pre 프리 / prod 프로덕션 / post 포스트) */
-    "stagesTitle": "지금 만들고 있는 영화",
-    "stages": {
-      "pre": [],
-      "prod": [],
-      "post": []
-    }
   },
 
   /* ⑥-2 다시, 변신 — 지금 직접 만들고 있는 영화 */
@@ -168,7 +160,25 @@ window.SITE = {
     "people": [
       { "name": "준화", "desc": "꿈을 내려놓으려던 스물일곱 살" },
       { "name": "태상", "desc": "아직 히어로를 꿈꾸는 고등학생" }
-    ]
+    ],
+    /* 진행 상황 — stage: 지금 단계(pre 프리 / prod 프로덕션 / post 포스트)
+       state: done 완료 / now 진행 중 / todo 예정 */
+    "stage": "pre",
+    "steps": {
+      "pre": [
+        { "name": "시놉시스", "state": "now" },
+        { "name": "시나리오", "state": "todo" },
+        { "name": "캐스팅 · 장소 섭외", "state": "todo" }
+      ],
+      "prod": [
+        { "name": "촬영", "state": "todo" }
+      ],
+      "post": [
+        { "name": "편집", "state": "todo" },
+        { "name": "사운드 · 색보정", "state": "todo" },
+        { "name": "완성 · 상영", "state": "todo" }
+      ]
+    }
   },
 
   /* ⑦ 편집 */

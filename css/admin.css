@@ -44,3 +44,17 @@ html.admin a{cursor:default}
 .ad-key{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .ad-key kbd{font:700 15px/1 var(--body);padding:9px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line);min-width:120px;text-align:center}
 .ad-tag{font-variant-numeric:tabular-nums}
+
+/* 관리자 모드일 때 왼쪽 위 로고: 'MS 포트폴리오 관리자' */
+html.admin #logoText{font-size:0}
+html.admin #logoText::after{content:"MS 포트폴리오 관리자";font-size:16px}
+/* 관리자 로그인 창 */
+#adLogin{position:fixed;inset:0;z-index:210;display:grid;place-items:center;padding:16px;background:rgba(10,8,16,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+#adLogin[hidden]{display:none}
+.al-card{width:min(360px,100%);display:flex;flex-direction:column;gap:12px;padding:24px;border-radius:22px;background:var(--bar);border:1px solid var(--glass-b);box-shadow:0 24px 60px rgba(0,0,0,.35);color:var(--text)}
+.al-head{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.al-head b{font-size:17px;font-weight:900}
+.al-msg{min-height:1.2em;font-size:13px;color:#E5786C}
+.al-btns{display:flex;gap:8px;justify-content:flex-end}
+.al-btns button{font:inherit;font-size:14px;font-weight:700;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--chip);color:var(--text);cursor:pointer}
+.al-btns .al-go{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}

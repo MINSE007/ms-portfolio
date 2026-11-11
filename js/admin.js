@@ -1,7 +1,7 @@
 /* =====================================================================
    admin.js — 관리자 모드
-   켜는 법: 단축키(처음엔 Ctrl+Shift+E · [설정] 탭에서 바꿀 수 있음),
-           주소 끝에 #admin, 또는 맨 아래 © 글자를 세 번 클릭
+   켜는 법: 맨 아래 '관리자 로그인' → 아이디·비밀번호 (단축키·주소 끝 #admin도 로그인 창이 떠요)
+           한 번 로그인하면 이 탭을 닫기 전까지 다시 안 물어봐요.
    할 수 있는 것:
      · 화면의 글자(점선 테두리)를 눌러서 바로 고치기 — Enter로 줄바꿈, Esc로 끝내기
      · [배치] 섹션 순서 바꾸기 / 숨기기
@@ -27,7 +27,7 @@
     '   · 글 안의 \\n 은 "여기서 줄바꿈" 표시예요.',
     '   · 관리자 모드에서 고치고 "GitHub에 저장"을 누르면 이 파일이 통째로 새로 저장돼요.',
     '   · layout: 섹션 순서와 보이기(show) / film.films: 필모그래피',
-    '     film.stages: 지금 만들고 있는 영화 (pre 프리 / prod 프로덕션 / post 포스트)',
+    '     film.picks: 대표작 3편 / dasi: 다시, 변신 (steps 진행 상황: done 완료 · now 진행 중 · todo 예정)',
     '     역할: 연출 연출부 스크립터 / 촬영 촬영부 / 조명 조명부 / 음향 음향부 /',
     '           제작 PD 제작부 / 미술 미술부 / 편집 편집부 / 배우',
     '   ===================================================================== */',''].join('\n');
@@ -54,6 +54,24 @@
     S.admin=S.admin||{};S.admin.shortcut=k;
     try{localStorage.setItem('msp-shortcut',k)}catch(e){}
     saveDraft();
+  }
+
+  /* ── 다시, 변신 진행 상황 편집 칸 ── */
+  var STG=[['pre','프리 프로덕션'],['prod','프로덕션'],['post','포스트 프로덕션']];
+  var STN=[['done','완료'],['now','진행 중'],['todo','예정']];
+  function dasiEditor(){
+    var D=S.dasi;if(!D)return '';D.steps=D.steps||{pre:[],prod:[],post:[]};
+    return '<label class="ad-f"><span>지금 단계</span><select data-f="dasi.stage" id="ad-dstage">'+STG.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===(D.stage||'pre')?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+      STG.map(function(c){
+        var list=D.steps[c[0]]||[];
+        return '<div class="ad-sub sm"><span>'+c[1]+' · '+list.length+'개</span><button type="button" data-a="addStep" data-s="'+c[0]+'">+ 할 일</button></div>'+
+          list.map(function(x,i){
+            var p='dasi.steps.'+c[0]+'.'+i+'.';
+            return '<div class="ad-card ad-2">'+inp(p+'name',x.name,'할 일')+
+              '<label class="ad-f"><span>상태</span><select data-f="'+p+'state" id="ad-st-'+c[0]+'-'+i+'">'+STN.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===x.state?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+              '<button type="button" class="ad-del" data-a="delStep" data-s="'+c[0]+'" data-i="'+i+'">삭제</button></div>';
+          }).join('');
+      }).join('');
   }
 
   /* ── 임시 저장 ── */
@@ -103,10 +121,9 @@
     return '<label class="ad-f" for="'+id+'"><span>'+label+'</span><textarea id="'+id+'" rows="3" data-f="'+path+'">'+esc(val==null?'':val)+'</textarea></label>';
   }
   var TABS=[['layout','배치'],['yt','유튜브'],['out','외주'],['film','영화'],['set','설정'],['save','저장']];
-  var STG=[['pre','프리 프로덕션'],['prod','프로덕션'],['post','포스트 프로덕션']];
   function drawPanel(){
     if(!on)return;
-    var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">'+esc(currentKey())+'</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button></div>'+
+    var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">'+esc(currentKey())+'</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button><button type="button" data-a="logout">로그아웃</button></div>'+
       '<div class="ad-tabs">'+TABS.map(function(t){return '<button type="button" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div><div class="ad-body">';
     if(tab==='layout'){
       html+='<p class="ad-tip">글자는 화면에서 <b>점선 테두리</b>가 있는 곳을 눌러 바로 고치면 돼요.<br><b>Enter</b>는 줄바꿈, <b>Esc</b>는 끝내기예요.</p><ol class="ad-list">'+
@@ -145,19 +162,7 @@
             '<div class="ad-2">'+inp(p+'year',x.year,'연도')+inp(p+'role',x.role,'맡은 일')+'</div>'+
             area(p+'desc',x.desc,'개요 (시놉시스)')+inp(p+'video',x.video,'영상 주소 (유튜브)','url')+'</div>';
         }).join('')+
-        '<div class="ad-sub"><b>지금 만들고 있는 영화</b></div>'+
-        STG.map(function(c){
-          var list=st[c[0]]||[];
-          return '<div class="ad-sub sm"><span>'+c[1]+' · '+list.length+'편</span><button type="button" data-a="addStage" data-s="'+c[0]+'">+ 추가</button></div>'+
-            list.map(function(x,i){
-              var p='film.stages.'+c[0]+'.'+i+'.';
-              return '<div class="ad-card">'+inp(p+'title',x.title,'제목')+'<div class="ad-2">'+inp(p+'role',x.role,'맡은 일')+inp(p+'status',x.status,'진행 상황')+'</div>'+
-                area(p+'logline',x.logline,'한 줄 소개')+area(p+'note',x.note,'덧붙이는 글')+
-                '<div class="ad-2"><label class="ad-f"><span>단계 옮기기</span><select data-a="moveStage" data-s="'+c[0]+'" data-i="'+i+'" id="ad-mv-'+c[0]+'-'+i+'">'+
-                STG.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===c[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
-                '<button type="button" class="ad-del" data-a="delStage" data-s="'+c[0]+'" data-i="'+i+'">삭제</button></div></div>';
-            }).join('');
-        }).join('')+
+        '<div class="ad-sub"><b>다시, 변신 · 진행 상황</b></div>'+dasiEditor()+
         '<div class="ad-sub"><b>필모그래피 '+F.films.length+'편</b><button type="button" data-a="addFilm">+ 작품 추가</button></div>'+
         '<p class="ad-tip">역할·기록은 쉼표(,)로 나눠 적어요. 기록에는 수상·상영 이력을 넣으면 작품 옆에 나와요.</p>'+
         F.films.map(function(f,i){
@@ -204,6 +209,7 @@
     if(b.dataset.tab){tab=b.dataset.tab;recording=false;drawPanel();return}
     var a=b.dataset.a,i=+b.dataset.i,L=S.layout,F=S.film;
     if(a==='off'){setOn(false);return}
+    if(a==='logout'){try{sessionStorage.removeItem(AUTH_KEY)}catch(err){}setOn(false);return}
     if(a==='recKey'){recording=true;drawPanel();return}
     if(a==='resetKey'){try{localStorage.removeItem('msp-shortcut')}catch(err){}setKey(DEF_KEY);drawPanel();return}
     if(a==='playIntro'){setOn(false);setTimeout(function(){MSP.playIntro&&MSP.playIntro()},50);return}
@@ -213,8 +219,8 @@
     else if(a==='delVid'){S.youtube.videos.splice(i,1)}
     else if(a==='addFilm'){F.films.unshift({title:'새 작품',year:new Date().getFullYear(),roles:[],records:[]})}
     else if(a==='delFilm'){F.films.splice(i,1)}
-    else if(a==='addStage'){F.stages=F.stages||{pre:[],prod:[],post:[]};(F.stages[b.dataset.s]=F.stages[b.dataset.s]||[]).push({title:'새 영화',role:'',status:'',logline:'',note:''})}
-    else if(a==='delStage'){F.stages[b.dataset.s].splice(i,1)}
+    else if(a==='addStep'){var D=S.dasi;D.steps=D.steps||{};(D.steps[b.dataset.s]=D.steps[b.dataset.s]||[]).push({name:'새 할 일',state:'todo'})}
+    else if(a==='delStep'){S.dasi.steps[b.dataset.s].splice(i,1)}
     else if(a==='addWork'){
       if(!S.outsource)S.outsource={en:'OUTSOURCING',badge:'WORK',title:'외주',desc:'',works:[]};
       if(!S.layout.some(function(x){return x.id==='outsource'}))S.layout.splice(1,0,{id:'outsource',show:true});
@@ -237,11 +243,6 @@
   panel.addEventListener('change',function(e){
     var c=e.target;
     if(c.dataset.a==='show'){S.layout[+c.dataset.i].show=c.checked;saveDraft();MSP.render()}
-    if(c.dataset.a==='moveStage'){
-      var from=c.dataset.s,to=c.value,i=+c.dataset.i;if(from===to)return;
-      var item=S.film.stages[from].splice(i,1)[0];(S.film.stages[to]=S.film.stages[to]||[]).push(item);
-      saveDraft();MSP.render();
-    }
   });
   panel.addEventListener('input',function(e){
     var c=e.target,p=c.dataset.f;if(!p)return;
@@ -295,7 +296,7 @@
       if(d&&d.site&&d.film){
         // 예전 임시본에 없는 새 항목은 원본에서 채워 넣기
         var o=JSON.parse(ORIG);Object.keys(o).forEach(function(k){if(!(k in d))d[k]=o[k]});
-        if(!d.film.stages)d.film.stages=o.film.stages;
+        if(d.dasi&&!d.dasi.steps&&o.dasi){d.dasi.steps=o.dasi.steps;d.dasi.stage=o.dasi.stage}
         if(!d.film.picks)d.film.picks=o.film.picks;
         (o.layout||[]).forEach(function(x,i){if(!d.layout.some(function(y){return y.id===x.id}))d.layout.splice(Math.min(i,d.layout.length),0,x)});
         replaceSite(d);
@@ -307,8 +308,41 @@
       if(location.hash==='#admin')try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}
     }
   }
-  if(location.hash==='#admin')setOn(true);
-  window.addEventListener('hashchange',function(){if(location.hash==='#admin')setOn(true)});
+  /* ── 관리자 로그인 (맨 아래 '관리자 로그인' · 단축키 · 주소 끝 #admin) ──
+     비밀번호는 파일에 그대로 적지 않고, 암호처럼 바꾼 값(SHA-256)만 넣어 둠.
+     ※ 이 로그인은 '편집 화면'을 여는 문이에요. 실제 사이트에 저장하는 건 GitHub 토큰이 있어야만 돼요. */
+  var AUTH_KEY='msp-auth',AUTH_HASH='7dff07c1895eb0cb8961bfcac30d129cfabdb30d23d157c8f11b1c83e0d03bd7';
+  function authed(){try{return sessionStorage.getItem(AUTH_KEY)===AUTH_HASH}catch(e){return false}}
+  async function sha(t){var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
+  var box=null;
+  function showLogin(){
+    if(!box){
+      box=document.createElement('div');box.id='adLogin';box.setAttribute('role','dialog');box.setAttribute('aria-modal','true');box.setAttribute('aria-label','관리자 로그인');
+      box.innerHTML='<form class="al-card" autocomplete="on"><div class="al-head"><span class="badge-ms">MS</span><b>관리자 로그인</b></div>'+
+        '<label class="ad-f" for="alId"><span>아이디</span><input id="alId" name="username" autocomplete="username" required></label>'+
+        '<label class="ad-f" for="alPw"><span>비밀번호</span><input id="alPw" name="password" type="password" autocomplete="current-password" required></label>'+
+        '<p class="al-msg" id="alMsg" role="status"></p>'+
+        '<div class="al-btns"><button type="button" class="al-x" data-al="close">닫기</button><button type="submit" class="al-go">로그인</button></div></form>';
+      document.body.appendChild(box);
+      box.addEventListener('click',function(e){if(e.target===box||e.target.closest('[data-al="close"]'))hideLogin()});
+      box.querySelector('form').addEventListener('submit',async function(e){
+        e.preventDefault();var m=document.getElementById('alMsg');
+        var id=document.getElementById('alId').value.trim(),pw=document.getElementById('alPw').value;
+        var h='';try{h=await sha('msp-admin-v1|'+id+'|'+pw)}catch(err){m.textContent='이 화면에서는 로그인할 수 없어요. (https 주소에서 열어 주세요)';return}
+        if(h!==AUTH_HASH){m.textContent='아이디 또는 비밀번호가 맞지 않아요.';document.getElementById('alPw').value='';return}
+        try{sessionStorage.setItem(AUTH_KEY,h)}catch(err){}
+        hideLogin();setOn(true);
+      });
+    }
+    box.hidden=false;document.getElementById('alMsg').textContent='';
+    setTimeout(function(){var f=document.getElementById('alId');if(f)f.focus()},30);
+  }
+  function hideLogin(){if(box){box.hidden=true;document.getElementById('alPw').value=''}}
+  function requestOn(){if(on)return;if(authed())setOn(true);else showLogin()}
+  MSP.adminLogin=requestOn;
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&box&&!box.hidden)hideLogin()});
+  if(location.hash==='#admin')requestOn();
+  window.addEventListener('hashchange',function(){if(location.hash==='#admin')requestOn()});
   document.addEventListener('keydown',function(e){
     // 새 단축키 기록 중
     if(recording){
@@ -318,7 +352,10 @@
       recording=false;setKey(k);drawPanel();return;
     }
     var name=keyName(e);
-    if(name&&name.toLowerCase()===currentKey().toLowerCase()){e.preventDefault();setOn(!on)}
+    if(name&&name.toLowerCase()===currentKey().toLowerCase()){e.preventDefault();if(on)setOn(false);else requestOn()}
   });
-  document.addEventListener('click',function(e){if(e.detail===3&&e.target.closest('#copyR')&&!on)setOn(true)});
+  document.addEventListener('click',function(e){
+    if(e.target.closest('#adminLogin')){e.preventDefault();if(on)setOn(false);else requestOn();return}
+    if(e.detail===3&&e.target.closest('#copyR')&&!on)requestOn();
+  });
 })();

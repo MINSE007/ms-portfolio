@@ -81,6 +81,25 @@
       '<h2'+ed(key+'.title')+'>'+esc(d.title)+'</h2></div>'+(d.desc!=null?'<p'+ed(key+'.desc')+'>'+txt(d.desc)+'</p>':'')+'</div>';
   }
 
+  /* ── 다시, 변신 진행 상황: 프리 → 프로덕션 → 포스트 ── */
+  var STEPS=[['pre','PRE-PRODUCTION','프리 프로덕션'],['prod','PRODUCTION','프로덕션'],['post','POST-PRODUCTION','포스트 프로덕션']];
+  var STATE={done:'완료',now:'진행 중',todo:'예정'};
+  function progress(d){
+    var steps=d.steps||{},cur=STEPS.map(function(x){return x[0]}).indexOf(d.stage||'pre');if(cur<0)cur=0;
+    var all=0,done=0;STEPS.forEach(function(x){(steps[x[0]]||[]).forEach(function(it){all++;if(it.state==='done')done++;else if(it.state==='now')done+=.5})});
+    var pct=all?Math.round(done/all*100):0;
+    var cols=STEPS.map(function(x,i){
+      var cls=i<cur?'past':i===cur?'cur':'next';
+      var list=(steps[x[0]]||[]).map(function(it,j){var p='dasi.steps.'+x[0]+'.'+j+'.';var s=STATE[it.state]?it.state:'todo';
+        return '<li class="pg-it is-'+s+'"><i aria-hidden="true"></i><span'+ed(p+'name')+'>'+esc(it.name)+'</span><em>'+STATE[s]+'</em></li>'}).join('');
+      return '<div class="pg-col '+cls+'"><div class="pg-h"><span class="pg-dot" aria-hidden="true"></span><span class="mono">'+pad(i+1)+' · '+x[1]+'</span><h4>'+x[2]+
+        (i===cur?'<b class="pg-now">지금 여기</b>':'')+'</h4></div><ul>'+(list||'<li class="pg-it is-todo"><i aria-hidden="true"></i><span>준비 중</span></li>')+'</ul></div>';
+    }).join('');
+    return '<div class="pg glass rv"><div class="pg-top"><div><span class="mono">PROGRESS</span><h3>지금 진행 상황</h3></div><b class="pg-pct num">'+pct+'<small>%</small></b></div>'+
+      '<div class="pg-bar" role="img" aria-label="전체 진행 '+pct+'%"><i style="width:'+pct+'%"></i></div>'+
+      '<div class="pg-cols" style="--cur:'+cur+'">'+cols+'</div></div>';
+  }
+
   /* ── 섹션들 ── */
   var ICON={
     plan:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
@@ -116,22 +135,10 @@
       }).join('')+'</div>';
     },
     film:function(n){
-      var f=S.film,films=f.films||[],st=f.stages||{};
+      var f=S.film,films=f.films||[];
       var used={};films.forEach(function(x){(x.roles||[]).forEach(function(r){if(CAT[r])used[CAT[r]]=1})});
       var tabs='<button class="tab" type="button" data-r="all" aria-pressed="true">전체</button>'+
         CATS.filter(function(c){return used[c[0]]}).map(function(c){return '<button class="tab" type="button" data-r="'+c[0]+'" aria-pressed="false">'+c[1]+'</button>'}).join('');
-      var COLS=[['pre','PRE-PRODUCTION','프리 프로덕션'],['prod','PRODUCTION','프로덕션'],['post','POST-PRODUCTION','포스트 프로덕션']];
-      var board=COLS.map(function(c,ci){
-        var list=st[c[0]]||[];
-        return '<div class="stg-col glass rv"><div class="stg-h"><span class="mono">'+pad(ci+1)+' · '+c[1]+'</span><h4>'+c[2]+'<b class="num">'+list.length+'</b></h4></div>'+
-          (list.length?list.map(function(x,i){
-            var p='film.stages.'+c[0]+'.'+i+'.';
-            return '<article class="pj"><h5'+ed(p+'title')+'>'+esc(x.title)+'</h5>'+
-              '<div class="pj-meta"><span'+ed(p+'role')+'>'+esc(x.role)+'</span>'+(x.status?'<span class="pj-st"'+ed(p+'status')+'>'+esc(x.status)+'</span>':'')+'</div>'+
-              (x.logline?'<p class="pj-log"'+ed(p+'logline')+'>'+txt(x.logline)+'</p>':'')+
-              (x.note?'<p class="pj-note"'+ed(p+'note')+'>'+txt(x.note)+'</p>':'')+'</article>';
-          }).join(''):'<p class="stg-empty">아직 이 단계의 작품이 없어요.</p>')+'</div>';
-      }).join('');
       // 대표작 3편: 영상이 있으면 썸네일(누르면 그 자리에서 재생), 없으면 '영상 준비 중'
       var picks=(f.picks||[]).map(function(x,i){
         var p='film.picks.'+i+'.',id=ytOf(x.video);
@@ -151,9 +158,7 @@
           '<button class="sort" type="button" id="sortBtn">최신순 ↓</button></div></div>'+
           '<div class="clip" id="filmClip"><div id="films"></div></div>'+
           '<button class="more-all" type="button" id="moreAll" aria-expanded="false" aria-controls="filmClip"><span>전체 필모그래피 보기</span><i aria-hidden="true"></i></button>'+
-        '</div>'+
-        '<div class="sub-h stg-title rv"><h3'+ed('film.stagesTitle')+'>'+esc(or(f.stagesTitle,'지금 만들고 있는 영화'))+'</h3></div>'+
-        '<div class="stages">'+board+'</div>';
+        '</div>';
     },
     dasi:function(n){
       var d=S.dasi;
@@ -162,7 +167,7 @@
         '<div class="ds-l"><div class="pj-meta"><span'+ed('dasi.role')+'>'+esc(d.role)+'</span>'+(d.status?'<span class="pj-st"'+ed('dasi.status')+'>'+esc(d.status)+'</span>':'')+'</div>'+
           '<p class="ds-log"'+ed('dasi.logline')+'>'+txt(d.logline)+'</p></div>'+
         '<div class="ds-r">'+(d.note?'<p class="pj-note"'+ed('dasi.note')+'>'+txt(d.note)+'</p>':'')+
-          (ppl?'<div class="ds-pp"><span class="mono">CHARACTERS</span><ul>'+ppl+'</ul></div>':'')+'</div></div>';
+          (ppl?'<div class="ds-pp"><span class="mono">CHARACTERS</span><ul>'+ppl+'</ul></div>':'')+'</div></div>'+progress(d);
     },
     edit:function(n){
       var e=S.edit;
@@ -260,7 +265,7 @@
     $('footer').innerHTML='<div class="wrap"><div><span class="logo"><span class="badge-ms">MS</span><span>'+esc(S.site.name)+'</span></span>'+
       '<div class="info"><span'+ed('footer.info')+'>'+esc(f.info)+'</span><br><span'+ed('footer.info2')+'>'+esc(f.info2)+'</span></div></div>'+
       '<div class="links"><a href="'+esc(S.youtube.channel.url)+'" target="_blank" rel="noopener">YouTube</a><a href="'+esc(S.contact.instagramUrl)+'" target="_blank" rel="noopener">Instagram</a>'+
-      '<button class="fbtn" id="replay" type="button">▶ 인트로 다시 보기</button><button class="fbtn" id="toTop" type="button">↑ TOP</button></div>'+
+      '<button class="fbtn" id="adminLogin" type="button">관리자 로그인</button><button class="fbtn" id="replay" type="button">▶ 인트로 다시 보기</button><button class="fbtn" id="toTop" type="button">↑ TOP</button></div>'+
       '<div class="bottom"><span'+ed('footer.address')+'>'+esc(f.address)+'</span><span id="copyR"'+ed('footer.copyright')+'>'+esc(f.copyright)+'</span></div></div>';
   }
 
@@ -323,11 +328,13 @@
     if(av&&src){var im=new Image();im.alt='';im.onload=function(){av.appendChild(im)};im.src=src}
     document.querySelectorAll('.thumb[data-yt]').forEach(function(box){
       // 화면에 먼저 붙여 두고(그래야 '늦게 불러오기'가 작동함), 다 불러오면 서서히 나타남
-      var im=new Image();im.alt='';im.loading='lazy';im.decoding='async';
+      // v1111: 화면 밖이어도 바로 불러오기(늦게 불러오기 끔) + 더 가벼운 webp 먼저, 없으면 jpg
+      var id=encodeURIComponent(box.getAttribute('data-yt'));
+      var im=new Image();im.alt='';im.decoding='async';
       im.onload=function(){im.classList.add('ok')};
-      im.onerror=function(){im.remove()};
+      im.onerror=function(){if(!im.dataset.jpg){im.dataset.jpg=1;im.src='https://i.ytimg.com/vi/'+id+'/hqdefault.jpg'}else im.remove()};
       box.insertBefore(im,box.firstChild);
-      im.src='https://i.ytimg.com/vi/'+encodeURIComponent(box.getAttribute('data-yt'))+'/hqdefault.jpg';
+      im.src='https://i.ytimg.com/vi_webp/'+id+'/hqdefault.webp';
     });
   }
 
