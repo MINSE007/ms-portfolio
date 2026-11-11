@@ -102,7 +102,8 @@ window.SITE = {
   /* ⑥ 영화 — 작품 하나 = { 제목, 연도, 역할들, 기록들 }
         역할: 연출 연출부 스크립터 / 촬영 촬영부 / 조명 조명부 / 음향 음향부 /
               제작 PD 제작부 / 미술 미술부 / 편집 편집부 / 배우
-        기록(records): 수상·상영 등 이력 — 나중에 채워 넣으면 작품 옆에 나와요 */
+        기록(records): 수상·상영 등 이력 — 나중에 채워 넣으면 작품 옆에 나와요
+        메모(note): 오른쪽 여백에 나오는 짧은 표시 (예: "프리 프로덕션 진행 중") — 지우면 사라져요 */
   "film": {
     "en": "FILM",
     "badge": "SUB",
@@ -120,8 +121,12 @@ window.SITE = {
 
     "films": [
       { "title": "이륙!", "year": 2026, "roles": ["연출"], "records": [] },
+      { "title": "끝과 시작 사이, 서울", "year": 2026, "roles": ["음향"], "records": [] },
+      { "title": "혈모양처", "year": 2026, "roles": ["배우"], "records": [] },
+      { "title": "Monage!", "year": 2026, "roles": ["PD", "라인PD", "제작부"], "records": [] },
+      { "title": "초록의 허상", "year": 2026, "roles": ["음향"], "records": [], "note": "프리 프로덕션 진행 중" },
+      { "title": "불어터진 고백", "year": 2026, "roles": ["음향"], "records": [], "note": "프리 프로덕션 진행 중" },
       { "title": "黃昏(황혼)", "year": 2026, "roles": ["연출"], "records": [] },
-      { "title": "Monage!", "year": 2026, "roles": ["제작부"], "records": [] },
       { "title": "아빠의 방식", "year": 2026, "roles": ["제작"], "records": [] },
       { "title": "Emotion Store", "year": 2026, "roles": ["제작부"], "records": [] },
       { "title": "성장통", "year": 2026, "roles": ["촬영부"], "records": [] },
@@ -153,6 +158,7 @@ window.SITE = {
     "badge": "MY FILM",
     "title": "다시, 변신",
     "desc": "지금, 이런 영화를\n만들고 있습니다.",
+    "kind": "SHORT FILM",
     "role": "연출 · 각본",
     "status": "프리 프로덕션 · 시놉시스 작업 중",
     "logline": "꿈을 내려놓으려던 스물일곱 살 준화가\n아직 히어로를 꿈꾸는 고등학생 태상을 만나\n잊고 있던 선의를 다시 꺼내는 이야기.",

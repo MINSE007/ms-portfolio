@@ -95,6 +95,8 @@
     });
   }
   (MSP.onRender=MSP.onRender||[]).push(function(){if(on){makeEditable();drawPanel()}});
+  // 화면에서 바로 고친 것(진행 상황 등)을 임시 저장하고 다시 그림
+  MSP.adminCommit=function(){saveDraft();MSP.render()};
   document.addEventListener('input',function(e){
     if(!on)return;
     var n=e.target.closest&&e.target.closest('[data-edit]');
@@ -169,7 +171,7 @@
           var p='film.films.'+i+'.';
           return '<div class="ad-card">'+inp(p+'title',f.title,'제목')+
             '<div class="ad-2">'+inp(p+'year',f.year,'연도','number')+inp(p+'roles',(f.roles||[]).join(', '),'역할','',' data-list="1"')+'</div>'+
-            inp(p+'records',(f.records||[]).join(', '),'기록','',' data-list="1"')+
+            inp(p+'records',(f.records||[]).join(', '),'기록','',' data-list="1"')+inp(p+'note',f.note||'','오른쪽 메모 (예: 프리 프로덕션 진행 중 · 비우면 사라져요)')+
             '<button type="button" class="ad-del" data-a="delFilm" data-i="'+i+'">이 작품 삭제</button></div>';
         }).join('');
     }else if(tab==='set'){
