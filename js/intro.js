@@ -24,7 +24,6 @@
   var MSP=window.MSP||{},S=window.SITE,root=document.documentElement;
   var el=document.getElementById('intro');if(!el)return;
   var stage=document.getElementById('iCuts'),slog=document.getElementById('iSlogan');
-  var take=document.getElementById('iTake'),seg=document.getElementById('iSeg');
   var timers=[],running=false;
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
   function at(ms,fn){timers.push(setTimeout(fn,ms))}
@@ -47,9 +46,7 @@
       if(sty==='out'&&/[가-힣一-龥]/.test(String(t)))sty='fill';
       return '<div class="cut s-'+sty+' p-'+L[1]+' m-'+L[3]+'"><span class="tx" style="--fs:'+fontSize(String(t))+'">'+esc(t)+'</span></div>';
     }).join('');
-    seg.innerHTML=cuts.map(function(){return '<i></i>'}).join('');
     slog.innerHTML='<span class="sl-in"><span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span></span>';
-    document.getElementById('iName').textContent=S.site.name;
     return cuts.length;
   }
 
@@ -65,9 +62,9 @@
   }
 
   function show(i,n){
-    var cs=stage.children,ss=seg.children;
-    for(var k=0;k<cs.length;k++){cs[k].classList.toggle('on',k===i);if(ss[k])ss[k].classList.toggle('on',k<=i)}
-    if(i>=0){el.setAttribute('data-bg',LOOK[i%LOOK.length][2]);take.textContent='TAKE '+pad(i+1)+' / '+pad(n)}
+    var cs=stage.children;
+    for(var k=0;k<cs.length;k++)cs[k].classList.toggle('on',k===i);
+    if(i>=0)el.setAttribute('data-bg',LOOK[i%LOOK.length][2]);
   }
 
   function finish(){
@@ -111,12 +108,23 @@
     setTimeout(start,1200);
   }
 
-  el.addEventListener('click',finish);
-  document.getElementById('skip').addEventListener('click',function(e){e.stopPropagation();finish()});
-  document.addEventListener('keydown',function(e){if(running&&(e.key==='Escape'||e.key==='Enter'))finish()});
+  // 인트로 도중 화면을 내리거나(휠·드래그·키) 누르면 부드럽게 사라짐
+  function fadeAway(){
+    if(!running)return;running=false;
+    timers.forEach(clearTimeout);timers=[];
+    root.classList.add('entered','i-fade');
+    el.classList.add('fading');
+    setTimeout(function(){el.classList.add('gone');el.classList.remove('fading');root.classList.remove('intro-on','i-fade')},650);
+  }
+  el.addEventListener('click',fadeAway);
+  window.addEventListener('wheel',function(e){if(running&&e.deltaY>0)fadeAway()},{passive:true});
+  window.addEventListener('touchmove',function(){if(running)fadeAway()},{passive:true});
+  window.addEventListener('scroll',function(){if(running&&scrollY>8)fadeAway()},{passive:true});
+  document.addEventListener('keydown',function(e){if(running&&/^(Escape|Enter|ArrowDown|PageDown|End| )$/.test(e.key))fadeAway()});
 
   MSP.playIntro=function(){if(!root.classList.contains('admin'))play()};
   MSP.skipIntro=finish;
+  MSP.fadeIntro=fadeAway;
 
   if(root.classList.contains('intro-on')){
     if(document.visibilityState==='hidden'){

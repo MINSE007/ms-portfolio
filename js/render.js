@@ -44,11 +44,13 @@
   function counts(){
     var films=S.film.films||[],aw=0;
     films.forEach(function(f){(f.records||[]).forEach(function(x){if(WIN.test(x))aw++})});
-    return {films:films.length,awards:aw,stages:stageList().length,next:stageList().length};
+    var mine=(S.dasi&&S.dasi.title)?1:0; // '다시, 변신'도 제작 중인 영화로 셈
+    return {films:films.length,awards:aw,stages:stageList().length+mine,next:stageList().length+mine};
   }
 
   /* ── 섹션 이름표 ── */
-  var NAMES={youtube:'유튜브',outsource:'외주',film:'영화',edit:'편집',contact:'연락'};
+  var NAMES={youtube:'유튜브',outsource:'외주',film:'영화',dasi:'다시, 변신',edit:'편집',contact:'연락'};
+  function ytOf(v){var m=String(v||'').match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{6,})/);return m?m[1]:(/^[\w-]{11}$/.test(String(v||'').trim())?String(v).trim():'')}
   MSP.NAMES=NAMES;
   function visible(){return (S.layout||[]).filter(function(x){return x.show!==false&&SECTIONS[x.id]&&S[x.id]})}
 
@@ -130,7 +132,19 @@
               (x.note?'<p class="pj-note"'+ed(p+'note')+'>'+txt(x.note)+'</p>':'')+'</article>';
           }).join(''):'<p class="stg-empty">아직 이 단계의 작품이 없어요.</p>')+'</div>';
       }).join('');
+      // 대표작 3편: 영상이 있으면 썸네일(누르면 그 자리에서 재생), 없으면 '영상 준비 중'
+      var picks=(f.picks||[]).map(function(x,i){
+        var p='film.picks.'+i+'.',id=ytOf(x.video);
+        if(!x.title)return '<article class="pk pk-empty glass rv"><div class="pk-v"><span>준비 중입니다</span></div><div class="pk-b"><h4>준비 중입니다</h4><p class="pk-d">다음 대표작이 곧 올라옵니다.</p></div></article>';
+        var v=id?'<button type="button" class="pk-v thumb" data-yt="'+esc(id)+'" data-play="'+esc(id)+'" aria-label="'+esc(x.title)+' 영상 재생"><span class="play"></span></button>'
+                :'<div class="pk-v"><span>영상 준비 중입니다</span></div>';
+        return '<article class="pk glass rv">'+v+'<div class="pk-b">'+
+          '<div class="pk-m"><span class="num"'+ed(p+'year')+'>'+esc(x.year)+'</span><span'+ed(p+'role')+'>'+esc(x.role)+'</span></div>'+
+          '<h4'+ed(p+'title')+'>'+esc(x.title)+'</h4>'+(x.sub?'<span class="pk-s"'+ed(p+'sub')+'>'+esc(x.sub)+'</span>':'')+
+          '<p class="pk-d'+(x.desc?'':' wait')+'"'+ed(p+'desc')+'>'+(x.desc?txt(x.desc):'개요 준비 중입니다.')+'</p></div></article>';
+      }).join('');
       return head('film',n)+
+        (picks?'<div class="sub-h rv"><h3'+ed('film.picksTitle')+'>'+esc(or(f.picksTitle,'대표작'))+'</h3></div><div class="picks">'+picks+'</div>':'')+
         '<div class="box glass rv">'+
           '<div class="fbar"><div class="sub-h"><h3>필모그래피<b class="num" id="fShown">'+films.length+'</b></h3></div>'+
           '<div class="tools"><div class="tabs" role="group" aria-label="분야별 보기" id="ftabs">'+tabs+'</div>'+
@@ -140,6 +154,15 @@
         '</div>'+
         '<div class="sub-h stg-title rv"><h3'+ed('film.stagesTitle')+'>'+esc(or(f.stagesTitle,'지금 만들고 있는 영화'))+'</h3></div>'+
         '<div class="stages">'+board+'</div>';
+    },
+    dasi:function(n){
+      var d=S.dasi;
+      var ppl=(d.people||[]).map(function(x,i){return '<li><b'+ed('dasi.people.'+i+'.name')+'>'+esc(x.name)+'</b><span'+ed('dasi.people.'+i+'.desc')+'>'+esc(x.desc)+'</span></li>'}).join('');
+      return head('dasi',n)+'<div class="ds glass rv">'+
+        '<div class="ds-l"><div class="pj-meta"><span'+ed('dasi.role')+'>'+esc(d.role)+'</span>'+(d.status?'<span class="pj-st"'+ed('dasi.status')+'>'+esc(d.status)+'</span>':'')+'</div>'+
+          '<p class="ds-log"'+ed('dasi.logline')+'>'+txt(d.logline)+'</p></div>'+
+        '<div class="ds-r">'+(d.note?'<p class="pj-note"'+ed('dasi.note')+'>'+txt(d.note)+'</p>':'')+
+          (ppl?'<div class="ds-pp"><span class="mono">CHARACTERS</span><ul>'+ppl+'</ul></div>':'')+'</div></div>';
     },
     edit:function(n){
       var e=S.edit;
@@ -252,9 +275,25 @@
     loadImages();
     reveal();
     navSpy();
+    fitChan();
     (MSP.onRender||[]).forEach(function(fn){fn()});
   }
   MSP.render=render;
+
+  /* ── 유튜브 채널 카드 높이 = 영상 썸네일 4개 영역 (아래 제목 글씨까지 내려가지 않게) ── */
+  function fitChan(){
+    var ch=document.querySelector('.chan'),th=document.querySelectorAll('.vids .thumb');
+    if(!ch||!th.length)return;
+    ch.style.height='';
+    if(getComputedStyle(ch.parentNode).gridTemplateColumns.split(' ').length<2)return; // 한 줄로 쌓이는 좁은 화면은 그대로
+    // 위치는 offsetTop으로 잼 (나타나는 효과로 살짝 움직이는 중이어도 정확하게)
+    var abs=function(el){var y=0;while(el){y+=el.offsetTop;el=el.offsetParent}return y};
+    var last=th[th.length-1];
+    ch.style.height=Math.max(0,Math.round(abs(last)+last.offsetHeight-abs(ch)))+'px';
+  }
+  MSP.fitChan=fitChan;
+  window.addEventListener('resize',function(){clearTimeout(fitChan.t);fitChan.t=setTimeout(fitChan,120)});
+  try{document.fonts.ready.then(fitChan)}catch(e){}
 
   /* ── 위쪽 메뉴: 지금 보고 있는 섹션에 표시가 미끄러져 따라감 ── */
   var spy=null;
@@ -355,6 +394,13 @@
       if(!fstate.all)setTimeout(applyClip,460);return;
     }
     if((t=e.target.closest('#moreAll'))){toggleAll();return}
+    // 대표작: 누르면 그 자리에서 유튜브 영상 재생
+    if((t=e.target.closest('[data-play]'))&&!root.classList.contains('admin')){
+      var fr=document.createElement('iframe');
+      fr.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(t.getAttribute('data-play'))+'?autoplay=1&rel=0';
+      fr.title=t.getAttribute('aria-label')||'영상';fr.allow='autoplay; encrypted-media; picture-in-picture; fullscreen';fr.allowFullscreen=true;
+      var box=document.createElement('div');box.className='pk-v pk-on';box.appendChild(fr);t.replaceWith(box);return;
+    }
     if((t=e.target.closest('.logo'))&&!root.classList.contains('admin')){e.preventDefault();scrollToY(0);return}
     if((t=e.target.closest('.cp'))){
       if(root.classList.contains('admin'))return;

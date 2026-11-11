@@ -45,6 +45,7 @@ window.SITE = {
     { "id": "youtube", "show": true },
     { "id": "outsource", "show": true },
     { "id": "film", "show": true },
+    { "id": "dasi", "show": true },
     { "id": "edit", "show": true },
     { "id": "contact", "show": true }
   ],
@@ -107,6 +108,16 @@ window.SITE = {
     "badge": "SUB",
     "title": "영화",
     "desc": "연출, 촬영, 음향, 배우까지.\n현장의 여러 자리에서 영화를 만들어 왔습니다.",
+
+    /* 대표작 3편 — video에 유튜브 주소를 넣으면 영상이 나와요 (비어 있으면 '영상 준비 중')
+       title이 비어 있으면 '준비 중입니다' 칸으로 나와요 */
+    "picksTitle": "대표작",
+    "picks": [
+      { "title": "영상고 옥상엔 요술램프가 있다!", "sub": "26 SVMHS 뮤지컬", "year": "2026", "role": "음향", "desc": "", "video": "" },
+      { "title": "Mon ange!", "sub": "나의 작은 천사", "year": "2026", "role": "제작부", "desc": "", "video": "" },
+      { "title": "", "sub": "", "year": "", "role": "", "desc": "", "video": "" }
+    ],
+
     "films": [
       { "title": "이륙!", "year": 2026, "roles": ["연출"], "records": [] },
       { "title": "黃昏(황혼)", "year": 2026, "roles": ["연출"], "records": [] },
@@ -138,18 +149,26 @@ window.SITE = {
     /* 지금 만들고 있는 영화 — 단계별(pre 프리 / prod 프로덕션 / post 포스트) */
     "stagesTitle": "지금 만들고 있는 영화",
     "stages": {
-      "pre": [
-        {
-          "title": "다시, 변신",
-          "role": "연출 · 각본",
-          "status": "시놉시스 작업 중",
-          "logline": "꿈을 내려놓으려던 스물일곱 살 준화가\n아직 히어로를 꿈꾸는 고등학생 태상을 만나\n잊고 있던 선의를 다시 꺼내는 이야기.",
-          "note": "세상을 바꾸는 건 거창한 신념이 아니라\n누군가를 향한 사소한 손짓일지도 모릅니다.\n지금, 이런 영화를 만들고 있습니다."
-        }
-      ],
+      "pre": [],
       "prod": [],
       "post": []
     }
+  },
+
+  /* ⑥-2 다시, 변신 — 지금 직접 만들고 있는 영화 */
+  "dasi": {
+    "en": "NOW MAKING",
+    "badge": "MY FILM",
+    "title": "다시, 변신",
+    "desc": "지금, 이런 영화를\n만들고 있습니다.",
+    "role": "연출 · 각본",
+    "status": "프리 프로덕션 · 시놉시스 작업 중",
+    "logline": "꿈을 내려놓으려던 스물일곱 살 준화가\n아직 히어로를 꿈꾸는 고등학생 태상을 만나\n잊고 있던 선의를 다시 꺼내는 이야기.",
+    "note": "세상을 바꾸는 건 거창한 신념이 아니라\n누군가를 향한 사소한 손짓일지도 모릅니다.",
+    "people": [
+      { "name": "준화", "desc": "꿈을 내려놓으려던 스물일곱 살" },
+      { "name": "태상", "desc": "아직 히어로를 꿈꾸는 고등학생" }
+    ]
   },
 
   /* ⑦ 편집 */

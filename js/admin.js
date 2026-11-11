@@ -138,7 +138,14 @@
         }).join('');
     }else if(tab==='film'){
       var F=S.film,st=F.stages||{};
-      html+='<div class="ad-sub"><b>지금 만들고 있는 영화</b></div>'+
+      html+='<div class="ad-sub"><b>대표작 3편</b></div><p class="ad-tip">영상 주소를 넣으면 영상이 나와요. 제목을 비우면 \'준비 중입니다\' 칸이 돼요.</p>'+
+        (F.picks||[]).map(function(x,i){
+          var p='film.picks.'+i+'.';
+          return '<div class="ad-card">'+'<div class="ad-2">'+inp(p+'title',x.title,'제목')+inp(p+'sub',x.sub,'부제')+'</div>'+
+            '<div class="ad-2">'+inp(p+'year',x.year,'연도')+inp(p+'role',x.role,'맡은 일')+'</div>'+
+            area(p+'desc',x.desc,'개요 (시놉시스)')+inp(p+'video',x.video,'영상 주소 (유튜브)','url')+'</div>';
+        }).join('')+
+        '<div class="ad-sub"><b>지금 만들고 있는 영화</b></div>'+
         STG.map(function(c){
           var list=st[c[0]]||[];
           return '<div class="ad-sub sm"><span>'+c[1]+' · '+list.length+'편</span><button type="button" data-a="addStage" data-s="'+c[0]+'">+ 추가</button></div>'+
@@ -289,6 +296,7 @@
         // 예전 임시본에 없는 새 항목은 원본에서 채워 넣기
         var o=JSON.parse(ORIG);Object.keys(o).forEach(function(k){if(!(k in d))d[k]=o[k]});
         if(!d.film.stages)d.film.stages=o.film.stages;
+        if(!d.film.picks)d.film.picks=o.film.picks;
         (o.layout||[]).forEach(function(x,i){if(!d.layout.some(function(y){return y.id===x.id}))d.layout.splice(Math.min(i,d.layout.length),0,x)});
         replaceSite(d);
       }
