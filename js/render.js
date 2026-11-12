@@ -81,26 +81,29 @@
       '<h2'+ed(key+'.title')+'>'+esc(d.title)+'</h2></div>'+(d.desc!=null?'<p'+ed(key+'.desc')+'>'+txt(d.desc)+'</p>':'')+'</div>';
   }
 
-  /* ── 다시, 변신 진행 상황: 프리 → 프로덕션 → 포스트 (가로 진행 선) ──
-     관리자 모드: 단계 이름을 누르면 '지금 단계'로, 상태 글자를 누르면 완료→진행 중→예정 순으로 바뀜 */
+  /* ── 다시, 변신 진행 상황: ③ 프리 ④ 프로덕션 ⑤ 포스트 — 줄 하나씩, 마우스를 올리면(폰은 누르면) 자세히 펼쳐짐
+     관리자 모드: 줄이 늘 펼쳐져 있고, 단계 이름을 누르면 '지금 단계', 상태 글자를 누르면 진행 중→완료→예정 */
   var STEPS=[['pre','PRE-PRODUCTION','프리 프로덕션'],['prod','PRODUCTION','프로덕션'],['post','POST-PRODUCTION','포스트 프로덕션']];
   var STATE={done:'완료',now:'진행 중',todo:'예정'};
-  function progress(d){
+  function stageRows(d){
     var steps=d.steps||{},cur=STEPS.map(function(x){return x[0]}).indexOf(d.stage||'pre');if(cur<0)cur=0;
-    var all=0,done=0;STEPS.forEach(function(x){(steps[x[0]]||[]).forEach(function(it){all++;if(it.state==='done')done++;else if(it.state==='now')done+=.5})});
-    var pct=all?Math.round(done/all*100):0;
-    var cols=STEPS.map(function(x,i){
-      var cls=i<cur?'past':i===cur?'cur':'next';
-      var list=(steps[x[0]]||[]).map(function(it,j){var p='dasi.steps.'+x[0]+'.'+j+'.';var st=STATE[it.state]?it.state:'todo';
+    return STEPS.map(function(x,i){
+      var list=steps[x[0]]||[],dn=list.filter(function(it){return it.state==='done'}).length,nw=list.filter(function(it){return it.state==='now'}).length;
+      var pct=list.length?Math.round((dn+nw*.5)/list.length*100):0;
+      var cls=i<cur?'past':i===cur?'cur':'next',lab=i<cur?'완료':i===cur?'진행 중':'예정';
+      var items=list.map(function(it,j){var p='dasi.steps.'+x[0]+'.'+j+'.';var st=STATE[it.state]?it.state:'todo';
         return '<li class="pg-it is-'+st+'"><i aria-hidden="true"></i><span'+ed(p+'name')+'>'+esc(it.name)+'</span>'+
           '<button type="button" class="pg-st" data-pg="state" data-s="'+x[0]+'" data-i="'+j+'" tabindex="-1">'+STATE[st]+'</button>'+
           '<button type="button" class="pg-del adm-only" data-pg="del" data-s="'+x[0]+'" data-i="'+j+'" aria-label="삭제">×</button></li>'}).join('');
-      return '<div class="pg-col '+cls+'"><button type="button" class="pg-node" data-pg="stage" data-s="'+x[0]+'" tabindex="-1"><span class="pg-dot" aria-hidden="true"></span>'+
-        '<span class="mono">'+pad(i+1)+' · '+x[1]+'</span><b>'+x[2]+'</b>'+(i===cur?'<em class="pg-now">NOW</em>':'')+'</button>'+
-        '<ul>'+list+'</ul><button type="button" class="pg-add adm-only" data-pg="add" data-s="'+x[0]+'">+ 할 일 추가</button></div>';
+      return '<div class="dz-row dz-stage '+cls+' rv" tabindex="0"><div class="dz-sh">'+
+          '<span class="dz-no num">'+pad(i+3)+'</span>'+
+          '<button type="button" class="pg-node" data-pg="stage" data-s="'+x[0]+'" tabindex="-1"><span class="mono">'+x[1]+'</span><b>'+x[2]+'</b></button>'+
+          '<span class="dz-bar" aria-hidden="true"><i style="width:'+pct+'%"></i></span>'+
+          '<span class="dz-cnt num">'+dn+' / '+list.length+'</span>'+
+          '<span class="dz-badge">'+lab+'</span><span class="dz-chev" aria-hidden="true"></span></div>'+
+        '<div class="dz-more"><div class="dz-in"><ul>'+(items||'<li class="pg-it is-todo"><i aria-hidden="true"></i><span>아직 정한 할 일이 없어요</span></li>')+'</ul>'+
+          '<button type="button" class="pg-add adm-only" data-pg="add" data-s="'+x[0]+'">+ 할 일 추가</button></div></div></div>';
     }).join('');
-    return '<div class="pg rv"><div class="pg-top"><span class="mono">PROGRESS</span><span class="pg-pct num">'+pct+'<small>%</small></span></div>'+
-      '<div class="pg-cols" style="--cur:'+cur+';--fill:calc('+(cur/3*100).toFixed(2)+'% + 14px)">'+cols+'</div></div>';
   }
 
   /* ── 섹션들 ── */
@@ -164,17 +167,21 @@
         '</div>';
     },
     dasi:function(n){
-      var d=S.dasi,t=String(d.title||'').split(/,\s*/);
-      var ppl=(d.people||[]).map(function(x,i){return '<li class="ds-pc"><span class="ds-av" aria-hidden="true">'+esc(String(x.name||'').slice(0,1))+'</span><div><b'+ed('dasi.people.'+i+'.name')+'>'+esc(x.name)+'</b><span'+ed('dasi.people.'+i+'.desc')+'>'+esc(x.desc)+'</span></div></li>'}).join('');
-      return head('dasi',n)+'<div class="ds2">'+
-        // 포스터: 단색 바탕 + 큰 제목
-        '<div class="ds-poster rv"><span class="mono"'+ed('dasi.kind')+'>'+esc(or(d.kind,'SHORT FILM'))+'</span>'+
-          '<h3 class="ds-tt">'+(t.length>1?esc(t[0])+',<br>'+esc(t.slice(1).join(', ')):esc(d.title))+'</h3>'+
-          '<div class="ds-pf"><span'+ed('dasi.role')+'>'+esc(d.role)+'</span><span class="ds-live"'+ed('dasi.status')+'>'+esc(d.status)+'</span></div></div>'+
-        '<div class="ds-info rv"><span class="mono">LOGLINE</span>'+
-          '<p class="ds-log"'+ed('dasi.logline')+'>'+txt(d.logline)+'</p>'+
-          (d.note!=null?'<blockquote class="ds-q"'+ed('dasi.note')+'>'+txt(d.note)+'</blockquote>':'')+
-          (ppl?'<div class="ds-ppl"><span class="mono">CHARACTERS</span><ul>'+ppl+'</ul></div>':'')+'</div></div>'+progress(d);
+      var d=S.dasi,id=ytOf(d.video);
+      var ppl=(d.people||[]).map(function(x,i){return '<li><b'+ed('dasi.people.'+i+'.name')+'>'+esc(x.name)+'</b><span'+ed('dasi.people.'+i+'.desc')+'>'+esc(x.desc)+'</span></li>'}).join('');
+      // ① 영상 칸
+      var v=id?'<button type="button" class="dz-v thumb" data-yt="'+esc(id)+'" data-play="'+esc(id)+'" aria-label="다시, 변신 영상 재생"><span class="play"></span></button>'
+              :'<div class="dz-v dz-wait"><span class="dz-wn mono">01 · FILM</span><b>영상 준비 중입니다</b><small>촬영을 마치면 이곳에서 볼 수 있어요.</small></div>';
+      return head('dasi',n)+'<div class="dz">'+
+        '<div class="dz-top"><div class="dz-box dz-vbox rv">'+v+'</div>'+
+        // ② 개요 · 감독 · 로그라인
+        '<div class="dz-box dz-info rv"><span class="mono">02 · OVERVIEW</span>'+
+          '<dl class="dz-dl"><dt>형식</dt><dd'+ed('dasi.kind')+'>'+esc(d.kind)+'</dd><dt>감독</dt><dd'+ed('dasi.director')+'>'+esc(d.director)+'</dd>'+
+          '<dt>맡은 일</dt><dd'+ed('dasi.role')+'>'+esc(d.role)+'</dd><dt>지금</dt><dd class="dz-live"'+ed('dasi.status')+'>'+esc(d.status)+'</dd></dl>'+
+          '<p class="dz-log"'+ed('dasi.logline')+'>'+txt(d.logline)+'</p>'+
+          (d.note?'<p class="dz-q"'+ed('dasi.note')+'>'+txt(d.note)+'</p>':'')+
+          (ppl?'<ul class="dz-ppl">'+ppl+'</ul>':'')+'</div></div>'+
+        stageRows(d)+'</div>';
     },
     edit:function(n){
       var e=S.edit;
@@ -421,6 +428,12 @@
       else if(act==='add')L.push({name:'새 할 일',state:'todo'});
       else if(act==='del')L.splice(j,1);
       MSP.adminCommit();return;
+    }
+    // 다시, 변신 단계 줄: 폰(마우스 없음)에서는 누르면 펼치고 다시 누르면 접기
+    if((t=e.target.closest('.dz-stage'))&&!root.classList.contains('admin')){
+      var hov=false;try{hov=matchMedia('(hover:hover)').matches}catch(err){}
+      if(!hov){t.classList.toggle('open');if(!t.classList.contains('open'))t.blur()}
+      return;
     }
     // 대표작: 누르면 그 자리에서 유튜브 영상 재생
     if((t=e.target.closest('[data-play]'))&&!root.classList.contains('admin')){

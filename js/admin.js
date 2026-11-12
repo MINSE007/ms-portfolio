@@ -61,7 +61,8 @@
   var STN=[['done','완료'],['now','진행 중'],['todo','예정']];
   function dasiEditor(){
     var D=S.dasi;if(!D)return '';D.steps=D.steps||{pre:[],prod:[],post:[]};
-    return '<label class="ad-f"><span>지금 단계</span><select data-f="dasi.stage" id="ad-dstage">'+STG.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===(D.stage||'pre')?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+    return inp('dasi.video',D.video||'','① 영상 주소 (유튜브 · 비우면 \'영상 준비 중\')','url')+'<div class="ad-2">'+inp('dasi.director',D.director||'','감독')+inp('dasi.kind',D.kind||'','형식')+'</div>'+
+      '<label class="ad-f"><span>지금 단계</span><select data-f="dasi.stage" id="ad-dstage">'+STG.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===(D.stage||'pre')?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
       STG.map(function(c){
         var list=D.steps[c[0]]||[];
         return '<div class="ad-sub sm"><span>'+c[1]+' · '+list.length+'개</span><button type="button" data-a="addStep" data-s="'+c[0]+'">+ 할 일</button></div>'+
