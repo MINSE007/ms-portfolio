@@ -96,7 +96,7 @@
           '<button type="button" class="pg-st" data-pg="state" data-s="'+x[0]+'" data-i="'+j+'" tabindex="-1">'+STATE[st]+'</button>'+
           '<button type="button" class="pg-del adm-only" data-pg="del" data-s="'+x[0]+'" data-i="'+j+'" aria-label="삭제">×</button></li>'}).join('');
       return '<div class="dz-row dz-stage '+cls+' rv" tabindex="0"><div class="dz-sh">'+
-          '<span class="dz-no num">'+pad(i+3)+'</span>'+
+          '<span class="dz-no num">'+pad(i+1)+'</span>'+
           '<button type="button" class="pg-node" data-pg="stage" data-s="'+x[0]+'" tabindex="-1"><span class="mono">'+x[1]+'</span><b>'+x[2]+'</b></button>'+
           '<span class="dz-bar" aria-hidden="true"><i style="width:'+pct+'%"></i></span>'+
           '<span class="dz-cnt num">'+dn+' / '+list.length+'</span>'+

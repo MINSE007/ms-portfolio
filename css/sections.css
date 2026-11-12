@@ -142,10 +142,10 @@ button.pk-v:hover .play{transform:scale(1.12)}
 
 /* 다시, 변신 — ① 영상 ② 개요 / ③ 프리 ④ 프로덕션 ⑤ 포스트 */
 .dz{display:flex;flex-direction:column;gap:16px}
-.dz-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.dz-top{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
 .dz-box{border-radius:24px;background:var(--glass);border:1px solid var(--glass-b);min-width:0}
-.dz-vbox{padding:12px;display:flex}
-.dz-v{position:relative;flex:1;min-height:260px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:var(--chip);border:1px solid var(--line);padding:0;font:inherit;color:inherit}
+.dz-vbox{padding:12px;display:flex;align-self:center}
+.dz-v{position:relative;flex:1;aspect-ratio:16/9;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:var(--chip);border:1px solid var(--line);padding:0;font:inherit;color:inherit}
 button.dz-v{cursor:pointer}
 .dz-v iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .dz-wait{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;border-style:dashed}
@@ -274,7 +274,6 @@ a.door:hover{transform:translateY(-4px)}
   .ed-yr{align-items:flex-start;text-align:left}
   .picks{grid-template-columns:1fr}
   .pg{padding:24px 20px}
-  .dz-v{min-height:0;aspect-ratio:16/9}
   .dz-info{padding:22px 20px}
   .dz-sh{grid-template-columns:30px minmax(0,1fr) auto 18px;gap:10px 12px;padding:18px 18px}
   .dz-bar{grid-column:2;grid-row:2}
