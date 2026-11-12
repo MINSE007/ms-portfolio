@@ -131,7 +131,7 @@ window.SITE = {
   "outsource": {
     "en": "OUTSOURCING",
     "badge": "WORK",
-    "title": "외주",
+    "title": "외부 작업",
     "desc": "의뢰받아 함께 만든 작업들입니다.\n맡긴 분이 그린 장면이 그대로 나오도록 만듭니다.",
     "works": [
       {
