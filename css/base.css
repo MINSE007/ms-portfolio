@@ -88,6 +88,12 @@ header,main,footer{position:relative;z-index:1}
 
 /* 유리 카드 */
 .glass{background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--g-shadow);-webkit-backdrop-filter:blur(24px) saturate(1.5);backdrop-filter:blur(24px) saturate(1.5)}
+/* 윈도우 최적화: 카드의 흐림 계산을 끄고 비슷한 반투명 색으로 (위쪽 메뉴만 흐림 유지) — 스크롤 끊김 줄이기 */
+html.win .glass{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(30,27,40,.82)}
+html.win[data-theme="light"] .glass{background:rgba(255,255,255,.86)}
+html.win header .glass{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+html.win .btn.ghost{-webkit-backdrop-filter:none;backdrop-filter:none}
+html.win footer{-webkit-backdrop-filter:none;backdrop-filter:none}
 
 /* 위쪽 메뉴: 떠 있는 알약 3개 (로고 · 메뉴 · 버튼) */
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;pointer-events:none}

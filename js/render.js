@@ -184,46 +184,50 @@
         stageRows(d)+'</div>';
     },
     edit:function(n){
-      // 프리미어 시퀀스 모양: ① 위 = 모니터(지금 재생선이 지나는 클립) ② 아래 = 타임라인(눈금 · 줄 · 클립 · 빨간 재생선)
-      var e=S.edit,tl=e.timeline||{},Y=tl.years||[],T=tl.tracks||[],C=tl.clips||[],ny=Math.max(1,Y.length);
+      // 맥에서 연 프리미어 작업 화면처럼:  위 = [소개(Source) | 큰 모니터(Program)]  아래 = [숫자·프로그램(Project) | 타임라인]
+      var e=S.edit,tl=e.timeline||{},Y=tl.years||[],T=tl.tracks||[],C=tl.clips||[],ny=Math.max(1,Y.length),cn=counts();
       var ruler=Y.map(function(y,i){return '<span'+ed('edit.timeline.years.'+i)+'>'+esc(y)+'</span>'}).join('');
       var heads=T.map(function(t){return '<div class="sq-th '+(/^A/i.test(t)?'is-a':'is-v')+'"><b>'+esc(t)+'</b><i class="sq-eye" aria-hidden="true"></i><i class="sq-lock" aria-hidden="true"></i></div>'}).join('');
       var lanes=T.map(function(t){
-        var clips=C.map(function(c,i){
+        return '<div class="sq-lane">'+C.map(function(c,i){
           if(c.track!==t)return '';
           var f=Math.max(0,Math.min(ny-1,+c.from||0)),to=Math.max(f,Math.min(ny-1,c.to==null?f:+c.to));
-          return '<button type="button" class="sq-clip '+(/^A/i.test(t)?'is-a':'is-v')+'" data-ci="'+i+'" style="left:calc('+(f/ny*100)+'% + 2px);width:calc('+((to-f+1)/ny*100)+'% - 4px)">'+
-            '<b'+ed('edit.timeline.clips.'+i+'.title')+'>'+esc(c.title)+'</b></button>';
-        }).join('');
-        return '<div class="sq-lane">'+clips+'</div>';
+          return '<button type="button" class="sq-clip '+(/^A/i.test(t)?'is-a':'is-v')+'" data-ci="'+i+'" style="left:calc('+(f/ny*100)+'% + 2px);width:calc('+((to-f+1)/ny*100)+'% - 4px)"><b'+ed('edit.timeline.clips.'+i+'.title')+'>'+esc(c.title)+'</b></button>';
+        }).join('')+'</div>';
       }).join('');
-      var empty=!C.length?'<p class="sq-empty">클립 준비 중 — 곧 채워집니다</p>':'';
-      var cn=counts();
       var stats=(e.stats||[]).map(function(f,i){
         var v=String(f.value),auto=v.indexOf('auto:')===0,p='edit.stats.'+i+'.';
         return '<li><b class="num">'+(auto?esc(cn[v.slice(5)]):'<span'+ed(p+'value')+'>'+esc(v)+'</span>')+'<small'+ed(p+'unit')+'>'+esc(f.unit)+'</small></b><span'+ed(p+'label')+'>'+esc(f.label)+'</span></li>';
       }).join('');
       var tools=(e.tools||[]).map(function(t,i){var p='edit.tools.'+i+'.';
-        return '<li><span class="sq-ico"'+ed(p+'short')+'>'+esc(t.short)+'</span><div><b'+ed(p+'name')+'>'+esc(t.name)+'</b><small'+ed(p+'role')+'>'+esc(t.role)+'</small></div></li>'}).join('');
-      var bar=function(t,r){return '<div class="sq-pbar"><span>'+t+'</span>'+(r||'')+'</div>'};
+        return '<li><span class="sq-ico"'+ed(p+'short')+'>'+esc(t.short)+'</span><b'+ed(p+'name')+'>'+esc(t.name)+'</b><small'+ed(p+'role')+'>'+esc(t.role)+'</small></li>'}).join('');
+      var tab=function(list,on){return '<div class="sq-tabs">'+list.map(function(x,i){return '<span'+(i===(on||0)?' class="on"':'')+'>'+x+'</span>'}).join('')+'</div>'};
+      var nm=esc(tl.name||'Sequence 01');
       return head('edit',n)+'<div class="sq rv" id="seq" style="--ny:'+ny+'">'+
-        // ① 위: 소개(Source) + 모니터(Program)
-        '<div class="sq-row sq-r1">'+
-          '<div class="sq-pn sq-about">'+bar('Source: 소개')+'<div class="sq-pad">'+
+        // 맥 창 테두리
+        '<div class="sq-win"><span class="sq-dots"><i></i><i></i><i></i></span><span class="sq-ttl">'+nm+'.prproj</span><span></span></div>'+
+        '<div class="sq-ws"><span>Learning</span><span>Assembly</span><span class="on">Editing</span><span>Color</span><span>Effects</span><span>Audio</span><span>Graphics</span></div>'+
+        '<div class="sq-grid2">'+
+          // ① 소개
+          '<section class="sq-pn sq-src">'+tab(['Source: 소개','Effect Controls','Audio Mixer'])+'<div class="sq-pad">'+
             '<span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'VIDEO EDITOR')+'</span>'+
             '<h3 class="sq-name"'+ed('edit.name')+'>'+esc(e.name||'')+'</h3>'+
-            '<p class="sq-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div></div>'+
-          '<div class="sq-pn sq-mon">'+bar('Program: '+esc(tl.name||'Sequence 01'),'<span class="sq-tc num" id="seqTC">00:00:00:00</span>')+
-            '<div class="sq-screen" id="seqScreen"><span class="mono" id="seqYear">'+esc(Y[0]||'')+'</span><b id="seqTitle"></b><p id="seqDesc"></p></div></div></div>'+
-        // ② 가운데: 숫자(Info) + 쓰는 프로그램(Project)
-        '<div class="sq-row sq-r2">'+
-          '<div class="sq-pn">'+bar('Info')+'<ul class="sq-stats">'+stats+'</ul></div>'+
-          '<div class="sq-pn">'+bar('Project: 쓰는 프로그램')+'<ul class="sq-tools">'+tools+'</ul></div></div>'+
-        // ③ 아래: 타임라인 = 성장 기록
-        '<div class="sq-tl"><div class="sq-bar"><span class="sq-tab">'+esc(tl.name||'Sequence 01')+'</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
-          '<div class="sq-scroll"><div class="sq-grid"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
-          '<div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+empty+'</div>'+
-          '<div class="sq-ph" id="seqPH" aria-hidden="true"><i></i></div></div></div></div></div></div>';
+            '<p class="sq-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div></section>'+
+          // ② 큰 모니터
+          '<section class="sq-pn sq-mon">'+tab(['Program: '+nm])+
+            '<div class="sq-screen" id="seqScreen"><span class="mono" id="seqYear">'+esc(Y[0]||'')+'</span><b id="seqTitle"></b><p id="seqDesc"></p></div>'+
+            '<div class="sq-trans"><span class="sq-tc num" id="seqTC">00:00:00:00</span><span class="sq-ctl" aria-hidden="true"><i class="pv"></i><i class="bk"></i><i class="pl"></i><i class="fw"></i><i class="nx"></i></span><span class="sq-dur num">08:00:00:00</span></div></section>'+
+          // ③ 숫자 + 쓰는 프로그램 (한쪽에 작게)
+          '<section class="sq-pn sq-proj">'+tab(['Project: 쓰는 프로그램','Info'])+
+            '<ul class="sq-tools">'+tools+'</ul><ul class="sq-stats">'+stats+'</ul></section>'+
+          // ④ 타임라인 — 안에서 끌거나 휠을 돌리면 좌우로 넘어감 (화면은 그대로)
+          '<section class="sq-pn sq-tl">'+tab([nm])+
+            '<div class="sq-tlbar"><span class="sq-tc num" id="seqTC2">00:00:00:00</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span></div>'+
+            '<div class="sq-tlbox"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
+              '<div class="sq-scroll" id="seqScroll"><div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+'</div></div></div>'+
+              '<div class="sq-ph" aria-hidden="true"><i></i></div>'+
+              (C.length?'':'<p class="sq-empty">클립 준비 중 — 곧 채워집니다</p>')+'</div></section>'+
+        '</div></div>';
     },
     contact:function(n){
       var c=S.contact;
@@ -339,43 +343,55 @@
   }
   MSP.render=render;
 
-  /* ── 편집 시퀀스: 스크롤하면 빨간 재생선이 2020 이전 → 2026 으로 지나가고, 닿는 클립이 위 모니터에 나옴 ──
-     눈금(맨 위 연도 줄)을 누르거나 끌면 그 자리로 옮겨짐 */
-  var seqP=0,seqHold=0;
-  function seqSet(p){
-    var body=$('seqBody');if(!body)return;
-    seqP=Math.max(0,Math.min(1,p));
-    var tl=(S.edit&&S.edit.timeline)||{},Y=tl.years||[],C=tl.clips||[],ny=Math.max(1,Y.length);
-    $('seqPH').style.left=(seqP*100)+'%';
-    var col=Math.min(ny-1,Math.floor(seqP*ny)),fr=Math.round(seqP*8*3600*24); // 0 ~ 8시간 타임코드 (8년)
+  /* ── 편집 시퀀스: 재생선은 타임라인 가운데 고정, 타임라인을 끌거나(마우스·손가락) 휠을 돌리면 좌우로 넘어감
+     타임라인 안에서는 화면이 안 내려가고, 밖에서 내리면 시퀀스는 멈춘 채 화면만 내려감 ── */
+  var YW=230; // 한 해 칸 너비(px)
+  function seqLayout(){
+    var sc=$('seqScroll'),body=$('seqBody');if(!sc||!body)return;
+    var ny=((S.edit.timeline||{}).years||[]).length||1,vw=sc.clientWidth;
+    body.style.width=(ny*YW)+'px';body.style.marginLeft=body.style.marginRight=Math.round(vw/2)+'px';
+    seqRead();
+  }
+  function seqRead(){
+    var sc=$('seqScroll');if(!sc)return;
+    var tl=S.edit.timeline||{},Y=tl.years||[],C=tl.clips||[],ny=Math.max(1,Y.length);
+    var p=Math.max(0,Math.min(1,sc.scrollLeft/(ny*YW)));
+    var col=Math.min(ny-1,Math.floor(p*ny)),fr=Math.round(p*8*3600*24);
     var tc=pad(Math.floor(fr/86400))+':'+pad(Math.floor(fr/1440)%60)+':'+pad(Math.floor(fr/24)%60)+':'+pad(fr%24);
-    $('seqTC').textContent=tc;$('seqTC2').textContent=tc;
-    $('seqYear').textContent=Y[col]||'';
-    var hit=null;C.forEach(function(c,i){var f=+c.from||0,t=c.to==null?f:+c.to;if(col>=f&&col<=t&&(!hit||/^V/i.test(c.track)))hit={c:c,i:i}});
+    $('seqTC').textContent=tc;$('seqTC2').textContent=tc;$('seqYear').textContent=Y[col]||'';
+    var x=p*ny,hit=null;C.forEach(function(c,i){var f=+c.from||0,t=(c.to==null?f:+c.to)+1;if(x>=f&&x<t&&(!hit||/^V/i.test(c.track)))hit={c:c,i:i}});
     document.querySelectorAll('#seq .sq-clip').forEach(function(b){b.classList.toggle('on',!!hit&&+b.getAttribute('data-ci')===hit.i)});
     $('seqTitle').textContent=hit?hit.c.title:'';
-    $('seqDesc').textContent=hit?(hit.c.desc||''):(C.length?'':'클립 준비 중');
+    $('seqDesc').textContent=hit?(hit.c.desc||''):'클립 준비 중';
     $('seqScreen').classList.toggle('has',!!hit);
   }
-  function seqScroll(){
-    var el=$('seq');if(!el||Date.now()<seqHold)return;
-    var r=el.getBoundingClientRect(),vh=innerHeight;
-    seqSet((vh*.85-r.top)/(r.height+vh*.35));
-  }
-  window.addEventListener('scroll',function(){if(!seqScroll.raf)seqScroll.raf=requestAnimationFrame(function(){seqScroll.raf=0;seqScroll()})},{passive:true});
-  (MSP.onRender=MSP.onRender||[]).push(function(){seqSet(seqP);seqScroll()});
-  // 눈금 누르기·끌기
+  function seqGo(px,smooth){var sc=$('seqScroll');if(sc)sc.scrollTo({left:px,behavior:smooth?'smooth':'auto'})}
+  (MSP.onRender=MSP.onRender||[]).push(function(){seqLayout();var sc=$('seqScroll');if(sc)sc.addEventListener('scroll',function(){if(!seqRead.raf)seqRead.raf=requestAnimationFrame(function(){seqRead.raf=0;seqRead()})},{passive:true})});
+  window.addEventListener('resize',function(){clearTimeout(seqLayout.t);seqLayout.t=setTimeout(seqLayout,150)});
+  // 휠: 시퀀스 위에서는 화면 대신 타임라인이 좌우로
+  document.addEventListener('wheel',function(e){
+    var q=e.target.closest&&e.target.closest('#seq');if(!q||root.classList.contains('admin'))return;
+    var sc=$('seqScroll');if(!sc)return;
+    var d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+    var max=sc.scrollWidth-sc.clientWidth;
+    e.preventDefault();sc.scrollLeft=Math.max(0,Math.min(max,sc.scrollLeft+d));
+  },{passive:false});
+  // 끌기: 타임라인을 잡고 좌우로 (손가락은 위아래로 밀면 화면이 내려감)
   document.addEventListener('pointerdown',function(e){
-    var ru=e.target.closest&&e.target.closest('#seq .sq-ruler');if(!ru||root.classList.contains('admin'))return;
-    var body=$('seqBody');var mv=function(ev){var r=body.getBoundingClientRect();seqHold=Date.now()+4000;seqSet((ev.clientX-r.left)/r.width)};
-    mv(e);var up=function(){removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};
-    addEventListener('pointermove',mv);addEventListener('pointerup',up);
-  });
-  // 클립 누르기 → 재생선이 그 클립 시작으로
-  document.addEventListener('click',function(e){
-    var b=e.target.closest&&e.target.closest('#seq .sq-clip');if(!b||root.classList.contains('admin'))return;
-    var c=((S.edit.timeline||{}).clips||[])[+b.getAttribute('data-ci')],ny=((S.edit.timeline||{}).years||[]).length||1;
-    if(c){seqHold=Date.now()+4000;seqSet(((+c.from||0)+.5)/ny)}
+    var box=e.target.closest&&e.target.closest('#seq .sq-tlbox');if(!box||root.classList.contains('admin')||e.button>0)return;
+    var sc=$('seqScroll'),x0=e.clientX,y0=e.clientY,s0=sc.scrollLeft,moved=false,horiz=e.pointerType==='mouse';
+    var mv=function(ev){
+      var dx=ev.clientX-x0,dy=ev.clientY-y0;
+      if(!moved&&Math.abs(dx)+Math.abs(dy)>4){moved=true;if(ev.pointerType!=='mouse')horiz=Math.abs(dx)>Math.abs(dy);if(horiz)box.classList.add('drag')}
+      if(moved&&horiz){sc.scrollLeft=s0-dx;ev.preventDefault()}
+    };
+    var up=function(ev){removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);box.classList.remove('drag');
+      if(!moved){ // 그냥 누르면: 클립이면 그 클립 시작으로, 눈금이면 그 자리로
+        var cl=ev.target.closest&&ev.target.closest('.sq-clip'),ny=((S.edit.timeline||{}).years||[]).length||1;
+        if(cl){var c=S.edit.timeline.clips[+cl.getAttribute('data-ci')];if(c)seqGo(((+c.from||0)+.02)*YW,true)}
+        else if(ev.target.closest&&ev.target.closest('.sq-ruler')){var r=$('seqBody').getBoundingClientRect();seqGo(Math.max(0,Math.min(ny*YW,ev.clientX-r.left)),true)}
+      }};
+    addEventListener('pointermove',mv,{passive:false});addEventListener('pointerup',up);addEventListener('pointercancel',up);
   });
 
   /* ── 유튜브 채널 카드 높이 = 영상 썸네일 4개 영역 (아래 제목 글씨까지 내려가지 않게) ── */
