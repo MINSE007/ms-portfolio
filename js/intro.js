@@ -21,7 +21,7 @@
   ];
   var DEFAULT_CUTS=['YOUTUBE','FILM','EDIT','8년','상상','을','현실','로.'];
   var HOLD=720, FLY=750;
-  var SLATE_MS=1150; // 맨 처음 슬레이트(딱!) 길이 — 0이면 슬레이트 없이 바로 컷
+  var SLATE_MS=1500; // 맨 처음 슬레이트(딱!) 길이 — 0이면 슬레이트 없이 바로 컷
   var MSP=window.MSP||{},S=window.SITE,root=document.documentElement;
   var el=document.getElementById('intro');if(!el)return;
   var stage=document.getElementById('iCuts'),slog=document.getElementById('iSlogan');
@@ -50,10 +50,11 @@
     // 슬레이트: 내용은 data.js 의 intro.slate
     var sl=(S.intro&&S.intro.slate)||{},d=new Date(),day=d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate());
     var box=document.getElementById('iSlate');if(!box){box=document.createElement('div');box.id='iSlate';box.setAttribute('aria-hidden','true');el.insertBefore(box,stage)}
-    box.innerHTML='<div class="sl-wrap"><div class="sl-stick sl-top"><i></i></div><div class="sl-stick sl-bot"></div>'+
+    box.innerHTML='<div class="sl-cam"><div class="sl-stick sl-top"><i></i></div><div class="sl-stick sl-bot"></div>'+
+      '<span class="sl-hit"><i></i><i></i><i></i><i></i><i></i></span>'+
       '<div class="sl-board"><div class="sl-prod">'+esc(sl.studio||'MS STUDIO')+'</div>'+
-      '<div class="sl-row"><div><small>SCENE</small><b>'+esc(sl.scene||'09')+'</b></div><div><small>CUT</small><b>'+esc(sl.cut||'07')+'</b></div><div><small>TAKE</small><b>'+esc(sl.take||'30')+'</b></div></div>'+
-      '<div class="sl-row sl-meta"><div><small>DIRECTOR</small><span>'+esc(sl.director||'kimminseo')+'</span></div><div><small>DATE</small><span>'+day+'</span></div></div></div></div>';
+      '<div class="sl-row"><div><small>SCENE</small><b class="sl-hw" style="--d:0">'+esc(sl.scene||'09')+'</b></div><div><small>CUT</small><b class="sl-hw" style="--d:1">'+esc(sl.cut||'07')+'</b></div><div><small>TAKE</small><b class="sl-hw" id="slTake" style="--d:2">'+esc(sl.take||'30')+'</b></div></div>'+
+      '<div class="sl-row sl-meta"><div><small>DIRECTOR</small><span class="sl-hw" style="--d:3">'+esc(sl.director||'kimminseo')+'</span></div><div><small>DATE</small><span class="sl-hw" style="--d:4">'+day+'</span></div></div></div></div>';
     slog.innerHTML='<span class="sl-in"><span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span></span>';
     return cuts.length;
   }
@@ -97,9 +98,13 @@
       var useSlate=!calm&&SLATE_MS>0;
       if(useSlate){
         el.classList.add('s-on');
-        at(560,function(){el.classList.add('s-clap')});
-        at(880,function(){el.classList.add('s-out')});
-        at(SLATE_MS,function(){el.classList.remove('s-on','s-clap','s-out')});
+        // TAKE 숫자가 굴러가다 멈춤 (01 → 30)
+        var tk=document.getElementById('slTake'),goal=parseInt(((S.intro&&S.intro.slate)||{}).take||'30',10);
+        if(tk&&goal>1){var k=0,N=9;at(300,function roll(){k++;var v=k>=N?goal:Math.max(1,Math.round(goal*k/N)-((k*7)%3));tk.textContent=String(v).padStart(2,'0');if(k<N)at(38,roll)})}
+        at(720,function(){el.classList.add('s-ready')});   // 위 막대를 한 번 더 크게 열고
+        at(900,function(){el.classList.add('s-clap')});    // 딱!
+        at(1180,function(){el.classList.add('s-out')});    // 슬레이트 속으로 빨려 들어감
+        at(SLATE_MS,function(){el.classList.remove('s-on','s-ready','s-clap','s-out')});
       }
       var t=useSlate?SLATE_MS:60;
       for(var i=0;i<n;i++)(function(i){at(t,function(){show(i,n)});t+=calm?320:LOOK[i%LOOK.length][4]})(i);

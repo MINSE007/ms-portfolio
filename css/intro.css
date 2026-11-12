@@ -70,29 +70,61 @@ html.intro-on #intro.calm[data-bg]{--ink:#F2EFF7}
 #intro.calm .i-slogan .ln>span{transform:none!important;transition:none!important}
 #intro.calm.p-fly .i-slogan{transition:opacity .5s!important}
 
-/* ── 맨 처음 슬레이트: 들어옴 → 딱! (위 막대가 닫히며 흔들림 + 번쩍) → 빠짐 ── */
-#iSlate{position:absolute;inset:0;z-index:2;display:none;place-items:center;pointer-events:none}
+/* ── 맨 처음 슬레이트 (약 1.5초)
+   ① 아래에서 기울어진 채 날아 들어옴 (흐림 → 또렷) + 칸마다 손글씨가 차례로 써짐, TAKE 숫자가 굴러가며 30에 멈춤
+   ② 위 막대가 한 번 더 크게 열렸다가(준비) → 딱! 닫힘: 화면 흔들림 · 판이 살짝 눌림 · 번쩍 · 충격 선
+   ③ 카메라가 슬레이트 속으로 빨려 들어가듯 확대·흐려지며 다음 컷으로 ── */
+#iSlate{position:absolute;inset:0;z-index:2;display:none;place-items:center;pointer-events:none;perspective:1100px}
 #intro.s-on #iSlate{display:grid}
-#intro.s-on .i-bg{background:#0E0C14}
-.sl-wrap{position:relative;width:min(560px,82vw);animation:slIn .42s cubic-bezier(.2,1.2,.4,1) both}
-#intro.s-clap .sl-wrap{animation:slHit .26s ease-out both}
-#intro.s-out .sl-wrap{animation:slOut .26s cubic-bezier(.6,0,.9,.4) both}
-@keyframes slIn{from{transform:translateY(60px) rotate(-6deg) scale(.9);opacity:0}to{transform:none;opacity:1}}
-@keyframes slHit{0%{transform:none}30%{transform:translate(-4px,5px) rotate(-.8deg)}60%{transform:translate(3px,-2px) rotate(.5deg)}100%{transform:none}}
-@keyframes slOut{from{transform:none;opacity:1}to{transform:translateY(-40px) scale(1.06);opacity:0}}
-.sl-stick{height:min(54px,9vw);border-radius:6px;background:repeating-linear-gradient(-55deg,#F2EFF7 0 22px,#14111B 22px 44px);border:3px solid #F2EFF7}
-.sl-top{position:relative;transform-origin:6px 100%;transform:rotate(-24deg);transition:transform .09s cubic-bezier(.7,0,1,.6);margin-bottom:4px}
-#intro.s-clap .sl-top{transform:rotate(0)}
-.sl-top i{position:absolute;left:-6px;bottom:-9px;width:14px;height:14px;border-radius:50%;background:#C3A3EE;border:3px solid #F2EFF7}
-.sl-board{margin-top:4px;border:3px solid #F2EFF7;border-radius:8px;background:#14111B;color:#F2EFF7;font-variant-numeric:tabular-nums}
-.sl-prod{padding:14px 18px;font-weight:900;font-size:min(34px,6vw);letter-spacing:.12em;border-bottom:3px solid #F2EFF7}
+#intro.s-on .i-bg{background:#0B0A10}
+/* 가장자리 어둡게 + 필름 결 (슬레이트 동안만) */
+#iSlate::before{content:"";position:absolute;inset:-10%;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.55) 100%);pointer-events:none}
+#iSlate::after{content:"";position:absolute;inset:0;opacity:.08;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain .5s steps(4) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(0,0)}}
+
+.sl-cam{position:relative;width:min(580px,84vw);transform-style:preserve-3d}
+#intro.s-on .sl-cam{animation:slIn .62s cubic-bezier(.16,1.18,.3,1) both}
+#intro.s-clap .sl-cam{animation:slShake .34s cubic-bezier(.3,0,.3,1) both}
+#intro.s-out .sl-cam{animation:slThrough .34s cubic-bezier(.7,0,.84,0) both}
+@keyframes slIn{0%{transform:translate3d(0,75vh,0) rotateX(38deg) rotateZ(-9deg) scale(.82);filter:blur(10px);opacity:0}
+  55%{filter:blur(0);opacity:1}100%{transform:none;filter:none;opacity:1}}
+@keyframes slShake{0%{transform:none}14%{transform:translate(-7px,9px) rotate(-1.1deg) scale(1.015)}30%{transform:translate(6px,-5px) rotate(.8deg)}
+  48%{transform:translate(-4px,3px) rotate(-.4deg)}68%{transform:translate(2px,-1px) rotate(.2deg)}100%{transform:none}}
+@keyframes slThrough{from{transform:none;filter:none;opacity:1}to{transform:translateY(-6%) scale(3.4);filter:blur(16px);opacity:0}}
+
+/* 막대 (위: 움직이는 막대 / 아래: 고정 막대) */
+.sl-stick{height:min(56px,9.6vw);border-radius:7px;border:3px solid #F2EFF7;
+  background:repeating-linear-gradient(-55deg,#F2EFF7 0 24px,#14111B 24px 48px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.sl-top{position:relative;transform-origin:8px 100%;transform:rotate(-22deg);margin-bottom:4px}
+#intro.s-ready .sl-top{transform:rotate(-36deg);transition:transform .17s cubic-bezier(.2,.8,.3,1)}
+#intro.s-clap .sl-top{transform:rotate(0);transition:transform .07s cubic-bezier(.8,0,1,.5)}
+.sl-top i{position:absolute;left:-7px;bottom:-10px;width:16px;height:16px;border-radius:50%;background:#C3A3EE;border:3px solid #F2EFF7}
+/* 판: 딱 칠 때 아주 살짝 눌림 */
+.sl-board{margin-top:4px;border:3px solid #F2EFF7;border-radius:9px;background:#14111B;color:#F2EFF7;transform-origin:50% 0;box-shadow:0 30px 60px rgba(0,0,0,.45)}
+#intro.s-clap .sl-board{animation:slSquash .22s ease-out both}
+@keyframes slSquash{0%{transform:scaleY(1)}25%{transform:scaleY(.965) scaleX(1.01)}100%{transform:none}}
+.sl-prod{padding:14px 18px 12px;font-weight:900;font-size:min(34px,6vw);letter-spacing:.14em;border-bottom:3px solid #F2EFF7}
 .sl-row{display:grid;grid-template-columns:repeat(3,1fr)}
-.sl-row>div{padding:10px 16px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.sl-row>div{padding:9px 16px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .sl-row>div+div{border-left:3px solid #F2EFF7}
-.sl-row small{font-size:min(12px,2.6vw);font-weight:700;letter-spacing:.2em;color:#C3A3EE}
-.sl-row b{font-size:min(52px,10vw);font-weight:900;line-height:1;letter-spacing:-.03em}
+.sl-row small{font-size:min(11.5px,2.5vw);font-weight:700;letter-spacing:.22em;color:#C3A3EE}
+/* 손글씨(분필 느낌) 칸 */
+.sl-hw{font-family:"Nanum Pen Script","Noto Sans KR",cursive;font-weight:400;line-height:1;color:#F2EFF7}
+.sl-row b.sl-hw{font-size:min(64px,12vw);letter-spacing:.01em}
 .sl-meta{grid-template-columns:1.3fr 1fr;border-top:3px solid #F2EFF7}
-.sl-meta span{font-size:min(20px,3.6vw);font-weight:700;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* 딱! 칠 때 번쩍 */
-#intro.s-clap::after{content:"";position:absolute;inset:0;z-index:3;background:#fff;pointer-events:none;animation:slFlash .22s ease-out both}
-@keyframes slFlash{from{opacity:.5}to{opacity:0}}
+.sl-meta .sl-hw{font-size:min(32px,5.6vw);white-space:nowrap;overflow:hidden}
+/* 손글씨가 왼쪽부터 써지듯 나타남 (칸마다 순서대로) */
+.sl-hw{clip-path:inset(0 100% 0 0)}
+#intro.s-on .sl-hw{animation:slWrite .34s cubic-bezier(.4,0,.2,1) forwards;animation-delay:calc(.28s + var(--d,0) * 70ms)}
+@keyframes slWrite{to{clip-path:inset(0 -5% 0 0)}}
+.sl-prod{clip-path:inset(0 100% 0 0)}
+#intro.s-on .sl-prod{animation:slWrite .3s cubic-bezier(.4,0,.2,1) .2s forwards}
+
+/* 딱! — 번쩍 + 충격 선 */
+#intro.s-clap::after{content:"";position:absolute;inset:0;z-index:3;background:#fff;pointer-events:none;animation:slFlash .24s ease-out both}
+@keyframes slFlash{from{opacity:.55}to{opacity:0}}
+.sl-hit{position:absolute;left:4%;top:min(56px,9.6vw);width:0;height:0;pointer-events:none}
+.sl-hit i{position:absolute;left:0;top:0;width:min(70px,12vw);height:3px;border-radius:3px;background:#F2EFF7;transform-origin:0 50%;opacity:0}
+#intro.s-clap .sl-hit i{animation:slBurst .3s cubic-bezier(.2,.8,.3,1) both}
+.sl-hit i:nth-child(1){--r:-150deg}.sl-hit i:nth-child(2){--r:-120deg}.sl-hit i:nth-child(3){--r:-90deg}.sl-hit i:nth-child(4){--r:-60deg}.sl-hit i:nth-child(5){--r:-30deg}
+@keyframes slBurst{0%{opacity:1;transform:rotate(var(--r)) translateX(10px) scaleX(.2)}100%{opacity:0;transform:rotate(var(--r)) translateX(60px) scaleX(1)}}
