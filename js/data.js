@@ -4,31 +4,44 @@
    · 따옴표 "..." 안의 글만 바꾸면 돼요. 쉼표(,)와 괄호는 지우지 마세요.
    · 글 안의 \n 은 "여기서 줄바꿈" 표시예요.
    · 관리자 모드에서 고치고 "GitHub에 저장"을 누르면 이 파일이 통째로 새로 저장돼요.
-   · 숫자(참여한 영화·제작 중인 영화)는 목록을 세서 자동으로 나와요.
+   · layout: 섹션 순서와 보이기(show) / film.films: 필모그래피
+     film.picks: 대표작 3편 / dasi: 다시, 변신 (steps 진행 상황: done 완료 · now 진행 중 · todo 예정)
+     역할: 연출 연출부 스크립터 / 촬영 촬영부 / 조명 조명부 / 음향 음향부 /
+           제작 PD 제작부 / 미술 미술부 / 편집 편집부 / 배우
    ===================================================================== */
 window.SITE = {
-  /* ⓪ 관리자 모드 단축키 (관리자 모드 [설정] 탭에서 키를 눌러 바꿀 수 있어요) */
   "admin": {
     "shortcut": "Ctrl+Shift+E"
   },
-
-  /* 화면 크기 (1 = 기본, 1.1 = 10% 크게) — 관리자 모드 [설정]에서 조절 */
-  "ui": { "zoom": 1, "hero": 1, "title": 1, "gap": 1 },
-
-  /* ① 사이트 이름 */
+  "ui": {
+    "zoom": 1,
+    "hero": 1,
+    "title": 1,
+    "gap": 1
+  },
   "site": {
     "name": "MS PORTFOLIO",
     "eyebrow": "MS PORTFOLIO — YOUTUBE · FILM · EDIT"
   },
-
-  /* ② 인트로 — 단어들이 컷처럼 빠르게 지나간 뒤 첫 화면 제목으로 이어져요 */
   "intro": {
-    "cuts": ["YOUTUBE", "FILM", "EDIT", "8년", "상상", "을", "현실", "로."],
-    /* 맨 처음 슬레이트 (딱! 치는 장면) */
-    "slate": { "studio": "MS STUDIO", "scene": "09", "cut": "07", "take": "30", "director": "kimminseo" }
+    "cuts": [
+      "YOUTUBE",
+      "FILM",
+      "EDIT",
+      "8년",
+      "상상",
+      "을",
+      "현실",
+      "로."
+    ],
+    "slate": {
+      "studio": "MS STUDIO",
+      "scene": "09",
+      "cut": "07",
+      "take": "30",
+      "director": "kimminseo"
+    }
   },
-
-  /* ③ 첫 화면 */
   "hero": {
     "metaLeft": "PORTFOLIO — 2026",
     "metaRight": "유튜브 · 영화 · 편집 — MS",
@@ -39,23 +52,49 @@ window.SITE = {
     "btn1": "유튜브 채널 보기",
     "btn2": "영화 포트폴리오",
     "facts": [
-      { "value": "8", "unit": "년", "label": "편집 경력" },
-      { "value": "auto:films", "unit": "편", "label": "참여한 영화" },
-      { "value": "auto:stages", "unit": "편", "label": "제작 중인 영화" }
+      {
+        "value": "8",
+        "unit": "년",
+        "label": "편집 경력"
+      },
+      {
+        "value": "auto:films",
+        "unit": "편",
+        "label": "참여한 영화"
+      },
+      {
+        "value": "auto:stages",
+        "unit": "편",
+        "label": "제작 중인 영화"
+      }
     ]
   },
-
-  /* ④ 섹션 순서와 보이기 (위에서부터 이 순서대로 나와요. show:false면 숨김) */
   "layout": [
-    { "id": "youtube", "show": true },
-    { "id": "outsource", "show": true },
-    { "id": "film", "show": true },
-    { "id": "dasi", "show": true },
-    { "id": "edit", "show": true },
-    { "id": "contact", "show": true }
+    {
+      "id": "youtube",
+      "show": true
+    },
+    {
+      "id": "outsource",
+      "show": true
+    },
+    {
+      "id": "film",
+      "show": true
+    },
+    {
+      "id": "dasi",
+      "show": true
+    },
+    {
+      "id": "edit",
+      "show": true
+    },
+    {
+      "id": "contact",
+      "show": true
+    }
   ],
-
-  /* ⑤ 유튜브 */
   "youtube": {
     "en": "YOUTUBE",
     "badge": "MAIN",
@@ -71,14 +110,24 @@ window.SITE = {
       "button": "채널 방문하기"
     },
     "videos": [
-      { "title": "이게 뭔 스킨이야", "id": "C0VnVbcB8-g" },
-      { "title": "한국인이 아시아 섭 하면 생기는 일", "id": "HX09tGF0QPc" },
-      { "title": "여기가 야시장 맛집이라면서요?", "id": "uZQ9S8cRW5I" },
-      { "title": "롤 좋아하는 친구들이랑 볼링 치러가면 생기는 일", "id": "Ih2qKrALhaI" }
+      {
+        "title": "이게 뭔 스킨이야",
+        "id": "C0VnVbcB8-g"
+      },
+      {
+        "title": "한국인이 아시아 섭 하면 생기는 일",
+        "id": "HX09tGF0QPc"
+      },
+      {
+        "title": "여기가 야시장 맛집이라면서요?",
+        "id": "uZQ9S8cRW5I"
+      },
+      {
+        "title": "롤 좋아하는 친구들이랑 볼링 치러가면 생기는 일",
+        "id": "Ih2qKrALhaI"
+      }
     ]
   },
-
-  /* ⑤-2 외주 — 의뢰받아 만든 작업 (link에 영상 주소를 넣으면 '영상 보기' 버튼이 생겨요) */
   "outsource": {
     "en": "OUTSOURCING",
     "badge": "WORK",
@@ -103,61 +152,282 @@ window.SITE = {
       }
     ]
   },
-
-  /* ⑥ 영화 — 작품 하나 = { 제목, 연도, 역할들, 기록들 }
-        역할: 연출 연출부 스크립터 / 촬영 촬영부 / 조명 조명부 / 음향 음향부 /
-              제작 PD 제작부 / 미술 미술부 / 편집 편집부 / 배우
-        기록(records): 수상·상영 등 이력 — 나중에 채워 넣으면 작품 옆에 나와요
-        메모(note): 오른쪽 여백에 나오는 짧은 표시 (예: "프리 프로덕션 진행 중") — 지우면 사라져요 */
   "film": {
     "en": "FILM",
     "badge": "SUB",
     "title": "영화",
     "desc": "연출, 촬영, 음향, 배우까지.\n현장의 여러 자리에서 영화를 만들어 왔습니다.",
-
-    /* 대표작 3편 — video에 유튜브 주소를 넣으면 영상이 나와요 (비어 있으면 '영상 준비 중')
-       title이 비어 있으면 '준비 중입니다' 칸으로 나와요 */
     "picksTitle": "대표작",
     "picks": [
-      { "title": "영상고 옥상엔 요술램프가 있다!", "sub": "26 SVMHS 뮤지컬", "year": "2026", "role": "음향", "desc": "", "video": "" },
-      { "title": "Mon ange!", "sub": "나의 작은 천사", "year": "2026", "role": "제작부", "desc": "", "video": "" },
-      { "title": "", "sub": "", "year": "", "role": "", "desc": "", "video": "" }
+      {
+        "title": "영상고 옥상엔 요술램프가 있다!",
+        "sub": "26 SVMHS 뮤지컬",
+        "year": "2026",
+        "role": "음향",
+        "desc": "",
+        "video": ""
+      },
+      {
+        "title": "Mon ange!",
+        "sub": "나의 작은 천사",
+        "year": "2026",
+        "role": "제작부",
+        "desc": "",
+        "video": ""
+      },
+      {
+        "title": "",
+        "sub": "",
+        "year": "",
+        "role": "",
+        "desc": "",
+        "video": ""
+      }
     ],
-
     "films": [
-      { "title": "초록의 허상", "year": 2026, "roles": ["음향"], "records": [], "note": "프리 프로덕션 진행 중" },
-      { "title": "불어터진 고백", "year": 2026, "roles": ["음향"], "records": [], "note": "프리 프로덕션 진행 중" },
-      { "title": "Monage!", "year": 2026, "roles": ["PD", "라인PD", "제작부"], "records": [] },
-      { "title": "혈모양처", "year": 2026, "roles": ["배우"], "records": [] },
-      { "title": "끝과 시작 사이, 서울", "year": 2026, "roles": ["음향"], "records": [] },
-      { "title": "이륙!", "year": 2026, "roles": ["연출"], "records": [] },
-      { "title": "黃昏(황혼)", "year": 2026, "roles": ["연출"], "records": [] },
-      { "title": "아빠의 방식", "year": 2026, "roles": ["제작"], "records": [] },
-      { "title": "Emotion Store", "year": 2026, "roles": ["제작부"], "records": [] },
-      { "title": "성장통", "year": 2026, "roles": ["촬영부"], "records": [] },
-      { "title": "영상고 옥상엔 요술램프가 있다! (26 SVMHS 뮤지컬)", "year": 2026, "roles": ["음향"], "records": [] },
-      { "title": "읽음", "year": 2026, "roles": ["연출"], "records": [] },
-      { "title": "빨래방", "year": 2026, "roles": ["제작"], "records": [] },
-      { "title": "내가 사랑하는 사람", "year": 2026, "roles": ["제작"], "records": [] },
-      { "title": "헤드 퍼스트 슬라이딩", "year": 2026, "roles": ["제작부"], "records": [] },
-      { "title": "나는 오늘!!", "year": 2026, "roles": ["촬영부", "조명부"], "records": [] },
-      { "title": "아트필름 홍보영상", "year": 2026, "roles": ["촬영부", "편집"], "records": [] },
-      { "title": "사랑의 색체", "year": 2026, "roles": ["제작부"], "records": [] },
-      { "title": "유흔", "year": 2025, "roles": ["연출부"], "records": [] },
-      { "title": "땅볼아웃", "year": 2025, "roles": ["배우"], "records": [] },
-      { "title": "Scholl Of Roll (25 SVMHS 뮤지컬)", "year": 2025, "roles": ["배우"], "records": [] },
-      { "title": "무제-Untitled", "year": 2025, "roles": ["제작", "미술"], "records": [] },
-      { "title": "비밀하나", "year": 2025, "roles": ["제작부"], "records": [] },
-      { "title": "도박 중독 예방 광고", "year": 2025, "roles": ["음향"], "records": [] },
-      { "title": "작은 불씨", "year": 2025, "roles": ["음향"], "records": [] },
-      { "title": "적반하장", "year": 2025, "roles": ["배우"], "records": [] },
-      { "title": "Awaken The Bull", "year": 2025, "roles": ["연출", "촬영"], "records": [] },
-      { "title": "환생검문소", "year": 2025, "roles": ["음향"], "records": [] },
-      { "title": "자화상", "year": 2025, "roles": ["촬영", "편집"], "records": [] }
-    ],
+      {
+        "title": "초록의 허상",
+        "year": 2026,
+        "roles": [
+          "음향"
+        ],
+        "records": [],
+        "note": "프리 프로덕션 진행 중"
+      },
+      {
+        "title": "불어터진 고백",
+        "year": 2026,
+        "roles": [
+          "음향"
+        ],
+        "records": [],
+        "note": "프리 프로덕션 진행 중"
+      },
+      {
+        "title": "Monage!",
+        "year": 2026,
+        "roles": [
+          "PD",
+          "라인PD",
+          "제작부"
+        ],
+        "records": []
+      },
+      {
+        "title": "혈모양처",
+        "year": 2026,
+        "roles": [
+          "배우"
+        ],
+        "records": []
+      },
+      {
+        "title": "끝과 시작 사이, 서울",
+        "year": 2026,
+        "roles": [
+          "음향"
+        ],
+        "records": []
+      },
+      {
+        "title": "이륙!",
+        "year": 2026,
+        "roles": [
+          "연출"
+        ],
+        "records": []
+      },
+      {
+        "title": "黃昏(황혼)",
+        "year": 2026,
+        "roles": [
+          "연출"
+        ],
+        "records": []
+      },
+      {
+        "title": "아빠의 방식",
+        "year": 2026,
+        "roles": [
+          "제작"
+        ],
+        "records": []
+      },
+      {
+        "title": "Emotion Store",
+        "year": 2026,
+        "roles": [
+          "제작부"
+        ],
+        "records": []
+      },
+      {
+        "title": "성장통",
+        "year": 2026,
+        "roles": [
+          "촬영부"
+        ],
+        "records": []
+      },
+      {
+        "title": "영상고 옥상엔 요술램프가 있다! (26 SVMHS 뮤지컬)",
+        "year": 2026,
+        "roles": [
+          "음향"
+        ],
+        "records": []
+      },
+      {
+        "title": "읽음",
+        "year": 2026,
+        "roles": [
+          "연출"
+        ],
+        "records": []
+      },
+      {
+        "title": "빨래방",
+        "year": 2026,
+        "roles": [
+          "제작"
+        ],
+        "records": []
+      },
+      {
+        "title": "내가 사랑하는 사람",
+        "year": 2026,
+        "roles": [
+          "제작"
+        ],
+        "records": []
+      },
+      {
+        "title": "헤드 퍼스트 슬라이딩",
+        "year": 2026,
+        "roles": [
+          "제작부"
+        ],
+        "records": []
+      },
+      {
+        "title": "나는 오늘!!",
+        "year": 2026,
+        "roles": [
+          "촬영부",
+          "조명부"
+        ],
+        "records": []
+      },
+      {
+        "title": "아트필름 홍보영상",
+        "year": 2026,
+        "roles": [
+          "촬영부",
+          "편집"
+        ],
+        "records": []
+      },
+      {
+        "title": "사랑의 색체",
+        "year": 2026,
+        "roles": [
+          "제작부"
+        ],
+        "records": []
+      },
+      {
+        "title": "유흔",
+        "year": 2025,
+        "roles": [
+          "연출부"
+        ],
+        "records": []
+      },
+      {
+        "title": "땅볼아웃",
+        "year": 2025,
+        "roles": [
+          "배우"
+        ],
+        "records": []
+      },
+      {
+        "title": "Scholl Of Roll (25 SVMHS 뮤지컬)",
+        "year": 2025,
+        "roles": [
+          "배우"
+        ],
+        "records": []
+      },
+      {
+        "title": "무제-Untitled",
+        "year": 2025,
+        "roles": [
+          "제작",
+          "미술"
+        ],
+        "records": []
+      },
+      {
+        "title": "비밀하나",
+        "year": 2025,
+        "roles": [
+          "제작부"
+        ],
+        "records": []
+      },
+      {
+        "title": "도박 중독 예방 광고",
+        "year": 2025,
+        "roles": [
+          "음향"
+        ],
+        "records": []
+      },
+      {
+        "title": "작은 불씨",
+        "year": 2025,
+        "roles": [
+          "음향"
+        ],
+        "records": []
+      },
+      {
+        "title": "적반하장",
+        "year": 2025,
+        "roles": [
+          "배우"
+        ],
+        "records": []
+      },
+      {
+        "title": "Awaken The Bull",
+        "year": 2025,
+        "roles": [
+          "연출",
+          "촬영"
+        ],
+        "records": []
+      },
+      {
+        "title": "환생검문소",
+        "year": 2025,
+        "roles": [
+          "음향"
+        ],
+        "records": []
+      },
+      {
+        "title": "자화상",
+        "year": 2025,
+        "roles": [
+          "촬영",
+          "편집"
+        ],
+        "records": []
+      }
+    ]
   },
-
-  /* ⑥-2 다시, 변신 — 지금 직접 만들고 있는 영화 */
   "dasi": {
     "en": "NOW MAKING",
     "badge": "MY FILM",
@@ -171,68 +441,128 @@ window.SITE = {
     "logline": "꿈을 내려놓으려던 스물일곱 살 준화가\n아직 히어로를 꿈꾸는 고등학생 태상을 만나\n잊고 있던 선의를 다시 꺼내는 이야기.",
     "note": "세상을 바꾸는 건 거창한 신념이 아니라\n누군가를 향한 사소한 손짓일지도 모릅니다.",
     "people": [
-      { "name": "준화", "desc": "꿈을 내려놓으려던 스물일곱 살" },
-      { "name": "태상", "desc": "아직 히어로를 꿈꾸는 고등학생" }
+      {
+        "name": "준화",
+        "desc": "꿈을 내려놓으려던 스물일곱 살"
+      },
+      {
+        "name": "태상",
+        "desc": "아직 히어로를 꿈꾸는 고등학생"
+      }
     ],
-    /* 진행 상황 — stage: 지금 단계(pre 프리 / prod 프로덕션 / post 포스트)
-       state: done 완료 / now 진행 중 / todo 예정 */
     "stage": "pre",
     "steps": {
       "pre": [
-        { "name": "시놉시스", "state": "now" },
-        { "name": "시나리오", "state": "todo" },
-        { "name": "캐스팅 · 장소 섭외", "state": "todo" }
+        {
+          "name": "시놉시스",
+          "state": "now"
+        },
+        {
+          "name": "시나리오",
+          "state": "todo"
+        },
+        {
+          "name": "캐스팅 · 장소 섭외",
+          "state": "todo"
+        }
       ],
       "prod": [
-        { "name": "촬영", "state": "todo" }
+        {
+          "name": "촬영",
+          "state": "todo"
+        }
       ],
       "post": [
-        { "name": "편집", "state": "todo" },
-        { "name": "사운드 · 색보정", "state": "todo" },
-        { "name": "완성 · 상영", "state": "todo" }
+        {
+          "name": "편집",
+          "state": "todo"
+        },
+        {
+          "name": "사운드 · 색보정",
+          "state": "todo"
+        },
+        {
+          "name": "완성 · 상영",
+          "state": "todo"
+        }
       ]
     }
   },
-
-  /* ⑦ 편집 */
   "edit": {
     "en": "EDIT",
     "badge": "SUB",
     "title": "편집",
     "desc": "모든 작업은 결국\n편집에서 완성됩니다.",
     "years": "8",
-    /* 소개 (시퀀스 화면 왼쪽 위) */
     "eyebrow": "VIDEO EDITOR",
     "name": "영상 편집자, 김민서.",
-    /* 숫자 4칸 — value에 auto:films(참여한 영화 수) · auto:stages(제작 중인 영화 수)를 쓰면 자동으로 세요 */
     "stats": [
-      { "value": "8", "unit": "년", "label": "편집 경력" },
-      { "value": "auto:films", "unit": "편", "label": "참여한 영화" },
-      { "value": "1", "unit": "채널", "label": "직접 운영하는 유튜브" },
-      { "value": "auto:stages", "unit": "편", "label": "지금 만드는 영화" }
+      {
+        "value": "8",
+        "unit": "년",
+        "label": "편집 경력"
+      },
+      {
+        "value": "auto:films",
+        "unit": "편",
+        "label": "참여한 영화"
+      },
+      {
+        "value": "1",
+        "unit": "채널",
+        "label": "직접 운영하는 유튜브"
+      },
+      {
+        "value": "auto:stages",
+        "unit": "편",
+        "label": "지금 만드는 영화"
+      }
     ],
-    /* 쓰는 프로그램 */
     "tools": [
-      { "short": "Pr", "name": "Premiere Pro", "role": "컷 편집 · 자막 · 사운드" },
-      { "short": "Ae", "name": "After Effects", "role": "모션그래픽 · 타이틀" },
-      { "short": "Ps", "name": "Photoshop", "role": "썸네일 · 이미지" },
-      { "short": "Ai", "name": "Illustrator", "role": "로고 · 그래픽" }
+      {
+        "short": "Pr",
+        "name": "Premiere Pro",
+        "role": "컷 편집 · 자막 · 사운드"
+      },
+      {
+        "short": "Ae",
+        "name": "After Effects",
+        "role": "모션그래픽 · 타이틀"
+      },
+      {
+        "short": "Ps",
+        "name": "Photoshop",
+        "role": "썸네일 · 이미지"
+      },
+      {
+        "short": "Ai",
+        "name": "Illustrator",
+        "role": "로고 · 그래픽"
+      }
     ],
     "hint": "재생선을 움직이면 해마다 무엇을 편집했는지 볼 수 있어요.",
     "lead": "편집은 촬영이 끝난 뒤에 시작되는\n두 번째 연출이라고 생각해요.\n유튜브의 빠른 호흡부터 단편 영화의 긴 여운까지,\n찍어둔 장면이 가장 잘 보이는 순서를\n8년째 찾고 있습니다.",
-    /* 프리미어 시퀀스처럼 보이는 타임라인
-       years: 맨 위 눈금 / tracks: 왼쪽 줄 이름 (V = 영상, A = 소리)
-       clips: { track: 줄 이름, from: 시작 칸 번호, to: 끝 칸 번호 (0 = 맨 왼쪽 칸), title: 제목, desc: 설명 }
-       → 관리자 모드 [편집] 탭에서 넣고 고칠 수 있어요 */
     "timeline": {
       "name": "MS_편집_2020-2026",
-      "years": ["2020 이전", "2021", "2022", "2023", "2024", "2025", "2026"],
-      "tracks": ["V3", "V2", "V1", "A1", "A2"],
+      "years": [
+        "2020 이전",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025",
+        "2026"
+      ],
+      "tracks": [
+        "V3",
+        "V2",
+        "V1",
+        "A1",
+        "A2"
+      ],
       "clips": []
     }
   },
-
-  /* ⑧ 연락 */
   "contact": {
     "en": "CONTACT",
     "title": "함께 만들어요",
@@ -246,8 +576,6 @@ window.SITE = {
     "viewerDesc": "새 영상은\n유튜브에 가장 먼저 올라갑니다.",
     "viewerLink": "채널 구독하러 가기"
   },
-
-  /* ⑨ 맨 아래 */
   "footer": {
     "info": "유튜브 · 영화 · 편집",
     "info2": "YouTube 카워드 스튜디오 @c_ward",
