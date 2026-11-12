@@ -129,7 +129,7 @@
     var id='ad-'+path.replace(/[^a-z0-9]/gi,'-');
     return '<label class="ad-f" for="'+id+'"><span>'+label+'</span><textarea id="'+id+'" rows="3" data-f="'+path+'">'+esc(val==null?'':val)+'</textarea></label>';
   }
-  var TABS=[['layout','배치'],['yt','유튜브'],['out','외주'],['film','영화'],['set','설정'],['save','저장']];
+  var TABS=[['layout','배치'],['yt','유튜브'],['out','외주'],['film','영화'],['ed','편집'],['set','설정'],['save','저장']];
   function drawPanel(){
     if(!on)return;
     var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">'+esc(currentKey())+'</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button><button type="button" data-a="logout">로그아웃</button></div>'+
@@ -181,6 +181,24 @@
             '<div class="ad-2">'+inp(p+'year',f.year,'연도','number')+inp(p+'roles',(f.roles||[]).join(', '),'역할','',' data-list="1"')+'</div>'+
             inp(p+'records',(f.records||[]).join(', '),'기록','',' data-list="1"')+inp(p+'note',f.note||'','오른쪽 메모 (예: 프리 프로덕션 진행 중 · 비우면 사라져요)')+
             '<button type="button" class="ad-del" data-a="delFilm" data-i="'+i+'">이 작품 삭제</button></div>';
+        }).join('');
+    }else if(tab==='ed'){
+      var E=S.edit;E.timeline=E.timeline||{years:[],tracks:[],clips:[]};var TL=E.timeline;TL.clips=TL.clips||[];
+      var yo=function(sel){return (TL.years||[]).map(function(y,i){return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(y)+'</option>'}).join('')};
+      var to=function(sel){return (TL.tracks||[]).map(function(t){return '<option'+(t===sel?' selected':'')+'>'+esc(t)+'</option>'}).join('')};
+      html+='<p class="ad-tip">프리미어 시퀀스처럼 보이는 타임라인이에요. 클립 = 줄 위에 놓이는 막대.<br>스크롤하면 빨간 재생선이 지나가며 닿은 클립의 제목·설명이 위 화면에 나와요.</p>'+
+        inp('edit.timeline.name',TL.name||'','시퀀스 이름 (맨 위 탭)')+
+        inp('edit.timeline.years',(TL.years||[]).join(', '),'눈금 (쉼표로 나눔, 왼쪽부터)','',' data-list="1"')+
+        inp('edit.timeline.tracks',(TL.tracks||[]).join(', '),'줄 이름 (V = 영상 · 보라 / A = 소리 · 초록)','',' data-list="1"')+
+        '<div class="ad-sub"><b>클립 '+TL.clips.length+'개</b><button type="button" data-a="addClip">+ 클립 추가</button></div>'+
+        TL.clips.map(function(c,i){
+          var p='edit.timeline.clips.'+i+'.';
+          return '<div class="ad-card">'+inp(p+'title',c.title,'제목')+
+            '<div class="ad-2"><label class="ad-f"><span>줄</span><select data-f="'+p+'track" id="ad-ct-'+i+'">'+to(c.track)+'</select></label>'+
+            '<label class="ad-f"><span>시작</span><select data-f="'+p+'from" data-num="1" id="ad-cf-'+i+'">'+yo(+c.from||0)+'</select></label></div>'+
+            '<div class="ad-2"><label class="ad-f"><span>끝</span><select data-f="'+p+'to" data-num="1" id="ad-cto-'+i+'">'+yo(c.to==null?+c.from||0:+c.to)+'</select></label><span></span></div>'+
+            area(p+'desc',c.desc,'설명 (재생선이 닿으면 위 화면에 나와요)')+
+            '<button type="button" class="ad-del" data-a="delClip" data-i="'+i+'">이 클립 삭제</button></div>';
         }).join('');
     }else if(tab==='set'){
       S.ui=S.ui||{};S.intro=S.intro||{};var sl=S.intro.slate=S.intro.slate||{};
@@ -238,6 +256,8 @@
     else if(a==='delVid'){S.youtube.videos.splice(i,1)}
     else if(a==='addFilm'){F.films.unshift({title:'새 작품',year:new Date().getFullYear(),roles:[],records:[]})}
     else if(a==='delFilm'){F.films.splice(i,1)}
+    else if(a==='addClip'){var TL=S.edit.timeline;TL.clips=TL.clips||[];TL.clips.push({track:(TL.tracks||['V1'])[Math.min(2,(TL.tracks||[]).length-1)]||'V1',from:0,to:0,title:'새 클립',desc:''})}
+    else if(a==='delClip'){S.edit.timeline.clips.splice(i,1)}
     else if(a==='addStep'){var D=S.dasi;D.steps=D.steps||{};(D.steps[b.dataset.s]=D.steps[b.dataset.s]||[]).push({name:'새 할 일',state:'todo'})}
     else if(a==='delStep'){S.dasi.steps[b.dataset.s].splice(i,1)}
     else if(a==='addWork'){
@@ -269,7 +289,7 @@
     var c=e.target,p=c.dataset.f;if(!p)return;
     var v=c.value;
     if(c.dataset.list)v=v.split(',').map(function(s){return s.trim()}).filter(Boolean);
-    else if(c.type==='number')v=parseInt(v,10)||0;
+    else if(c.type==='number'||c.dataset.num)v=parseInt(v,10)||0;
     else if(c.type==='range'){v=parseFloat(v)||1;var rl=document.getElementById(c.id+'-v');if(rl)rl.textContent=Math.round(v*100)+'%';setPath(S,p,v);MSP.applyUI&&MSP.applyUI();saveDraft();return}
     else if(c.dataset.yt)v=ytId(v);
     setPath(S,p,v);saveDraft();
@@ -342,6 +362,7 @@
         var o=JSON.parse(ORIG);Object.keys(o).forEach(function(k){if(!(k in d))d[k]=o[k]});
         if(d.dasi&&!d.dasi.steps&&o.dasi){d.dasi.steps=o.dasi.steps;d.dasi.stage=o.dasi.stage}
         if(!d.film.picks)d.film.picks=o.film.picks;
+        if(d.edit&&!d.edit.timeline&&o.edit)d.edit.timeline=o.edit.timeline;
         (o.layout||[]).forEach(function(x,i){if(!d.layout.some(function(y){return y.id===x.id}))d.layout.splice(Math.min(i,d.layout.length),0,x)});
         replaceSite(d);
       }

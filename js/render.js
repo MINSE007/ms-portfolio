@@ -184,17 +184,31 @@
         stageRows(d)+'</div>';
     },
     edit:function(n){
-      var e=S.edit;
-      var rows=(e.skills||[]).map(function(s,i){
-        var p='edit.skills.'+i+'.';
-        return '<li class="sv rv"><span class="sv-no num">'+pad(i+1)+'</span>'+
-          '<h3><span'+ed(p+'title')+'>'+esc(s.title)+'</span><small'+ed(p+'en')+'>'+esc(s.en)+'</small></h3>'+
-          '<p'+ed(p+'desc')+'>'+txt(s.desc)+'</p>'+
-          '<span class="sv-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(ICON[s.icon]||ICON.edit)+'</svg></span></li>';
+      // 프리미어 시퀀스 모양: ① 위 = 모니터(지금 재생선이 지나는 클립) ② 아래 = 타임라인(눈금 · 줄 · 클립 · 빨간 재생선)
+      var e=S.edit,tl=e.timeline||{},Y=tl.years||[],T=tl.tracks||[],C=tl.clips||[],ny=Math.max(1,Y.length);
+      var ruler=Y.map(function(y,i){return '<span'+ed('edit.timeline.years.'+i)+'>'+esc(y)+'</span>'}).join('');
+      var heads=T.map(function(t){return '<div class="sq-th '+(/^A/i.test(t)?'is-a':'is-v')+'"><b>'+esc(t)+'</b><i class="sq-eye" aria-hidden="true"></i><i class="sq-lock" aria-hidden="true"></i></div>'}).join('');
+      var lanes=T.map(function(t){
+        var clips=C.map(function(c,i){
+          if(c.track!==t)return '';
+          var f=Math.max(0,Math.min(ny-1,+c.from||0)),to=Math.max(f,Math.min(ny-1,c.to==null?f:+c.to));
+          return '<button type="button" class="sq-clip '+(/^A/i.test(t)?'is-a':'is-v')+'" data-ci="'+i+'" style="left:calc('+(f/ny*100)+'% + 2px);width:calc('+((to-f+1)/ny*100)+'% - 4px)">'+
+            '<b'+ed('edit.timeline.clips.'+i+'.title')+'>'+esc(c.title)+'</b></button>';
+        }).join('');
+        return '<div class="sq-lane">'+clips+'</div>';
       }).join('');
-      return head('edit',n)+'<div class="ed2 rv"><p class="ed-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p>'+
-        '<div class="ed-yr"><b class="num"><span'+ed('edit.years')+'>'+esc(e.years)+'</span><small>년</small></b><span class="mono">EDITING CAREER</span></div></div>'+
-        '<ol class="svc">'+rows+'</ol>';
+      var empty=!C.length?'<p class="sq-empty">클립 준비 중 — 곧 채워집니다</p>':'';
+      return head('edit',n)+'<div class="sq rv" id="seq" style="--ny:'+ny+'">'+
+        // ① 모니터
+        '<div class="sq-top"><div class="sq-mon"><div class="sq-mon-bar"><span>Program: '+esc(tl.name||'Sequence 01')+'</span><span class="sq-tc num" id="seqTC">00:00:00:00</span></div>'+
+          '<div class="sq-screen" id="seqScreen"><span class="mono" id="seqYear">'+esc(Y[0]||'')+'</span><b id="seqTitle"></b><p id="seqDesc"></p></div></div>'+
+          '<div class="sq-info"><span class="mono">EDITING CAREER</span><div class="sq-yrs"><b class="num"'+ed('edit.years')+'>'+esc(e.years)+'</b><small>년</small></div>'+
+          '<p class="sq-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div></div>'+
+        // ② 타임라인
+        '<div class="sq-tl"><div class="sq-bar"><span class="sq-tab">'+esc(tl.name||'Sequence 01')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
+          '<div class="sq-scroll"><div class="sq-grid"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
+          '<div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+empty+'</div>'+
+          '<div class="sq-ph" id="seqPH" aria-hidden="true"><i></i></div></div></div></div></div></div>';
     },
     contact:function(n){
       var c=S.contact;
@@ -309,6 +323,45 @@
     (MSP.onRender||[]).forEach(function(fn){fn()});
   }
   MSP.render=render;
+
+  /* ── 편집 시퀀스: 스크롤하면 빨간 재생선이 2020 이전 → 2026 으로 지나가고, 닿는 클립이 위 모니터에 나옴 ──
+     눈금(맨 위 연도 줄)을 누르거나 끌면 그 자리로 옮겨짐 */
+  var seqP=0,seqHold=0;
+  function seqSet(p){
+    var body=$('seqBody');if(!body)return;
+    seqP=Math.max(0,Math.min(1,p));
+    var tl=(S.edit&&S.edit.timeline)||{},Y=tl.years||[],C=tl.clips||[],ny=Math.max(1,Y.length);
+    $('seqPH').style.left=(seqP*100)+'%';
+    var col=Math.min(ny-1,Math.floor(seqP*ny)),fr=Math.round(seqP*8*3600*24); // 0 ~ 8시간 타임코드 (8년)
+    var tc=pad(Math.floor(fr/86400))+':'+pad(Math.floor(fr/1440)%60)+':'+pad(Math.floor(fr/24)%60)+':'+pad(fr%24);
+    $('seqTC').textContent=tc;$('seqTC2').textContent=tc;
+    $('seqYear').textContent=Y[col]||'';
+    var hit=null;C.forEach(function(c,i){var f=+c.from||0,t=c.to==null?f:+c.to;if(col>=f&&col<=t&&(!hit||/^V/i.test(c.track)))hit={c:c,i:i}});
+    document.querySelectorAll('#seq .sq-clip').forEach(function(b){b.classList.toggle('on',!!hit&&+b.getAttribute('data-ci')===hit.i)});
+    $('seqTitle').textContent=hit?hit.c.title:'';
+    $('seqDesc').textContent=hit?(hit.c.desc||''):(C.length?'':'클립 준비 중');
+    $('seqScreen').classList.toggle('has',!!hit);
+  }
+  function seqScroll(){
+    var el=$('seq');if(!el||Date.now()<seqHold)return;
+    var r=el.getBoundingClientRect(),vh=innerHeight;
+    seqSet((vh*.85-r.top)/(r.height+vh*.35));
+  }
+  window.addEventListener('scroll',function(){if(!seqScroll.raf)seqScroll.raf=requestAnimationFrame(function(){seqScroll.raf=0;seqScroll()})},{passive:true});
+  (MSP.onRender=MSP.onRender||[]).push(function(){seqSet(seqP);seqScroll()});
+  // 눈금 누르기·끌기
+  document.addEventListener('pointerdown',function(e){
+    var ru=e.target.closest&&e.target.closest('#seq .sq-ruler');if(!ru||root.classList.contains('admin'))return;
+    var body=$('seqBody');var mv=function(ev){var r=body.getBoundingClientRect();seqHold=Date.now()+4000;seqSet((ev.clientX-r.left)/r.width)};
+    mv(e);var up=function(){removeEventListener('pointermove',mv);removeEventListener('pointerup',up)};
+    addEventListener('pointermove',mv);addEventListener('pointerup',up);
+  });
+  // 클립 누르기 → 재생선이 그 클립 시작으로
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('#seq .sq-clip');if(!b||root.classList.contains('admin'))return;
+    var c=((S.edit.timeline||{}).clips||[])[+b.getAttribute('data-ci')],ny=((S.edit.timeline||{}).years||[]).length||1;
+    if(c){seqHold=Date.now()+4000;seqSet(((+c.from||0)+.5)/ny)}
+  });
 
   /* ── 유튜브 채널 카드 높이 = 영상 썸네일 4개 영역 (아래 제목 글씨까지 내려가지 않게) ── */
   function fitChan(){
