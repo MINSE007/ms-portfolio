@@ -58,3 +58,11 @@ html.admin #logoText::after{content:"MS 포트폴리오 관리자";font-size:16p
 .al-btns{display:flex;gap:8px;justify-content:flex-end}
 .al-btns button{font:inherit;font-size:14px;font-weight:700;padding:9px 16px;border-radius:999px;border:1px solid var(--line);background:var(--chip);color:var(--text);cursor:pointer}
 .al-btns .al-go{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+
+/* 자동 저장 표시 */
+.ad-auto{margin:0 12px 10px;padding:6px 10px!important;border-radius:10px!important;font-size:12.5px!important;text-align:left;border:1px solid var(--line)!important;background:var(--chip)!important;color:var(--muted)!important}
+.ad-auto.st-ok{color:var(--acc)!important}
+.ad-auto.st-saving,.ad-auto.st-wait{color:var(--gold)!important}
+.ad-auto.st-err,.ad-auto.st-notoken{color:#E5786C!important}
+.ad-f input[type=range]{padding:0;accent-color:var(--acc)}
+.ad-f span b{color:var(--acc);margin-left:4px}

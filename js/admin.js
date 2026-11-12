@@ -82,6 +82,7 @@
     saveT=setTimeout(function(){
       try{if(dirty())localStorage.setItem('msp-draft',JSON.stringify(S));else localStorage.removeItem('msp-draft')}catch(e){}
       status();
+      scheduleAuto();
     },250);
   }
 
@@ -103,6 +104,7 @@
     var n=e.target.closest&&e.target.closest('[data-edit]');
     if(!n||panel.contains(n))return;
     var v=n.innerText.replace(/ /g,' ').replace(/[ \t]*\n[ \t]*/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
+    if(n.dataset.list)v=v.split(/\s*[·,\n]\s*/).filter(Boolean);
     setPath(S,n.getAttribute('data-edit'),v);
     saveDraft();
   });
@@ -119,6 +121,10 @@
     var id='ad-'+path.replace(/[^a-z0-9]/gi,'-');
     return '<label class="ad-f" for="'+id+'"><span>'+label+'</span><input id="'+id+'"'+(type?' type="'+type+'"':'')+' data-f="'+path+'"'+(extra||'')+' value="'+esc(val==null?'':val)+'"></label>';
   }
+  function rng(path,label,min,max){
+    var v=path.split('.').reduce(function(o,k){return o&&o[k]},S);v=typeof v==='number'?v:1;var id='ad-'+path.replace(/[^a-z0-9]/gi,'-');
+    return '<label class="ad-f" for="'+id+'"><span>'+label+' <b id="'+id+'-v">'+Math.round(v*100)+'%</b></span><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step=".05" data-f="'+path+'" value="'+v+'"></label>';
+  }
   function area(path,val,label){
     var id='ad-'+path.replace(/[^a-z0-9]/gi,'-');
     return '<label class="ad-f" for="'+id+'"><span>'+label+'</span><textarea id="'+id+'" rows="3" data-f="'+path+'">'+esc(val==null?'':val)+'</textarea></label>';
@@ -127,6 +133,7 @@
   function drawPanel(){
     if(!on)return;
     var html='<div class="ad-head"><b>관리자 모드</b><span class="ad-tag">'+esc(currentKey())+'</span><button type="button" class="ad-x" data-a="off" aria-label="관리자 모드 끄기">끄기</button><button type="button" data-a="logout">로그아웃</button></div>'+
+      '<button type="button" class="ad-auto" id="adAuto" data-tab="save"></button>'+
       '<div class="ad-tabs">'+TABS.map(function(t){return '<button type="button" data-tab="'+t[0]+'" aria-pressed="'+(tab===t[0])+'">'+t[1]+'</button>'}).join('')+'</div><div class="ad-body">';
     if(tab==='layout'){
       html+='<p class="ad-tip">글자는 화면에서 <b>점선 테두리</b>가 있는 곳을 눌러 바로 고치면 돼요.<br><b>Enter</b>는 줄바꿈, <b>Esc</b>는 끝내기예요.</p><ol class="ad-list">'+
@@ -176,9 +183,15 @@
             '<button type="button" class="ad-del" data-a="delFilm" data-i="'+i+'">이 작품 삭제</button></div>';
         }).join('');
     }else if(tab==='set'){
+      S.ui=S.ui||{};S.intro=S.intro||{};var sl=S.intro.slate=S.intro.slate||{};
       html+='<div class="ad-sub"><b>관리자 모드 단축키</b></div>'+
         '<div class="ad-key"><kbd id="adKey">'+esc(currentKey())+'</kbd><button type="button" data-a="recKey" id="adRec">'+(recording?'키를 눌러 주세요…':'바꾸기')+'</button><button type="button" data-a="resetKey">처음대로</button></div>'+
         '<p class="ad-tip">"바꾸기"를 누른 뒤 원하는 조합을 누르면 돼요. 예: Ctrl+Alt+M<br>Ctrl·Alt 중 하나는 꼭 같이 눌러야 해요. 이 컴퓨터에는 바로 적용되고, 다른 컴퓨터에는 GitHub에 저장한 뒤 적용돼요.</p>'+
+        '<div class="ad-sub"><b>화면 크기</b><button type="button" data-a="resetUI">처음대로</button></div>'+
+        rng('ui.zoom','전체 크기 (글자·카드 모두)',.8,1.25)+rng('ui.hero','첫 화면 큰 제목',.6,1.3)+rng('ui.title','섹션 제목 (유튜브·영화…)',.6,1.4)+rng('ui.gap','섹션 사이 간격',.5,1.5)+
+        '<div class="ad-sub"><b>인트로 슬레이트</b></div>'+
+        '<div class="ad-2">'+inp('intro.slate.studio',sl.studio,'제작사')+inp('intro.slate.director',sl.director,'디렉터')+'</div>'+
+        '<div class="ad-2">'+inp('intro.slate.scene',sl.scene,'씬')+inp('intro.slate.cut',sl.cut,'컷')+'</div>'+inp('intro.slate.take',sl.take,'테이크')+
         '<div class="ad-sub"><b>사이트</b></div>'+inp('site.name',S.site.name,'사이트 이름 (왼쪽 위 로고)')+
         inp('intro.cuts',((S.intro&&S.intro.cuts)||[]).join(', '),'인트로 단어 (쉼표로 나눔, 순서대로 나와요)','',' data-list="1"')+
         '<button type="button" data-a="playIntro">인트로 미리 보기</button>';
@@ -188,7 +201,9 @@
         '<div class="ad-sub"><b>GitHub에 저장</b></div>'+
         '<p class="ad-tip">GitHub에서 만든 <b>토큰</b>을 한 번 넣어두면 이 컴퓨터에서는 계속 쓸 수 있어요. 토큰은 이 브라우저에만 저장되고 사이트 파일에는 들어가지 않아요.</p>'+
         '<label class="ad-f" for="adToken"><span>토큰</span><input id="adToken" type="password" autocomplete="off" placeholder="github_pat_…" value="'+esc(tok)+'"></label>'+
-        '<button type="button" class="ad-main" data-a="push">GitHub에 저장</button>'+
+        '<button type="button" data-a="autoToggle">'+(autoOn()?'✓ 자동 저장 켜짐 (끄기)':'자동 저장 꺼짐 (켜기)')+'</button>'+
+        '<p class="ad-tip">자동 저장이 켜져 있으면 고치고 2초 뒤 저절로 저장되고, 1분쯤 뒤 모든 사람 화면에 반영돼요.</p>'+
+        '<button type="button" class="ad-main" data-a="push">지금 바로 저장</button>'+
         '<p class="ad-msg" id="adMsg" role="status"></p>'+
         '<div class="ad-sub"><b>다른 방법</b></div>'+
         '<button type="button" data-a="copy">data.js 내용 복사</button>'+
@@ -198,6 +213,7 @@
     panel.innerHTML=html+'</div>';
     var body=panel.querySelector('.ad-body');if(body)body.scrollTop=keepScroll;
     status();
+    setChip(!autoOn()?'off':!getToken()?'notoken':dirty()?'wait':'ok');
   }
   function status(){
     var n=document.getElementById('adState');
@@ -239,7 +255,9 @@
       try{localStorage.removeItem('msp-draft')}catch(err){}
       replaceSite(JSON.parse(ORIG));MSP.render();msg('바뀐 내용을 모두 버리고 원래대로 돌렸어요.',true);return;
     }
-    else if(a==='push'){push();return}
+    else if(a==='push'){push(false);return}
+    else if(a==='resetUI'){S.ui={zoom:1,hero:1,title:1,gap:1};MSP.applyUI&&MSP.applyUI();saveDraft();drawPanel();return}
+    else if(a==='autoToggle'){try{localStorage.setItem('msp-auto',autoOn()?'0':'1')}catch(err){}drawPanel();scheduleAuto();return}
     else return;
     saveDraft();MSP.render();
   });
@@ -252,6 +270,7 @@
     var v=c.value;
     if(c.dataset.list)v=v.split(',').map(function(s){return s.trim()}).filter(Boolean);
     else if(c.type==='number')v=parseInt(v,10)||0;
+    else if(c.type==='range'){v=parseFloat(v)||1;var rl=document.getElementById(c.id+'-v');if(rl)rl.textContent=Math.round(v*100)+'%';setPath(S,p,v);MSP.applyUI&&MSP.applyUI();saveDraft();return}
     else if(c.dataset.yt)v=ytId(v);
     setPath(S,p,v);saveDraft();
     // 패널 입력칸에 커서가 있으니 본문만 다시 그림
@@ -262,29 +281,51 @@
 
   /* ── GitHub에 저장 ── */
   function b64(str){var bytes=new TextEncoder().encode(str),bin='';for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);return btoa(bin)}
-  async function push(){
-    var inpEl=document.getElementById('adToken'),token=(inpEl&&inpEl.value||'').trim();
-    if(!token){msg('토큰을 먼저 넣어 주세요.');return}
+  /* 저장 방식: 고치고 2초 동안 손을 멈추면 GitHub에 자동 저장 (토큰이 있을 때) → 1분쯤 뒤 모든 사람 화면에 반영
+     저장 중에 또 고치면 끝난 뒤 한 번 더 저장 (순서대로 하나씩) */
+  var busy=false,again=false,lastSha=null,autoT=0;
+  function getToken(){var el=document.getElementById('adToken');var t=(el&&el.value||'').trim();if(!t){try{t=localStorage.getItem('msp-gh-token')||''}catch(e){}}return t}
+  function autoOn(){try{return localStorage.getItem('msp-auto')!=='0'}catch(e){return true}}
+  function scheduleAuto(){clearTimeout(autoT);if(!on||!autoOn()||!getToken()||!dirty())return;setChip('wait');autoT=setTimeout(function(){push(true)},2000)}
+  function setChip(st,extra){
+    var c=document.getElementById('adAuto');if(!c)return;
+    var T={off:'자동 저장 꺼짐',notoken:'토큰을 넣으면 자동 저장돼요',wait:'고치는 중…',saving:'저장하는 중…',ok:'✓ 저장됨 · 1분쯤 뒤 사이트에 반영',err:'저장 실패 — [저장] 탭 확인'};
+    c.textContent=T[st]+(extra?' '+extra:'');c.className='ad-auto st-'+st;
+  }
+  async function push(silent){
+    var token=getToken();
+    if(!token){if(!silent)msg('토큰을 먼저 넣어 주세요.');setChip('notoken');return}
+    if(busy){again=true;return}
+    busy=true;
     try{localStorage.setItem('msp-gh-token',token)}catch(e){}
     var api='https://api.github.com/repos/'+REPO.owner+'/'+REPO.repo+'/contents/'+REPO.path;
     var h={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'};
-    msg('저장하는 중…',true);
+    var snap=JSON.stringify(S);
+    if(!silent)msg('저장하는 중…',true);setChip('saving');
+    var fail=function(t){busy=false;msg(t);setChip('err')};
     try{
-      var r=await fetch(api+'?ref='+REPO.branch,{headers:h,cache:'no-store'});
-      if(r.status===401){msg('토큰이 맞지 않아요. 토큰을 다시 확인해 주세요.');return}
-      if(r.status===403){msg('이 토큰으로는 저장소를 볼 수 없어요. 토큰에 ms-portfolio 저장소의 Contents 읽기/쓰기 권한을 주세요.');return}
-      if(r.status===404){msg('저장소를 찾지 못했어요. 토큰에 ms-portfolio 저장소 권한(Contents: 읽기/쓰기)이 있는지 확인해 주세요.');return}
-      if(!r.ok){msg('GitHub이 응답하지 않아요 ('+r.status+'). 잠시 뒤 다시 눌러 주세요.');return}
-      var cur=await r.json();
-      r=await fetch(api,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},h),
-        body:JSON.stringify({message:'관리자 모드에서 내용 수정',content:b64(toFile()),sha:cur.sha,branch:REPO.branch})});
-      if(r.status===403||r.status===404){msg('토큰에 쓰기 권한이 없어요. Contents 권한을 "읽기/쓰기"로 해 주세요.');return}
-      if(r.status===409||r.status===422){msg('그 사이 파일이 바뀌었어요. 다시 한 번 눌러 주세요.');return}
-      if(!r.ok){msg('저장에 실패했어요 ('+r.status+').');return}
-      ORIG=JSON.stringify(S);try{localStorage.removeItem('msp-draft')}catch(e){}
-      status();msg('저장했어요! 1~2분 뒤 사이트에 반영돼요.',true);
+      for(var tryN=0;tryN<2;tryN++){
+        if(!lastSha||tryN>0){
+          var r=await fetch(api+'?ref='+REPO.branch,{headers:h,cache:'no-store'});
+          if(r.status===401)return fail('토큰이 맞지 않아요. 토큰을 다시 확인해 주세요.');
+          if(r.status===403||r.status===404)return fail('이 토큰으로는 저장소에 들어갈 수 없어요. 토큰에 ms-portfolio 저장소의 Contents 읽기/쓰기 권한을 주세요.');
+          if(!r.ok)return fail('GitHub이 응답하지 않아요 ('+r.status+'). 잠시 뒤 다시 해 주세요.');
+          lastSha=(await r.json()).sha;
+        }
+        var w=await fetch(api,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},h),
+          body:JSON.stringify({message:'관리자 모드에서 내용 수정',content:b64(toFile()),sha:lastSha,branch:REPO.branch})});
+        if(w.status===409||w.status===422){lastSha=null;continue} // 그 사이 파일이 바뀜 → 새로 읽고 한 번 더
+        if(w.status===403||w.status===404)return fail('토큰에 쓰기 권한이 없어요. Contents 권한을 "읽기/쓰기"로 해 주세요.');
+        if(!w.ok)return fail('저장에 실패했어요 ('+w.status+').');
+        try{lastSha=(await w.json()).content.sha}catch(e){lastSha=null}
+        ORIG=snap;try{if(!dirty())localStorage.removeItem('msp-draft')}catch(e){}
+        busy=false;status();setChip('ok');if(!silent)msg('저장했어요! 1분쯤 뒤 사이트에 반영돼요.',true);
+        if(again||dirty()){again=false;scheduleAuto()}
+        return;
+      }
+      fail('그 사이 파일이 여러 번 바뀌었어요. 잠시 뒤 다시 해 주세요.');
     }catch(err){
-      msg('이 화면에서는 GitHub에 연결할 수 없어요. (Claude 미리보기 화면은 외부 연결이 막혀 있어요. 실제 사이트에서 저장해 주세요.)');
+      fail('이 화면에서는 GitHub에 연결할 수 없어요. (Claude 미리보기 화면은 외부 연결이 막혀 있어요. 실제 사이트에서 해 주세요.)');
     }
   }
 

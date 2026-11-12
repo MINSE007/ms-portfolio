@@ -8,7 +8,7 @@
 .h-meta span:first-child{color:var(--acc)}
 .h-main{display:block}
 /* 제목: 인트로 슬로건과 똑같은 모양이라 그대로 이어져요 (js/intro.js) */
-.hero h1,.i-slogan{font-weight:900;font-size:clamp(44px,8.4vw,120px);line-height:1.02;letter-spacing:-.055em}
+.hero h1,.i-slogan{font-weight:900;font-size:calc(clamp(44px,8.4vw,120px) * var(--k-hero,1));line-height:1.02;letter-spacing:-.055em}
 .hero h1 .l,.i-slogan .ln{display:block;padding-bottom:.06em}
 .hero h1 .l2,.i-slogan .ln.l2{color:var(--acc)}
 .hero .sub{margin:30px 0 34px;font-size:clamp(16px,1.6vw,18.5px);color:var(--muted);max-width:34em}

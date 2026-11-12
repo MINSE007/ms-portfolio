@@ -117,11 +117,12 @@ nav.has-on .nav-ind{opacity:1}
 .btn.ghost:hover{background:var(--hover)}
 
 /* 섹션 머리: 번호 · 제목 · 설명 (왼쪽 제목, 오른쪽 설명) */
-.sec{padding-block:128px 0}
+main{zoom:var(--k-zoom,1)}
+.sec{padding-block:calc(128px * var(--k-gap,1)) 0}
 .sh{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px 40px;align-items:end;padding-bottom:22px;margin-bottom:40px;border-bottom:1px solid var(--line)}
 .sh .no{display:flex;align-items:center;gap:10px;color:var(--acc);margin-bottom:14px}
 .sh .no .lv{font-size:10.5px;padding:2px 9px;border-radius:999px;border:1px solid currentColor;letter-spacing:.14em}
-.sh h2{font-size:clamp(34px,5vw,60px);font-weight:900;line-height:1.08}
+.sh h2{font-size:calc(clamp(34px,5vw,60px) * var(--k-title,1));font-weight:900;line-height:1.08}
 .sh p{color:var(--muted);max-width:30em;justify-self:end;text-align:right}
 
 /* 맨 아래 */
@@ -142,6 +143,6 @@ footer .bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:1
 @media (max-width:640px){
   .pillcta{display:none}
   .logo{padding-right:12px}
-  .sec{padding-block:88px 0}
+  .sec{padding-block:calc(88px * var(--k-gap,1)) 0}
   footer .wrap{grid-template-columns:1fr}
 }

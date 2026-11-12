@@ -229,7 +229,9 @@
             '<button class="more" type="button" data-i="'+o.i+'" data-label="'+(main.length?'기록 '+rest.length+'개 더':'기록 보기')+'" aria-expanded="'+open+'">'+(open?'접기':(main.length?'기록 '+rest.length+'개 더':'기록 보기'))+'</button>';
         }
         if(f.note)res='<span class="fnote"'+ed('film.films.'+o.i+'.note')+'>'+esc(f.note)+'</span>'+res; // 오른쪽 여백 메모 (예: 프리 프로덕션 진행 중)
-        return '<li class="fr'+(open?' open':'')+'"><span class="t">'+esc(f.title)+'</span><span class="ro">'+roleText(f.roles)+'</span><span class="res">'+res+'</span></li>';
+        var adm=root.classList.contains('admin'),fp='film.films.'+o.i+'.';
+        var ro=adm?'<span class="ro" data-edit="'+fp+'roles" data-list="1">'+esc((f.roles||[]).join(' · '))+'</span>':'<span class="ro">'+roleText(f.roles)+'</span>';
+        return '<li class="fr'+(open?' open':'')+'"><span class="t"'+ed(fp+'title')+'>'+esc(f.title)+'</span>'+ro+'<span class="res">'+res+'</span></li>';
       }).join('')+'</ul></div>';
     }).join('');
     applyClip();
@@ -289,7 +291,11 @@
   }
 
   /* ── 전체 그리기 ── */
+  /* 관리자 모드 [설정] '화면 크기' → CSS 변수 */
+  function applyUI(){var u=S.ui||{};['zoom','hero','title','gap'].forEach(function(k){var v=parseFloat(u[k]);root.style.setProperty('--k-'+k,isFinite(v)&&v>0?v:1)})}
+  MSP.applyUI=applyUI;
   function render(){
+    applyUI();
     renderNav();renderHero();
     $('sections').innerHTML=visible().map(function(x,i){
       return '<section class="sec" id="'+x.id+'">'+SECTIONS[x.id](i+1)+'</section>';

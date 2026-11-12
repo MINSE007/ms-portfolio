@@ -21,6 +21,7 @@
   ];
   var DEFAULT_CUTS=['YOUTUBE','FILM','EDIT','8년','상상','을','현실','로.'];
   var HOLD=720, FLY=750;
+  var SLATE_MS=1150; // 맨 처음 슬레이트(딱!) 길이 — 0이면 슬레이트 없이 바로 컷
   var MSP=window.MSP||{},S=window.SITE,root=document.documentElement;
   var el=document.getElementById('intro');if(!el)return;
   var stage=document.getElementById('iCuts'),slog=document.getElementById('iSlogan');
@@ -46,6 +47,13 @@
       if(sty==='out'&&/[가-힣一-龥]/.test(String(t)))sty='fill';
       return '<div class="cut s-'+sty+' p-'+L[1]+' m-'+L[3]+'"><span class="tx" style="--fs:'+fontSize(String(t))+'">'+esc(t)+'</span></div>';
     }).join('');
+    // 슬레이트: 내용은 data.js 의 intro.slate
+    var sl=(S.intro&&S.intro.slate)||{},d=new Date(),day=d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate());
+    var box=document.getElementById('iSlate');if(!box){box=document.createElement('div');box.id='iSlate';box.setAttribute('aria-hidden','true');el.insertBefore(box,stage)}
+    box.innerHTML='<div class="sl-wrap"><div class="sl-stick sl-top"><i></i></div><div class="sl-stick sl-bot"></div>'+
+      '<div class="sl-board"><div class="sl-prod">'+esc(sl.studio||'MS STUDIO')+'</div>'+
+      '<div class="sl-row"><div><small>SCENE</small><b>'+esc(sl.scene||'09')+'</b></div><div><small>CUT</small><b>'+esc(sl.cut||'07')+'</b></div><div><small>TAKE</small><b>'+esc(sl.take||'30')+'</b></div></div>'+
+      '<div class="sl-row sl-meta"><div><small>DIRECTOR</small><span>'+esc(sl.director||'kimminseo')+'</span></div><div><small>DATE</small><span>'+day+'</span></div></div></div></div>';
     slog.innerHTML='<span class="sl-in"><span class="ln l1"><span>'+esc(S.hero.title1)+'</span></span><span class="ln l2"><span>'+esc(S.hero.title2)+'</span></span></span>';
     return cuts.length;
   }
@@ -85,7 +93,15 @@
     slog.style.transition='none';slog.style.transform='none';
     var go=function(){
       if(!running)return;
-      var t=60;
+      // ① 슬레이트가 들어와서 → 딱! 치고 → 빠짐
+      var useSlate=!calm&&SLATE_MS>0;
+      if(useSlate){
+        el.classList.add('s-on');
+        at(560,function(){el.classList.add('s-clap')});
+        at(880,function(){el.classList.add('s-out')});
+        at(SLATE_MS,function(){el.classList.remove('s-on','s-clap','s-out')});
+      }
+      var t=useSlate?SLATE_MS:60;
       for(var i=0;i<n;i++)(function(i){at(t,function(){show(i,n)});t+=calm?320:LOOK[i%LOOK.length][4]})(i);
       at(t,function(){
         show(-1,n);el.removeAttribute('data-bg');

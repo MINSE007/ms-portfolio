@@ -12,6 +12,9 @@ window.SITE = {
     "shortcut": "Ctrl+Shift+E"
   },
 
+  /* 화면 크기 (1 = 기본, 1.1 = 10% 크게) — 관리자 모드 [설정]에서 조절 */
+  "ui": { "zoom": 1, "hero": 1, "title": 1, "gap": 1 },
+
   /* ① 사이트 이름 */
   "site": {
     "name": "MS PORTFOLIO",
@@ -20,7 +23,9 @@ window.SITE = {
 
   /* ② 인트로 — 단어들이 컷처럼 빠르게 지나간 뒤 첫 화면 제목으로 이어져요 */
   "intro": {
-    "cuts": ["YOUTUBE", "FILM", "EDIT", "8년", "상상", "을", "현실", "로."]
+    "cuts": ["YOUTUBE", "FILM", "EDIT", "8년", "상상", "을", "현실", "로."],
+    /* 맨 처음 슬레이트 (딱! 치는 장면) */
+    "slate": { "studio": "MS STUDIO", "scene": "09", "cut": "07", "take": "30", "director": "kimminseo" }
   },
 
   /* ③ 첫 화면 */
