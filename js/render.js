@@ -198,14 +198,29 @@
         return '<div class="sq-lane">'+clips+'</div>';
       }).join('');
       var empty=!C.length?'<p class="sq-empty">클립 준비 중 — 곧 채워집니다</p>':'';
+      var cn=counts();
+      var stats=(e.stats||[]).map(function(f,i){
+        var v=String(f.value),auto=v.indexOf('auto:')===0,p='edit.stats.'+i+'.';
+        return '<li><b class="num">'+(auto?esc(cn[v.slice(5)]):'<span'+ed(p+'value')+'>'+esc(v)+'</span>')+'<small'+ed(p+'unit')+'>'+esc(f.unit)+'</small></b><span'+ed(p+'label')+'>'+esc(f.label)+'</span></li>';
+      }).join('');
+      var tools=(e.tools||[]).map(function(t,i){var p='edit.tools.'+i+'.';
+        return '<li><span class="sq-ico"'+ed(p+'short')+'>'+esc(t.short)+'</span><div><b'+ed(p+'name')+'>'+esc(t.name)+'</b><small'+ed(p+'role')+'>'+esc(t.role)+'</small></div></li>'}).join('');
+      var bar=function(t,r){return '<div class="sq-pbar"><span>'+t+'</span>'+(r||'')+'</div>'};
       return head('edit',n)+'<div class="sq rv" id="seq" style="--ny:'+ny+'">'+
-        // ① 모니터
-        '<div class="sq-top"><div class="sq-mon"><div class="sq-mon-bar"><span>Program: '+esc(tl.name||'Sequence 01')+'</span><span class="sq-tc num" id="seqTC">00:00:00:00</span></div>'+
-          '<div class="sq-screen" id="seqScreen"><span class="mono" id="seqYear">'+esc(Y[0]||'')+'</span><b id="seqTitle"></b><p id="seqDesc"></p></div></div>'+
-          '<div class="sq-info"><span class="mono">EDITING CAREER</span><div class="sq-yrs"><b class="num"'+ed('edit.years')+'>'+esc(e.years)+'</b><small>년</small></div>'+
-          '<p class="sq-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div></div>'+
-        // ② 타임라인
-        '<div class="sq-tl"><div class="sq-bar"><span class="sq-tab">'+esc(tl.name||'Sequence 01')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
+        // ① 위: 소개(Source) + 모니터(Program)
+        '<div class="sq-row sq-r1">'+
+          '<div class="sq-pn sq-about">'+bar('Source: 소개')+'<div class="sq-pad">'+
+            '<span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'VIDEO EDITOR')+'</span>'+
+            '<h3 class="sq-name"'+ed('edit.name')+'>'+esc(e.name||'')+'</h3>'+
+            '<p class="sq-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div></div>'+
+          '<div class="sq-pn sq-mon">'+bar('Program: '+esc(tl.name||'Sequence 01'),'<span class="sq-tc num" id="seqTC">00:00:00:00</span>')+
+            '<div class="sq-screen" id="seqScreen"><span class="mono" id="seqYear">'+esc(Y[0]||'')+'</span><b id="seqTitle"></b><p id="seqDesc"></p></div></div></div>'+
+        // ② 가운데: 숫자(Info) + 쓰는 프로그램(Project)
+        '<div class="sq-row sq-r2">'+
+          '<div class="sq-pn">'+bar('Info')+'<ul class="sq-stats">'+stats+'</ul></div>'+
+          '<div class="sq-pn">'+bar('Project: 쓰는 프로그램')+'<ul class="sq-tools">'+tools+'</ul></div></div>'+
+        // ③ 아래: 타임라인 = 성장 기록
+        '<div class="sq-tl"><div class="sq-bar"><span class="sq-tab">'+esc(tl.name||'Sequence 01')+'</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
           '<div class="sq-scroll"><div class="sq-grid"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
           '<div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+empty+'</div>'+
           '<div class="sq-ph" id="seqPH" aria-hidden="true"><i></i></div></div></div></div></div></div>';

@@ -201,6 +201,24 @@ window.SITE = {
     "title": "편집",
     "desc": "모든 작업은 결국\n편집에서 완성됩니다.",
     "years": "8",
+    /* 소개 (시퀀스 화면 왼쪽 위) */
+    "eyebrow": "VIDEO EDITOR",
+    "name": "영상 편집자, 김민서.",
+    /* 숫자 4칸 — value에 auto:films(참여한 영화 수) · auto:stages(제작 중인 영화 수)를 쓰면 자동으로 세요 */
+    "stats": [
+      { "value": "8", "unit": "년", "label": "편집 경력" },
+      { "value": "auto:films", "unit": "편", "label": "참여한 영화" },
+      { "value": "1", "unit": "채널", "label": "직접 운영하는 유튜브" },
+      { "value": "auto:stages", "unit": "편", "label": "지금 만드는 영화" }
+    ],
+    /* 쓰는 프로그램 */
+    "tools": [
+      { "short": "Pr", "name": "Premiere Pro", "role": "컷 편집 · 자막 · 사운드" },
+      { "short": "Ae", "name": "After Effects", "role": "모션그래픽 · 타이틀" },
+      { "short": "Ps", "name": "Photoshop", "role": "썸네일 · 이미지" },
+      { "short": "Ai", "name": "Illustrator", "role": "로고 · 그래픽" }
+    ],
+    "hint": "재생선을 움직이면 해마다 무엇을 편집했는지 볼 수 있어요.",
     "lead": "편집은 촬영이 끝난 뒤에 시작되는\n두 번째 연출이라고 생각해요.\n유튜브의 빠른 호흡부터 단편 영화의 긴 여운까지,\n찍어둔 장면이 가장 잘 보이는 순서를\n8년째 찾고 있습니다.",
     /* 프리미어 시퀀스처럼 보이는 타임라인
        years: 맨 위 눈금 / tracks: 왼쪽 줄 이름 (V = 영상, A = 소리)
