@@ -212,7 +212,10 @@
         W.map(function(w,i){
           var p='outsource.works.'+i+'.';
           return '<div class="ad-card">'+inp(p+'title',w.title,'제목')+'<div class="ad-2">'+inp(p+'client',w.client,'의뢰')+inp(p+'year',w.year,'연도')+'</div>'+
-            inp(p+'role',w.role,'맡은 일')+area(p+'desc',w.desc,'설명')+inp(p+'link',w.link,'영상 주소','url')+
+            inp(p+'role',w.role,'맡은 일')+area(p+'desc',w.desc,'설명')+
+            (w.videos||[]).map(function(v,j){return '<div class="ad-2">'+inp(p+'videos.'+j+'.title',v.title,'영상 '+(j+1)+' 이름')+inp(p+'videos.'+j+'.link',v.link,'영상 '+(j+1)+' 주소','url')+'</div>'+
+              '<button type="button" class="ad-del" data-a="delWVid" data-i="'+i+'" data-j="'+j+'">영상 '+(j+1)+' 빼기</button>'}).join('')+
+            '<button type="button" data-a="addWVid" data-i="'+i+'">+ 이 카드에 영상 추가</button>'+
             '<button type="button" class="ad-del" data-a="delWork" data-i="'+i+'">이 외주 삭제</button></div>';
         }).join('');
     }else if(tab==='film'){
@@ -315,9 +318,11 @@
     else if(a==='addWork'){
       if(!S.outsource)S.outsource={en:'OUTSOURCING',badge:'WORK',title:'외주',desc:'',works:[]};
       if(!S.layout.some(function(x){return x.id==='outsource'}))S.layout.splice(1,0,{id:'outsource',show:true});
-      S.outsource.works.unshift({title:'새 외주 작업',client:'',year:'',role:'',desc:'',link:''});
+      S.outsource.works.unshift({title:'새 외주 작업',client:'',year:'',role:'',desc:'',link:'',videos:[{title:'',link:''}]});
     }
     else if(a==='delWork'){S.outsource.works.splice(i,1)}
+    else if(a==='addWVid'){var w=S.outsource.works[i];w.videos=w.videos||(w.link?[{title:'',link:w.link}]:[]);w.link='';w.videos.push({title:'',link:''})}
+    else if(a==='delWVid'){S.outsource.works[i].videos.splice(+b.dataset.j,1)}
     else if(a==='copy'){
       var t=toFile();
       try{navigator.clipboard.writeText(t).then(function(){msg('복사했어요. GitHub의 js/data.js 에 붙여 넣으면 돼요.',true)},function(){msg('복사가 막혀 있어요. GitHub에 저장 버튼을 써 주세요.')})}catch(err){msg('복사가 막혀 있어요.')}

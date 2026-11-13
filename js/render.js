@@ -128,16 +128,21 @@
         '<div class="vids">'+grid+'</div></div>';
     },
     outsource:function(n){
-      var o=S.outsource,works=o.works||[];
+      // 한 의뢰처 = 카드 하나. 카드 안에 영상 여러 개(썸네일 나란히)
+      var o=S.outsource,works=o.works||[],rich=function(t){return txt(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')};
       return head('outsource',n)+'<div class="cases'+(works.length===1?' solo':'')+'">'+works.map(function(w,i){
         var p='outsource.works.'+i+'.';
-        var m=String(w.link||'').match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{6,})/);
-        var th=m?'<a class="cs-thumb thumb" data-yt="'+esc(m[1])+'" href="'+esc(w.link)+'" target="_blank" rel="noopener" aria-label="영상 보기"><span class="play"></span></a>':'';
-        return '<article class="case glass rv'+(th?' has-th':'')+'">'+th+'<div class="cs-body"><div class="cs-top"><span class="cs-no">CASE '+pad(i+1)+'</span>'+(w.year?'<span'+ed(p+'year')+'>'+esc(w.year)+'</span>':'')+'</div>'+
+        var V=(w.videos&&w.videos.length)?w.videos:(w.link?[{title:'',link:w.link}]:[]);
+        var th=V.map(function(v,j){
+          var m=String(v.link||'').match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{6,})/);if(!m)return '';
+          return '<a class="cs-v" href="'+esc(v.link)+'" target="_blank" rel="noopener"><span class="cs-thumb thumb" data-yt="'+esc(m[1])+'"><span class="play"></span></span>'+
+            (v.title?'<small'+ed(p+'videos.'+j+'.title')+'>'+esc(v.title)+' ↗</small>':'')+'</a>';
+        }).join('');
+        return '<article class="case glass rv'+(th?' has-th':'')+'">'+(th?'<div class="cs-vids n'+Math.min(V.length,3)+'">'+th+'</div>':'')+
+          '<div class="cs-body"><div class="cs-top"><span class="cs-no">CASE '+pad(i+1)+'</span>'+(w.year?'<span'+ed(p+'year')+'>'+esc(w.year)+'</span>':'')+'</div>'+
           '<h3'+ed(p+'title')+'>'+esc(w.title)+'</h3>'+
           '<dl class="meta"><dt>의뢰</dt><dd'+ed(p+'client')+'>'+esc(w.client)+'</dd><dt>맡은 일</dt><dd'+ed(p+'role')+'>'+esc(w.role)+'</dd></dl>'+
-          '<p'+ed(p+'desc')+'>'+txt(w.desc)+'</p>'+
-          (w.link?'<a class="cs-link" href="'+esc(w.link)+'" target="_blank" rel="noopener">영상 보기 ↗</a>':'')+'</div></article>';
+          '<p'+ed(p+'desc')+'>'+rich(w.desc)+'</p></div></article>';
       }).join('')+'</div>';
     },
     film:function(n){
@@ -209,7 +214,7 @@
         '<div class="sq-ws"><span>Learning</span><span>Assembly</span><span class="on">Editing</span><span>Color</span><span>Effects</span><span>Audio</span><span>Graphics</span></div>'+
         '<div class="sq-grid2">'+
           // ① 이야기 (재생선이 지나는 해의 글) — 길면 이 칸 안에서 스크롤
-          '<section class="sq-pn sq-src">'+tab(['Source: 발자취','Effect Controls'])+
+          '<section class="sq-pn sq-src">'+'<div class="sq-tabs"><span class="on">Source:&nbsp;<i'+ed('edit.name')+'>'+esc(S.edit.name||'')+'</i></span><span>Effect Controls</span></div>'+
             '<div class="sq-story" id="seqStory"></div></section>'+
           // ② 모니터
           '<section class="sq-pn sq-mon">'+tab(['Program: '+nm])+
@@ -389,16 +394,16 @@
     var st=$('seqStory');if(!st)return;
     if(!st.querySelector('.sq-yr')){
       var e=S.edit,rich=function(t){return txt(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')};
-      var h='<div class="sq-who"><span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'')+'</span><h3'+ed('edit.name')+'>'+esc(e.name||'')+'</h3></div>';
+      var h='';
       Y.forEach(function(y,yi){
         var mi=-1;C.forEach(function(c,i){if(c.main&&(+c.from||0)===yi&&mi<0)mi=i});
         var subs=C.map(function(c,i){var f=+c.from||0,t=c.to==null?f:+c.to;return (i!==mi&&!c.main&&yi>=f&&yi<=t)?'<span>'+esc(c.title)+'</span>':''}).join('');
-        var body='';
-        if(mi>=0){var c=C[mi],pp='edit.timeline.clips.'+mi+'.';
-          body='<h4'+ed(pp+'title')+'>'+esc(c.title)+'</h4>'+(subs?'<div class="sq-tags">'+subs+'</div>':'')+
-            '<div class="sq-body-txt">'+(c.desc?String(c.desc).split(/\n{2,}/).map(function(par){return '<p>'+rich(par)+'</p>'}).join(''):'<p class="sq-mu">아직 글이 없어요.</p>')+'</div>';
-        }else body=(subs?'<div class="sq-tags">'+subs+'</div>':'')+'<div class="sq-body-txt"><p'+(yi===0?ed('edit.lead'):'')+'>'+(yi===0?txt(e.lead):'아직 글이 없어요.')+'</p></div>';
-        h+='<section class="sq-yr" data-y="'+yi+'"><span class="sq-yn">'+esc(y)+'</span>'+body+'</section>';
+        var c=mi>=0?C[mi]:null,pp='edit.timeline.clips.'+mi+'.';
+        // 한눈에 보이게: 해마다 한 줄(연도 + 제목), 재생선이 있는 해만 펼쳐서 짧은 글
+        var tt=c?'<b'+ed(pp+'title')+'>'+esc(c.title)+'</b>':'<b>시작</b>';
+        var body=c?'<p'+ed(pp+(c.short?'short':'desc'))+'>'+rich(c.short||c.desc||'')+'</p>':'<p'+(yi===0?ed('edit.intro0'):'')+'>'+(yi===0?txt(e.intro0||''):'')+'</p>';
+        h+='<section class="sq-yr" data-y="'+yi+'"><div class="sq-yh"><span class="sq-yn">'+esc(y)+'</span>'+tt+'</div>'+
+          '<div class="sq-yd">'+(subs?'<div class="sq-tags">'+subs+'</div>':'')+body+'</div></section>';
       });
       st.innerHTML=h;st.dataset.k='';
       if(root.classList.contains('admin')&&MSP.adminMakeEditable)MSP.adminMakeEditable();
@@ -407,7 +412,7 @@
       var first=st.dataset.k==='';st.dataset.k=String(col);
       st.querySelectorAll('.sq-yr').forEach(function(x){x.classList.toggle('on',+x.getAttribute('data-y')===col)});
       var cur=st.querySelector('.sq-yr.on');
-      if(cur&&!root.classList.contains('admin')){var top=col===0?0:cur.offsetTop-12;if(first)st.scrollTop=top;else st.scrollTo({top:top,behavior:'smooth'})}
+      if(cur&&!root.classList.contains('admin')&&st.scrollHeight>st.clientHeight+2){var top=col===0?0:cur.offsetTop-12;if(first)st.scrollTop=top;else st.scrollTo({top:top,behavior:'smooth'})}
     }
   }
   (MSP.onRender=MSP.onRender||[]).push(seqLayout);
