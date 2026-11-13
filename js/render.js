@@ -192,7 +192,7 @@
         return '<div class="sq-lane">'+C.map(function(c,i){
           if(c.track!==t)return '';
           var f=Math.max(0,Math.min(ny-1,+c.from||0)),to=Math.max(f,Math.min(ny-1,c.to==null?f:+c.to));
-          return '<button type="button" class="sq-clip '+(/^A/i.test(t)?'is-a':'is-v')+'" data-ci="'+i+'" style="left:calc('+(f/ny*100)+'% + 2px);width:calc('+((to-f+1)/ny*100)+'% - 4px)"><b'+ed('edit.timeline.clips.'+i+'.title')+'>'+esc(c.title)+'</b></button>';
+          return '<button type="button" class="sq-clip '+(/^A/i.test(t)?'is-a':'is-v')+'" '+(c.main?' is-main':'')+'" data-ci="'+i+'" title="'+esc(c.title)+'" aria-label="'+esc(c.title)+'" style="left:calc('+(f/ny*100)+'% + 2px);width:calc('+((to-f+1)/ny*100)+'% - 4px)"></button>';
         }).join('')+'</div>';
       }).join('');
       var stats=[].map(function(f,i){
@@ -222,7 +222,7 @@
           '<section class="sq-pn sq-tl"><div class="sq-tabs"><span class="on">'+nm+'</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
             '<div class="sq-tlbox"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
               '<div class="sq-scroll" id="seqScroll"><div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+'</div>'+
-              '<div class="sq-ph" id="seqPH" aria-hidden="true"><i></i></div></div></div>'+
+              '<div class="sq-ph" id="seqPH" aria-hidden="true"><em id="seqBadge"></em></div></div></div>'+
               (C.length?'':'<p class="sq-empty">클립 준비 중 — 곧 채워집니다</p>')+'</div></section>'+
         '</div></div>';
     },
@@ -359,7 +359,7 @@
 
   /* ── 편집 시퀀스: 연보라 재생선(막대)이 움직이고 배경(타임라인)은 가만히 — 막대가 화면 끝에 닿을 때만 배경이 따라 넘어감
      타임라인 안에서 끌기·휠 = 재생선 이동 (화면은 안 내려감) / 밖에서 휠 = 화면만 내려감 ── */
-  var seqP=0,MINYW=120;
+  var seqP=0,MINYW=56;
   function seqW(){var b=$('seqBody');return b?b.offsetWidth:1}
   function seqLayout(){
     var sc=$('seqScroll'),body=$('seqBody');if(!sc||!body)return;
@@ -371,32 +371,43 @@
     var sc=$('seqScroll'),ph=$('seqPH');if(!sc||!ph)return;
     seqP=Math.max(0,Math.min(1,p));var W=seqW(),x=seqP*W;
     ph.style.left=x+'px';
+    var bd=$('seqBadge');if(bd)bd.style.transform='translateX(-'+(seqP*100)+'%)';
     if(follow!==false){ // 막대가 보이는 칸 끝에 가까우면 배경을 따라 넘김
       var m=40;if(x<sc.scrollLeft+m)sc.scrollLeft=Math.max(0,x-m);else if(x>sc.scrollLeft+sc.clientWidth-m)sc.scrollLeft=x-sc.clientWidth+m;
     }
     var tl=S.edit.timeline||{},Y=tl.years||[],C=tl.clips||[],ny=Math.max(1,Y.length);
-    var col=Math.min(ny-1,Math.floor(seqP*ny)),fr=Math.round(seqP*8*3600*24);
+    var col=Math.min(ny-1,Math.floor(seqP*ny)),fr=Math.round(seqP*ny*86400);
     var tc=pad(Math.floor(fr/86400))+':'+pad(Math.floor(fr/1440)%60)+':'+pad(Math.floor(fr/24)%60)+':'+pad(fr%24);
-    $('seqTC').textContent=tc;$('seqTC2').textContent=tc;$('seqYear').textContent=Y[col]||'';
+    $('seqTC').textContent=tc;$('seqTC2').textContent=tc;$('seqYear').textContent=Y[col]||'';if($('seqBadge'))$('seqBadge').textContent=Y[col]||'';
     var xx=seqP*ny,hit=null,on={};
     C.forEach(function(c,i){var f=+c.from||0,t=(c.to==null?f:+c.to)+1;if(xx>=f&&xx<t){on[i]=1;if(!hit||(c.main&&!hit.c.main))hit={c:c,i:i}}});
     document.querySelectorAll('#seq .sq-clip').forEach(function(b){b.classList.toggle('on',!!on[b.getAttribute('data-ci')])});
     $('seqTitle').textContent=hit?hit.c.title:'';
     $('seqDesc').textContent=hit?'':'클립 준비 중';
     $('seqScreen').classList.toggle('has',!!hit);
-    // 왼쪽 이야기 칸: 그 해의 글 (없으면 소개)
-    var st=$('seqStory'),key=hit?'c'+hit.i:'intro';
-    if(st&&st.dataset.k!==key){
-      st.dataset.k=key;st.scrollTop=0;
+    // 왼쪽 이야기 칸: 영상편집자 김민서 → 해마다의 글을 차례로. 재생선이 있는 해만 밝게, 그 해로 스크롤
+    var st=$('seqStory');if(!st)return;
+    if(!st.querySelector('.sq-yr')){
       var e=S.edit,rich=function(t){return txt(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')};
-      if(hit){var c=hit.c,pp='edit.timeline.clips.'+hit.i+'.';
-        var subs=C.filter(function(x,i){return on[i]&&i!==hit.i}).map(function(x){return '<span>'+esc(x.title)+'</span>'}).join('');
-        st.innerHTML='<span class="mono">'+esc(Y[col]||'')+'</span><h3'+ed(pp+'title')+'>'+esc(c.title)+'</h3>'+(subs?'<div class="sq-tags">'+subs+'</div>':'')+
-          '<div class="sq-body-txt">'+(c.desc?String(c.desc).split(/\n{2,}/).map(function(par){return '<p>'+rich(par)+'</p>'}).join(''):'<p class="sq-mu">아직 글이 없어요.</p>')+'</div>';
-      }else{
-        st.innerHTML='<span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'')+'</span><h3'+ed('edit.name')+'>'+esc(e.name||'')+'</h3><div class="sq-body-txt"><p'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div>';
-      }
+      var h='<div class="sq-who"><span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'')+'</span><h3'+ed('edit.name')+'>'+esc(e.name||'')+'</h3></div>';
+      Y.forEach(function(y,yi){
+        var mi=-1;C.forEach(function(c,i){if(c.main&&(+c.from||0)===yi&&mi<0)mi=i});
+        var subs=C.map(function(c,i){var f=+c.from||0,t=c.to==null?f:+c.to;return (i!==mi&&!c.main&&yi>=f&&yi<=t)?'<span>'+esc(c.title)+'</span>':''}).join('');
+        var body='';
+        if(mi>=0){var c=C[mi],pp='edit.timeline.clips.'+mi+'.';
+          body='<h4'+ed(pp+'title')+'>'+esc(c.title)+'</h4>'+(subs?'<div class="sq-tags">'+subs+'</div>':'')+
+            '<div class="sq-body-txt">'+(c.desc?String(c.desc).split(/\n{2,}/).map(function(par){return '<p>'+rich(par)+'</p>'}).join(''):'<p class="sq-mu">아직 글이 없어요.</p>')+'</div>';
+        }else body=(subs?'<div class="sq-tags">'+subs+'</div>':'')+'<div class="sq-body-txt"><p'+(yi===0?ed('edit.lead'):'')+'>'+(yi===0?txt(e.lead):'아직 글이 없어요.')+'</p></div>';
+        h+='<section class="sq-yr" data-y="'+yi+'"><span class="sq-yn">'+esc(y)+'</span>'+body+'</section>';
+      });
+      st.innerHTML=h;st.dataset.k='';
       if(root.classList.contains('admin')&&MSP.adminMakeEditable)MSP.adminMakeEditable();
+    }
+    if(st.dataset.k!==String(col)){
+      var first=st.dataset.k==='';st.dataset.k=String(col);
+      st.querySelectorAll('.sq-yr').forEach(function(x){x.classList.toggle('on',+x.getAttribute('data-y')===col)});
+      var cur=st.querySelector('.sq-yr.on');
+      if(cur&&!root.classList.contains('admin')){var top=col===0?0:cur.offsetTop-12;if(first)st.scrollTop=top;else st.scrollTo({top:top,behavior:'smooth'})}
     }
   }
   (MSP.onRender=MSP.onRender||[]).push(seqLayout);

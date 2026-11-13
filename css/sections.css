@@ -247,8 +247,14 @@ html.admin .pg-st{padding:2px 8px;border-radius:999px;border:1px dashed var(--ac
 .sq-ctl .bk,.sq-ctl .pv{border-left:0;border-right:7px solid var(--sq-ctl)}
 .sq-ctl .pl{border-top-width:6px;border-bottom-width:6px;border-left-width:10px;border-left-color:var(--sq-tx);opacity:1}
 /* 이야기 칸 (재생선이 지나는 해의 글 — 이 칸 안에서만 스크롤) */
-.sq-story{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--sq-line) transparent}
+.sq-story{position:relative;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;scrollbar-width:thin;scrollbar-color:var(--sq-line) transparent}
 .sq-story .mono{color:var(--sq-acc)}
+.sq-who{padding-bottom:6px}
+.sq-yr{display:flex;flex-direction:column;gap:7px;padding:14px 0 6px;border-top:1px solid var(--sq-line);opacity:.38;transition:opacity .35s}
+.sq-yr.on{opacity:1}
+.sq-yn{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--sq-acc)}
+.sq-yr h4{margin:0;font-size:clamp(15px,1.35vw,18px);font-weight:900;letter-spacing:-.035em;line-height:1.3}
+html.admin .sq-yr{opacity:1}
 .sq-story h3{margin:0;font-size:clamp(18px,1.8vw,23px);font-weight:900;letter-spacing:-.04em;line-height:1.25}
 .sq-tags{display:flex;flex-wrap:wrap;gap:5px}
 .sq-tags span{font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;background:rgba(195,163,238,.12);color:var(--sq-acc)}
@@ -280,24 +286,25 @@ html.admin .pg-st{padding:2px 8px;border-radius:999px;border:1px dashed var(--ac
 .sq-th i{width:7px;height:7px;border-radius:2px;border:1.5px solid var(--sq-mu);opacity:.6}
 .sq-th .sq-eye{border-radius:50%}
 .sq-corner{height:26px}
-.sq-scroll{overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#3A3348 transparent}
+.sq-scroll{overflow:hidden;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:#3A3348 transparent}
 .sq-body{position:relative;cursor:ew-resize}
 .sq-ruler{height:26px;display:grid;grid-template-columns:repeat(var(--ny),1fr);border-bottom:1px solid var(--sq-line);
   background:repeating-linear-gradient(90deg,transparent 0 calc(100% / var(--ny) / 8 - 1px),rgba(195,163,238,.2) calc(100% / var(--ny) / 8 - 1px) calc(100% / var(--ny) / 8)) bottom/100% 5px no-repeat}
 .sq-ruler span{display:flex;align-items:center;padding-left:7px;font-size:11px;font-weight:600;color:var(--sq-mu);border-left:1px solid rgba(195,163,238,.22);white-space:nowrap;font-variant-numeric:tabular-nums}
 .sq-lane{position:relative;height:30px;border-bottom:1px solid var(--sq-line);
   background:repeating-linear-gradient(90deg,transparent 0 calc(100% / var(--ny) - 1px),rgba(195,163,238,.04) calc(100% / var(--ny) - 1px) calc(100% / var(--ny)))}
-.sq-clip{position:absolute;top:3px;bottom:3px;border:0;border-radius:4px;padding:0 9px;text-align:left;font:inherit;font-size:11.5px;color:#fff;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
-  background:var(--sq-v);box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);transition:filter .2s,box-shadow .2s}
-.sq-clip.is-a{background:var(--sq-a)}
-.sq-clip b{font-weight:600}
-.sq-clip:hover{filter:brightness(1.12)}
-.sq-clip.on{box-shadow:inset 0 0 0 2px #fff}
+.sq-clip{position:absolute;top:6px;bottom:6px;border:0;border-radius:4px;padding:0;cursor:pointer;
+  background:color-mix(in srgb,var(--sq-v) 34%,var(--sq-pn));transition:background .25s,filter .2s}
+.sq-clip.is-main{background:color-mix(in srgb,var(--sq-v) 52%,var(--sq-pn))}
+.sq-clip.is-a{background:color-mix(in srgb,var(--sq-a) 38%,var(--sq-pn))}
+.sq-clip:hover{filter:brightness(1.15)}
+.sq-clip.on{background:var(--sq-acc)}
+.sq-clip.is-a.on{background:var(--sq-a)}
 .sq-empty{position:absolute;left:64px;right:0;top:26px;bottom:0;display:grid;place-items:center;margin:0;font-size:12px;color:var(--sq-mu);pointer-events:none}
 /* 재생선: 타임라인 위에서 움직이는 연보라 막대 (배경은 가만히, 막대가 끝에 닿으면 배경이 따라 넘어감) */
 .sq-ph{position:absolute;top:0;bottom:0;left:0;width:0;z-index:3;pointer-events:none}
 .sq-ph::before{content:"";position:absolute;top:0;bottom:0;left:-1px;width:2px;background:var(--sq-acc);box-shadow:0 0 8px rgba(195,163,238,.6)}
-.sq-ph i{position:absolute;top:0;left:-7px;width:14px;height:15px;background:var(--sq-acc);clip-path:polygon(0 0,100% 0,100% 60%,50% 100%,0 60%)}
+.sq-ph em{position:absolute;top:4px;left:0;padding:2px 7px;border-radius:5px;background:var(--sq-acc);color:var(--sq-bg);font:700 10.5px/1.3 ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-style:normal;white-space:nowrap}
 
 /* 지금 만들고 있는 영화: 프리 → 프로덕션 → 포스트 */
 .stg-title{margin-top:56px}
@@ -348,7 +355,9 @@ a.door:hover{transform:translateY(-4px)}
   .sq{aspect-ratio:auto}
   .sq-src,.sq-mon,.sq-proj,.sq-tl{grid-column:1;grid-row:auto}
   .sq-mon{order:-2}.sq-tl{order:-1}
-  .sq-tlbox{min-height:210px}
+  .sq-tlbox{min-height:190px}
+  .sq-story{max-height:400px}
+  .sq-ruler span{font-size:9.5px;padding-left:4px;letter-spacing:-.02em}
   .sq-ws{justify-content:flex-start}
   .picks{grid-template-columns:1fr}
   .pg{padding:24px 20px}
