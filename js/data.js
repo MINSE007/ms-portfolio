@@ -207,9 +207,7 @@ window.SITE = {
         "title": "Monage!",
         "year": 2026,
         "roles": [
-          "PD",
-          "라인PD",
-          "제작부"
+          "제작"
         ],
         "records": []
       },
