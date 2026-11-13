@@ -195,7 +195,7 @@
           return '<button type="button" class="sq-clip '+(/^A/i.test(t)?'is-a':'is-v')+'" data-ci="'+i+'" style="left:calc('+(f/ny*100)+'% + 2px);width:calc('+((to-f+1)/ny*100)+'% - 4px)"><b'+ed('edit.timeline.clips.'+i+'.title')+'>'+esc(c.title)+'</b></button>';
         }).join('')+'</div>';
       }).join('');
-      var stats=(e.stats||[]).map(function(f,i){
+      var stats=[].map(function(f,i){
         var v=String(f.value),auto=v.indexOf('auto:')===0,p='edit.stats.'+i+'.';
         return '<li><b class="num">'+(auto?esc(cn[v.slice(5)]):'<span'+ed(p+'value')+'>'+esc(v)+'</span>')+'<small'+ed(p+'unit')+'>'+esc(f.unit)+'</small></b><span'+ed(p+'label')+'>'+esc(f.label)+'</span></li>';
       }).join('');
@@ -208,18 +208,16 @@
         '<div class="sq-win"><span class="sq-dots"><i></i><i></i><i></i></span><span class="sq-ttl">'+nm+'.prproj</span><span></span></div>'+
         '<div class="sq-ws"><span>Learning</span><span>Assembly</span><span class="on">Editing</span><span>Color</span><span>Effects</span><span>Audio</span><span>Graphics</span></div>'+
         '<div class="sq-grid2">'+
-          // ① 소개
-          '<section class="sq-pn sq-src">'+tab(['Source: 소개','Effect Controls','Audio Mixer'])+'<div class="sq-pad">'+
-            '<span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'VIDEO EDITOR')+'</span>'+
-            '<h3 class="sq-name"'+ed('edit.name')+'>'+esc(e.name||'')+'</h3>'+
-            '<p class="sq-lead"'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div></section>'+
-          // ② 큰 모니터
+          // ① 이야기 (재생선이 지나는 해의 글) — 길면 이 칸 안에서 스크롤
+          '<section class="sq-pn sq-src">'+tab(['Source: 발자취','Effect Controls'])+
+            '<div class="sq-story" id="seqStory"></div></section>'+
+          // ② 모니터
           '<section class="sq-pn sq-mon">'+tab(['Program: '+nm])+
             '<div class="sq-screen" id="seqScreen"><span class="mono" id="seqYear">'+esc(Y[0]||'')+'</span><b id="seqTitle"></b><p id="seqDesc"></p></div>'+
-            '<div class="sq-trans"><span class="sq-tc num" id="seqTC">00:00:00:00</span><span class="sq-ctl" aria-hidden="true"><i class="pv"></i><i class="bk"></i><i class="pl"></i><i class="fw"></i><i class="nx"></i></span><span class="sq-dur num">08:00:00:00</span></div></section>'+
-          // ③ 숫자 + 쓰는 프로그램 (한쪽에 작게)
-          '<section class="sq-pn sq-proj">'+tab(['Project: 쓰는 프로그램','Info'])+
-            '<ul class="sq-tools">'+tools+'</ul><ul class="sq-stats">'+stats+'</ul></section>'+
+            '<div class="sq-trans"><span class="sq-tc num" id="seqTC">00:00:00:00</span><span class="sq-ctl" aria-hidden="true"><i class="pv"></i><i class="bk"></i><i class="pl"></i><i class="fw"></i><i class="nx"></i></span><span class="sq-dur num">'+pad(ny)+':00:00:00</span></div></section>'+
+          // ③ 쓰는 프로그램 (아이콘과 함께)
+          '<section class="sq-pn sq-proj">'+tab(['Project: 쓰는 프로그램'])+
+            '<ul class="sq-tools">'+tools+'</ul></section>'+
           // ④ 타임라인 — 안에서 끌거나 휠을 돌리면 좌우로 넘어감 (화면은 그대로)
           '<section class="sq-pn sq-tl"><div class="sq-tabs"><span class="on">'+nm+'</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
             '<div class="sq-tlbox"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
@@ -380,17 +378,33 @@
     var col=Math.min(ny-1,Math.floor(seqP*ny)),fr=Math.round(seqP*8*3600*24);
     var tc=pad(Math.floor(fr/86400))+':'+pad(Math.floor(fr/1440)%60)+':'+pad(Math.floor(fr/24)%60)+':'+pad(fr%24);
     $('seqTC').textContent=tc;$('seqTC2').textContent=tc;$('seqYear').textContent=Y[col]||'';
-    var xx=seqP*ny,hit=null;C.forEach(function(c,i){var f=+c.from||0,t=(c.to==null?f:+c.to)+1;if(xx>=f&&xx<t&&(!hit||/^V/i.test(c.track)))hit={c:c,i:i}});
-    document.querySelectorAll('#seq .sq-clip').forEach(function(b){b.classList.toggle('on',!!hit&&+b.getAttribute('data-ci')===hit.i)});
+    var xx=seqP*ny,hit=null,on={};
+    C.forEach(function(c,i){var f=+c.from||0,t=(c.to==null?f:+c.to)+1;if(xx>=f&&xx<t){on[i]=1;if(!hit||(c.main&&!hit.c.main))hit={c:c,i:i}}});
+    document.querySelectorAll('#seq .sq-clip').forEach(function(b){b.classList.toggle('on',!!on[b.getAttribute('data-ci')])});
     $('seqTitle').textContent=hit?hit.c.title:'';
-    $('seqDesc').textContent=hit?(hit.c.desc||''):'클립 준비 중';
+    $('seqDesc').textContent=hit?'':'클립 준비 중';
     $('seqScreen').classList.toggle('has',!!hit);
+    // 왼쪽 이야기 칸: 그 해의 글 (없으면 소개)
+    var st=$('seqStory'),key=hit?'c'+hit.i:'intro';
+    if(st&&st.dataset.k!==key){
+      st.dataset.k=key;st.scrollTop=0;
+      var e=S.edit,rich=function(t){return txt(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')};
+      if(hit){var c=hit.c,pp='edit.timeline.clips.'+hit.i+'.';
+        var subs=C.filter(function(x,i){return on[i]&&i!==hit.i}).map(function(x){return '<span>'+esc(x.title)+'</span>'}).join('');
+        st.innerHTML='<span class="mono">'+esc(Y[col]||'')+'</span><h3'+ed(pp+'title')+'>'+esc(c.title)+'</h3>'+(subs?'<div class="sq-tags">'+subs+'</div>':'')+
+          '<div class="sq-body-txt">'+(c.desc?String(c.desc).split(/\n{2,}/).map(function(par){return '<p>'+rich(par)+'</p>'}).join(''):'<p class="sq-mu">아직 글이 없어요.</p>')+'</div>';
+      }else{
+        st.innerHTML='<span class="mono"'+ed('edit.eyebrow')+'>'+esc(e.eyebrow||'')+'</span><h3'+ed('edit.name')+'>'+esc(e.name||'')+'</h3><div class="sq-body-txt"><p'+ed('edit.lead')+'>'+txt(e.lead)+'</p></div>';
+      }
+      if(root.classList.contains('admin')&&MSP.adminMakeEditable)MSP.adminMakeEditable();
+    }
   }
   (MSP.onRender=MSP.onRender||[]).push(seqLayout);
   window.addEventListener('resize',function(){clearTimeout(seqLayout.t);seqLayout.t=setTimeout(seqLayout,150)});
   // 휠: 시퀀스 위에서는 화면 대신 재생선이 좌우로
   document.addEventListener('wheel',function(e){
     if(!(e.target.closest&&e.target.closest('#seq'))||root.classList.contains('admin'))return;
+    var sty=e.target.closest('.sq-story');if(sty&&sty.scrollHeight>sty.clientHeight+2){e.stopPropagation();return} // 글 칸은 그 안에서만 스크롤 (화면은 그대로)
     var d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
     e.preventDefault();seqSet(seqP+d/(seqW()*1.2));
   },{passive:false});

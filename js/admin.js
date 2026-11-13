@@ -150,6 +150,7 @@
 
   // 화면에서 바로 고친 것(진행 상황 등)을 임시 저장하고 다시 그림
   MSP.adminCommit=function(){saveDraft();MSP.render()};
+  MSP.adminMakeEditable=function(){if(on)makeEditable()};
   document.addEventListener('input',function(e){
     if(!on)return;
     var n=e.target.closest&&e.target.closest('[data-edit]');
