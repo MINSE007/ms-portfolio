@@ -207,7 +207,9 @@ window.SITE = {
         "title": "Monage!",
         "year": 2026,
         "roles": [
-          "제작"
+          "제",
+          "라인프로듀서",
+          "제작부"
         ],
         "records": []
       },
