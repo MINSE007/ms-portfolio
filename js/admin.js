@@ -97,6 +97,57 @@
     });
   }
   (MSP.onRender=MSP.onRender||[]).push(function(){if(on){makeEditable();drawPanel()}});
+  /* ── 글자 도구 (미리캔버스·포토샵처럼): 관리자 모드에서 글자를 누르면 위에 도구 막대가 뜸 ──
+     크기 −/+ · 굵게 · 색 · 정렬 · 원래대로 → data.js 의 style 에 저장 (자동 저장) */
+  var tb=null,tbEl=null;
+  var SW=[['','기본','var(--text)'],['acc','보라','var(--acc)'],['muted','회색','var(--muted)'],['gold','노랑','var(--gold)'],['red','빨강','#E5484D']];
+  function tbBuild(){
+    tb=document.createElement('div');tb.id='adTool';tb.setAttribute('role','toolbar');tb.setAttribute('aria-label','글자 도구');
+    tb.innerHTML='<button type="button" data-t="s-" title="작게">A−</button><b id="adTs">100%</b><button type="button" data-t="s+" title="크게">A+</button><i></i>'+
+      '<button type="button" data-t="b" title="굵게" class="t-b">B</button><i></i>'+
+      SW.map(function(c){return '<button type="button" data-t="c" data-v="'+c[0]+'" title="'+c[1]+'" class="t-sw"><span style="background:'+c[2]+'"></span></button>'}).join('')+'<i></i>'+
+      '<button type="button" data-t="a" data-v="left" title="왼쪽 정렬">⇤</button><button type="button" data-t="a" data-v="center" title="가운데 정렬">↔</button><button type="button" data-t="a" data-v="right" title="오른쪽 정렬">⇥</button><i></i>'+
+      '<button type="button" data-t="r" title="원래대로">↺</button>';
+    document.body.appendChild(tb);
+    tb.addEventListener('mousedown',function(e){e.preventDefault()}); // 누를 때 글자 선택이 풀리지 않게
+    tb.addEventListener('click',function(e){
+      var b=e.target.closest('button');if(!b||!tbEl)return;
+      var path=tbEl.getAttribute('data-edit');S.style=S.style||{};var o=S.style[path]=Object.assign({},S.style[path]);
+      var t=b.dataset.t;
+      if(t==='s+')o.s=Math.min(3,Math.round(((o.s||1)+.1)*10)/10);
+      else if(t==='s-')o.s=Math.max(.4,Math.round(((o.s||1)-.1)*10)/10);
+      else if(t==='b')o.b=o.b===900?400:900;
+      else if(t==='c'){if(b.dataset.v)o.c=b.dataset.v;else delete o.c}
+      else if(t==='a')o.a=o.a===b.dataset.v?'':b.dataset.v;
+      else if(t==='r'){delete S.style[path];o=null}
+      if(o){if(o.s===1)delete o.s;if(!o.a)delete o.a;if(!Object.keys(o).length)delete S.style[path]}
+      MSP.applyStyles&&MSP.applyStyles();tbSync();tbPlace();saveDraft();
+    });
+  }
+  function tbSync(){
+    if(!tb||!tbEl)return;var o=((S.style||{})[tbEl.getAttribute('data-edit')])||{};
+    document.getElementById('adTs').textContent=Math.round((o.s||1)*100)+'%';
+    tb.querySelector('.t-b').classList.toggle('on',o.b===900);
+    tb.querySelectorAll('.t-sw').forEach(function(x){x.classList.toggle('on',(x.dataset.v||'')===(o.c||''))});
+    tb.querySelectorAll('[data-t="a"]').forEach(function(x){x.classList.toggle('on',x.dataset.v===o.a)});
+  }
+  function tbPlace(){
+    if(!tb||!tbEl)return;var r=tbEl.getBoundingClientRect();
+    var top=r.top-tb.offsetHeight-10;if(top<70)top=r.bottom+10;
+    tb.style.top=Math.round(top)+'px';tb.style.left=Math.round(Math.max(8,Math.min(innerWidth-tb.offsetWidth-8,r.left)))+'px';
+  }
+  document.addEventListener('focusin',function(e){
+    if(!on)return;var el=e.target.closest&&e.target.closest('[data-edit]');
+    if(!el||panel.contains(el)){return}
+    if(!tb)tbBuild();tbEl=el;tb.hidden=false;
+    document.querySelectorAll('.ad-sel').forEach(function(x){x.classList.remove('ad-sel')});el.classList.add('ad-sel');
+    tbSync();tbPlace();
+  });
+  document.addEventListener('focusout',function(e){
+    setTimeout(function(){if(tb&&!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('[data-edit]'))){tb.hidden=true;if(tbEl)tbEl.classList.remove('ad-sel');tbEl=null}},150);
+  });
+  window.addEventListener('scroll',function(){if(tb&&!tb.hidden)tbPlace()},{passive:true});
+
   // 화면에서 바로 고친 것(진행 상황 등)을 임시 저장하고 다시 그림
   MSP.adminCommit=function(){saveDraft();MSP.render()};
   document.addEventListener('input',function(e){
@@ -369,7 +420,7 @@
       MSP.render();
       if(d){tab='save';drawPanel();msg('지난번에 저장 안 한 변경을 불러왔어요.',true)}
     }else{
-      recording=false;makeEditable();
+      recording=false;makeEditable();if(tb)tb.hidden=true;
       if(location.hash==='#admin')try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}
     }
   }

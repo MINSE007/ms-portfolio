@@ -25,7 +25,7 @@
     ['cam','촬영',['촬영','촬영부']],
     ['light','조명',['조명','조명부']],
     ['snd','음향',['음향','음향부']],
-    ['prod','제작',['제작','PD','라인PD','제작부']],
+    ['prod','제작',['프로듀서','라인프로듀서','제작','PD','라인PD','제작부']],
     ['art','미술',['미술','미술부']],
     ['edit','편집',['편집','편집부']],
     ['act','배우',['배우']]
@@ -221,11 +221,10 @@
           '<section class="sq-pn sq-proj">'+tab(['Project: 쓰는 프로그램','Info'])+
             '<ul class="sq-tools">'+tools+'</ul><ul class="sq-stats">'+stats+'</ul></section>'+
           // ④ 타임라인 — 안에서 끌거나 휠을 돌리면 좌우로 넘어감 (화면은 그대로)
-          '<section class="sq-pn sq-tl">'+tab([nm])+
-            '<div class="sq-tlbar"><span class="sq-tc num" id="seqTC2">00:00:00:00</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span></div>'+
+          '<section class="sq-pn sq-tl"><div class="sq-tabs"><span class="on">'+nm+'</span><span class="sq-hint"'+ed('edit.hint')+'>'+esc(e.hint||'')+'</span><span class="sq-tc num" id="seqTC2">00:00:00:00</span></div>'+
             '<div class="sq-tlbox"><div class="sq-heads"><div class="sq-th sq-corner"></div>'+heads+'</div>'+
-              '<div class="sq-scroll" id="seqScroll"><div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+'</div></div></div>'+
-              '<div class="sq-ph" aria-hidden="true"><i></i></div>'+
+              '<div class="sq-scroll" id="seqScroll"><div class="sq-body" id="seqBody"><div class="sq-ruler">'+ruler+'</div><div class="sq-lanes">'+lanes+'</div>'+
+              '<div class="sq-ph" id="seqPH" aria-hidden="true"><i></i></div></div></div>'+
               (C.length?'':'<p class="sq-empty">클립 준비 중 — 곧 채워집니다</p>')+'</div></section>'+
         '</div></div>';
     },
@@ -327,6 +326,22 @@
   /* 관리자 모드 [설정] '화면 크기' → CSS 변수 */
   function applyUI(){var u=S.ui||{};['zoom','hero','title','gap'].forEach(function(k){var v=parseFloat(u[k]);root.style.setProperty('--k-'+k,isFinite(v)&&v>0?v:1)})}
   MSP.applyUI=applyUI;
+  /* 관리자 모드 글자 도구(크기·굵기·색·정렬)로 바꾼 모양을 화면에 입힘 — data.js 의 style */
+  var COLORS={acc:'var(--acc)',muted:'var(--muted)',text:'var(--text)',gold:'var(--gold)',red:'#E5484D'};
+  function applyStyles(){
+    var st=S.style||{};
+    document.querySelectorAll('[data-edit]').forEach(function(el){
+      var o=st[el.getAttribute('data-edit')];
+      el.style.fontSize='';el.style.fontWeight='';el.style.color='';el.style.textAlign='';el.style.display=el.dataset.stDisp||'';
+      if(!o)return;
+      if(o.s&&o.s!==1){var base=parseFloat(getComputedStyle(el).fontSize)||16;el.style.fontSize=(base*o.s).toFixed(1)+'px'}
+      if(o.b)el.style.fontWeight=o.b;
+      if(o.c)el.style.color=COLORS[o.c]||o.c;
+      if(o.a){el.style.textAlign=o.a;if(getComputedStyle(el).display==='inline'){el.dataset.stDisp='';el.style.display='block'}}
+    });
+  }
+  MSP.applyStyles=applyStyles;
+  window.addEventListener('resize',function(){clearTimeout(applyStyles.t);applyStyles.t=setTimeout(applyStyles,200)});
   function render(){
     applyUI();
     renderNav();renderHero();
@@ -339,58 +354,63 @@
     reveal();
     navSpy();
     fitChan();
+    applyStyles();
     (MSP.onRender||[]).forEach(function(fn){fn()});
   }
   MSP.render=render;
 
-  /* ── 편집 시퀀스: 재생선은 타임라인 가운데 고정, 타임라인을 끌거나(마우스·손가락) 휠을 돌리면 좌우로 넘어감
-     타임라인 안에서는 화면이 안 내려가고, 밖에서 내리면 시퀀스는 멈춘 채 화면만 내려감 ── */
-  var YW=230; // 한 해 칸 너비(px)
+  /* ── 편집 시퀀스: 연보라 재생선(막대)이 움직이고 배경(타임라인)은 가만히 — 막대가 화면 끝에 닿을 때만 배경이 따라 넘어감
+     타임라인 안에서 끌기·휠 = 재생선 이동 (화면은 안 내려감) / 밖에서 휠 = 화면만 내려감 ── */
+  var seqP=0,MINYW=120;
+  function seqW(){var b=$('seqBody');return b?b.offsetWidth:1}
   function seqLayout(){
     var sc=$('seqScroll'),body=$('seqBody');if(!sc||!body)return;
-    var ny=((S.edit.timeline||{}).years||[]).length||1,vw=sc.clientWidth;
-    body.style.width=(ny*YW)+'px';body.style.marginLeft=body.style.marginRight=Math.round(vw/2)+'px';
-    seqRead();
+    var ny=((S.edit.timeline||{}).years||[]).length||1;
+    body.style.width=Math.max(sc.clientWidth,ny*MINYW)+'px'; // 넓은 화면은 꽉 차게, 좁은 화면(폰)은 옆으로 넘김
+    seqSet(seqP,false);
   }
-  function seqRead(){
-    var sc=$('seqScroll');if(!sc)return;
+  function seqSet(p,follow){
+    var sc=$('seqScroll'),ph=$('seqPH');if(!sc||!ph)return;
+    seqP=Math.max(0,Math.min(1,p));var W=seqW(),x=seqP*W;
+    ph.style.left=x+'px';
+    if(follow!==false){ // 막대가 보이는 칸 끝에 가까우면 배경을 따라 넘김
+      var m=40;if(x<sc.scrollLeft+m)sc.scrollLeft=Math.max(0,x-m);else if(x>sc.scrollLeft+sc.clientWidth-m)sc.scrollLeft=x-sc.clientWidth+m;
+    }
     var tl=S.edit.timeline||{},Y=tl.years||[],C=tl.clips||[],ny=Math.max(1,Y.length);
-    var p=Math.max(0,Math.min(1,sc.scrollLeft/(ny*YW)));
-    var col=Math.min(ny-1,Math.floor(p*ny)),fr=Math.round(p*8*3600*24);
+    var col=Math.min(ny-1,Math.floor(seqP*ny)),fr=Math.round(seqP*8*3600*24);
     var tc=pad(Math.floor(fr/86400))+':'+pad(Math.floor(fr/1440)%60)+':'+pad(Math.floor(fr/24)%60)+':'+pad(fr%24);
     $('seqTC').textContent=tc;$('seqTC2').textContent=tc;$('seqYear').textContent=Y[col]||'';
-    var x=p*ny,hit=null;C.forEach(function(c,i){var f=+c.from||0,t=(c.to==null?f:+c.to)+1;if(x>=f&&x<t&&(!hit||/^V/i.test(c.track)))hit={c:c,i:i}});
+    var xx=seqP*ny,hit=null;C.forEach(function(c,i){var f=+c.from||0,t=(c.to==null?f:+c.to)+1;if(xx>=f&&xx<t&&(!hit||/^V/i.test(c.track)))hit={c:c,i:i}});
     document.querySelectorAll('#seq .sq-clip').forEach(function(b){b.classList.toggle('on',!!hit&&+b.getAttribute('data-ci')===hit.i)});
     $('seqTitle').textContent=hit?hit.c.title:'';
     $('seqDesc').textContent=hit?(hit.c.desc||''):'클립 준비 중';
     $('seqScreen').classList.toggle('has',!!hit);
   }
-  function seqGo(px,smooth){var sc=$('seqScroll');if(sc)sc.scrollTo({left:px,behavior:smooth?'smooth':'auto'})}
-  (MSP.onRender=MSP.onRender||[]).push(function(){seqLayout();var sc=$('seqScroll');if(sc)sc.addEventListener('scroll',function(){if(!seqRead.raf)seqRead.raf=requestAnimationFrame(function(){seqRead.raf=0;seqRead()})},{passive:true})});
+  (MSP.onRender=MSP.onRender||[]).push(seqLayout);
   window.addEventListener('resize',function(){clearTimeout(seqLayout.t);seqLayout.t=setTimeout(seqLayout,150)});
-  // 휠: 시퀀스 위에서는 화면 대신 타임라인이 좌우로
+  // 휠: 시퀀스 위에서는 화면 대신 재생선이 좌우로
   document.addEventListener('wheel',function(e){
-    var q=e.target.closest&&e.target.closest('#seq');if(!q||root.classList.contains('admin'))return;
-    var sc=$('seqScroll');if(!sc)return;
+    if(!(e.target.closest&&e.target.closest('#seq'))||root.classList.contains('admin'))return;
     var d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-    var max=sc.scrollWidth-sc.clientWidth;
-    e.preventDefault();sc.scrollLeft=Math.max(0,Math.min(max,sc.scrollLeft+d));
+    e.preventDefault();seqSet(seqP+d/(seqW()*1.2));
   },{passive:false});
-  // 끌기: 타임라인을 잡고 좌우로 (손가락은 위아래로 밀면 화면이 내려감)
+  // 끌기: 타임라인 위에서 누르고 좌우로 → 재생선이 손을 따라감 (폰: 위아래로 밀면 화면이 내려감)
   document.addEventListener('pointerdown',function(e){
     var box=e.target.closest&&e.target.closest('#seq .sq-tlbox');if(!box||root.classList.contains('admin')||e.button>0)return;
-    var sc=$('seqScroll'),x0=e.clientX,y0=e.clientY,s0=sc.scrollLeft,moved=false,horiz=e.pointerType==='mouse';
+    if(e.target.closest('.sq-heads'))return;
+    var x0=e.clientX,y0=e.clientY,moved=false,horiz=e.pointerType==='mouse';
+    var at=function(ev){var r=$('seqBody').getBoundingClientRect();seqSet((ev.clientX-r.left)/r.width)};
+    if(e.pointerType==='mouse'){at(e);e.preventDefault()}
     var mv=function(ev){
       var dx=ev.clientX-x0,dy=ev.clientY-y0;
-      if(!moved&&Math.abs(dx)+Math.abs(dy)>4){moved=true;if(ev.pointerType!=='mouse')horiz=Math.abs(dx)>Math.abs(dy);if(horiz)box.classList.add('drag')}
-      if(moved&&horiz){sc.scrollLeft=s0-dx;ev.preventDefault()}
+      if(!moved&&Math.abs(dx)+Math.abs(dy)>4){moved=true;if(ev.pointerType!=='mouse')horiz=Math.abs(dx)>Math.abs(dy)}
+      if(horiz&&(moved||ev.pointerType==='mouse')){at(ev);ev.preventDefault()}
     };
-    var up=function(ev){removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);box.classList.remove('drag');
-      if(!moved){ // 그냥 누르면: 클립이면 그 클립 시작으로, 눈금이면 그 자리로
-        var cl=ev.target.closest&&ev.target.closest('.sq-clip'),ny=((S.edit.timeline||{}).years||[]).length||1;
-        if(cl){var c=S.edit.timeline.clips[+cl.getAttribute('data-ci')];if(c)seqGo(((+c.from||0)+.02)*YW,true)}
-        else if(ev.target.closest&&ev.target.closest('.sq-ruler')){var r=$('seqBody').getBoundingClientRect();seqGo(Math.max(0,Math.min(ny*YW,ev.clientX-r.left)),true)}
-      }};
+    var up=function(ev){removeEventListener('pointermove',mv);removeEventListener('pointerup',up);removeEventListener('pointercancel',up);
+      if(!moved&&ev.pointerType!=='mouse')at(ev); // 손가락으로 톡 누르면 그 자리로
+      var cl=!moved&&ev.target.closest&&ev.target.closest('.sq-clip');
+      if(cl){var c=S.edit.timeline.clips[+cl.getAttribute('data-ci')],ny=(S.edit.timeline.years||[]).length||1;if(c)seqSet(((+c.from||0)+.02)/ny)}
+    };
     addEventListener('pointermove',mv,{passive:false});addEventListener('pointerup',up);addEventListener('pointercancel',up);
   });
 
@@ -545,6 +565,8 @@
   });
 
   /* ── 다크/라이트 ── */
+  // 위쪽 메뉴 오른쪽: 인트로 다시 보기
+  $('replayTop').addEventListener('click',function(){if(MSP.playIntro)MSP.playIntro(true)});
   $('tg').addEventListener('click',function(){
     var n=root.getAttribute('data-theme')==='light'?'dark':'light';
     root.setAttribute('data-theme',n);

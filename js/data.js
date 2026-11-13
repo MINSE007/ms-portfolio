@@ -249,7 +249,7 @@ window.SITE = {
         "title": "아빠의 방식",
         "year": 2026,
         "roles": [
-          "제작"
+          "프로듀서"
         ],
         "records": []
       },
@@ -289,7 +289,7 @@ window.SITE = {
         "title": "빨래방",
         "year": 2026,
         "roles": [
-          "제작"
+          "프로듀서"
         ],
         "records": []
       },
@@ -297,7 +297,7 @@ window.SITE = {
         "title": "내가 사랑하는 사람",
         "year": 2026,
         "roles": [
-          "제작"
+          "프로듀서"
         ],
         "records": []
       },
@@ -363,7 +363,7 @@ window.SITE = {
         "title": "무제-Untitled",
         "year": 2025,
         "roles": [
-          "제작",
+          "프로듀서",
           "미술"
         ],
         "records": []
