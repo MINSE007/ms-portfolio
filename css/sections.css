@@ -60,7 +60,7 @@ html.entered .hero .facts{transition-delay:.26s}
 
 /* ── 외주 ── */
 .cases{display:grid;grid-template-columns:1fr;gap:22px}
-.case.has-th{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:20px 36px;align-items:center;padding:16px 32px 16px 16px}
+.case.has-th{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px 36px;align-items:center;padding:16px 32px 16px 16px}
 .cs-vids{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .cs-vids.n1{grid-template-columns:1fr}.cs-vids.n3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .cs-v{display:flex;flex-direction:column;gap:7px;min-width:0}
@@ -68,7 +68,8 @@ html.entered .hero .facts{transition-delay:.26s}
 .cs-v:hover small{color:var(--acc)}
 .cs-v:hover img{transform:scale(1.05)}.cs-v:hover .play{transform:scale(1.12)}
 .case p b{color:var(--text);font-weight:800}
-.case{border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.case{border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0;transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.case:hover{transform:translateY(-4px)}
 .cs-body{display:flex;flex-direction:column;gap:12px;min-width:0;padding:0 4px}
 .cs-thumb{border-radius:16px}
 .vid h3,.case h3{transition:color .25s}
@@ -228,7 +229,7 @@ html.admin .pg-st{padding:2px 8px;border-radius:999px;border:1px dashed var(--ac
 .fp-tags li{font-size:13px;font-weight:600;padding:3px 10px;border-radius:6px;border:1px solid var(--line);color:var(--muted)}
 /* 타임라인: 페이지 색 그대로, 얇게 */
 .fp-tl{position:relative}
-.fp-hint{font-family:"Nanum Pen Script",cursive;font-size:22px;line-height:1;color:var(--acc);transform:rotate(-1.5deg);transform-origin:left;margin:0 0 10px 2px}
+.fp-hint{font-size:13px;color:var(--muted);margin:0 0 10px 2px}
 .fp-scroll{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);cursor:ew-resize;user-select:none;touch-action:pan-y}
 .fp-body{position:relative}
 .fp-ruler{height:32px;display:grid;grid-template-columns:repeat(var(--ny),1fr);
@@ -316,6 +317,8 @@ a.door:hover{transform:translateY(-4px)}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
+  .fp-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fp-tools li{padding-right:10px}
   .hero .wrap{padding-block:36px 0}
   .h-meta{flex-direction:column;gap:4px}
   .facts{grid-template-columns:repeat(var(--n,4),minmax(0,1fr))}

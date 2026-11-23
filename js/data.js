@@ -132,7 +132,7 @@ window.SITE = {
     "en": "OUTSOURCING",
     "badge": "WORK",
     "title": "외부 작업",
-    "desc": "부탁받아 같이 만든 영상들.\n맡긴 사람이 떠올린 장면 그대로 나오게.",
+    "desc": "의뢰받아 함께 만든 작업들입니다.\n맡긴 분이 그린 장면이 그대로 나오도록 만듭니다.",
     "works": [
       {
         "title": "십세들",
@@ -161,12 +161,12 @@ window.SITE = {
         "link": "",
         "videos": [
           {
-            "title": "친해지기 ep.4 (숏폼)",
-            "link": "https://www.youtube.com/shorts/C06eM7JAXJA"
+            "title": "이런 영상은 누가 만들어요? ep.2 마케팅 편",
+            "link": "https://www.youtube.com/watch?v=CSpVg6mq04E&t=113s"
           },
           {
-            "title": "welcome to NAPKO!",
-            "link": "https://www.youtube.com/watch?v=KVgNlGrf-B0"
+            "title": "모든 팀과 친해지기 ep.1 (숏폼)",
+            "link": "https://www.youtube.com/shorts/6tNZhWkYbAM"
           }
         ]
       }
@@ -538,7 +538,7 @@ window.SITE = {
         "role": "로고 · 그래픽"
       }
     ],
-    "hint": "← 막대를 끌어서 넘겨 보세요",
+    "hint": "재생선을 움직이면 해마다의 발자취를 볼 수 있어요.",
     "lead": "편집은 촬영이 끝난 뒤에 시작되는\n두 번째 연출이라고 생각해요.\n유튜브의 빠른 호흡부터 단편 영화의 긴 여운까지,\n찍어둔 장면이 가장 잘 보이는 순서를\n8년째 찾고 있습니다.",
     "timeline": {
       "name": "MS_발자취_2022-2026",
@@ -557,6 +557,29 @@ window.SITE = {
         "A2"
       ],
       "clips": [
+        {
+          "track": "V1",
+          "from": 0,
+          "to": 0,
+          "main": true,
+          "title": "영상을 좋아하는 아이",
+          "desc": "어린 시절부터 영화와 방송을 즐겨 보며 자연스럽게 영상이라는 매체에 관심을 갖게 되었습니다. 단순히 영상을 시청하는 것에서 그치지 않고, 직접 무언가를 만들어 보고 싶다는 생각으로 유튜브 활동을 시작했습니다.\n\n작은 영상들을 직접 기획하고 제작하는 경험을 쌓으며 영상 제작자라는 꿈을 키워 나갔고, 이를 계기로 영상이라는 분야에 더욱 깊이 빠져들게 되었습니다.",
+          "short": "어릴 때부터 영화와 방송을 즐겨 보다가, 직접 만들어 보고 싶어 **유튜브 활동**을 시작했습니다. 작은 영상을 스스로 기획·제작하며 영상 제작자라는 꿈을 키웠습니다."
+        },
+        {
+          "track": "V2",
+          "from": 0,
+          "to": 0,
+          "title": "영화 · 방송 즐겨 보기",
+          "desc": ""
+        },
+        {
+          "track": "A1",
+          "from": 0,
+          "to": 0,
+          "title": "유튜브 활동 시작",
+          "desc": ""
+        },
         {
           "track": "V1",
           "from": 1,

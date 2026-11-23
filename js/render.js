@@ -136,10 +136,10 @@
         var th=V.map(function(v,j){
           var m=String(v.link||'').match(/(?:v=|youtu\.be\/|shorts\/|embed\/)([\w-]{6,})/);if(!m)return '';
           return '<a class="cs-v" href="'+esc(v.link)+'" target="_blank" rel="noopener"><span class="cs-thumb thumb" data-yt="'+esc(m[1])+'"><span class="play"></span></span>'+
-            (v.title?'<small'+ed(p+'videos.'+j+'.title')+'>'+esc(v.title)+'</small>':'')+'</a>';
+            (v.title?'<small'+ed(p+'videos.'+j+'.title')+'>'+esc(v.title)+' ↗</small>':'')+'</a>';
         }).join('');
         return '<article class="case glass rv'+(th?' has-th':'')+'">'+(th?'<div class="cs-vids n'+Math.min(V.length,3)+'">'+th+'</div>':'')+
-          '<div class="cs-body">'+(w.year?'<div class="cs-top"><span'+ed(p+'year')+'>'+esc(w.year)+'</span></div>':'')+
+          '<div class="cs-body"><div class="cs-top"><span class="cs-no">CASE '+pad(i+1)+'</span>'+(w.year?'<span'+ed(p+'year')+'>'+esc(w.year)+'</span>':'')+'</div>'+
           '<h3'+ed(p+'title')+'>'+esc(w.title)+'</h3>'+
           '<dl class="meta"><dt>의뢰</dt><dd'+ed(p+'client')+'>'+esc(w.client)+'</dd><dt>맡은 일</dt><dd'+ed(p+'role')+'>'+esc(w.role)+'</dd></dl>'+
           '<p'+ed(p+'desc')+'>'+rich(w.desc)+'</p></div></article>';
